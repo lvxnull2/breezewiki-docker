@@ -8,5 +8,8 @@
 *.typedattempt
 *.untyped
 
+# Compiled
+compiled
+
 # Personal
 /config.txt

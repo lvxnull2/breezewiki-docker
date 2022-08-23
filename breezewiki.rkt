@@ -8,12 +8,12 @@
          (prefix-in lift: web-server/dispatchers/dispatch-lift)
          (prefix-in filter: web-server/dispatchers/dispatch-filter)
          (prefix-in files: web-server/dispatchers/dispatch-files)
-         "config.rkt"
-         "page-category.rkt"
-         "page-not-found.rkt"
-         "page-proxy.rkt"
-         "page-wiki.rkt"
-         "page-search.rkt")
+         "src/config.rkt"
+         "src/page-category.rkt"
+         "src/page-not-found.rkt"
+         "src/page-proxy.rkt"
+         "src/page-wiki.rkt"
+         "src/page-search.rkt")
 
 (define mime-types
   (hash #".css" #"text/css"
@@ -30,7 +30,7 @@
     (filter:make #rx"^/static/" (files:make
                                  #:url->path
                                  (lambda (u)
-                                   ((make-url->path "../static")
+                                   ((make-url->path "static")
                                     (struct-copy url u [path (cdr (url-path u))])))
                                  #:path->mime-type
                                  (lambda (u)
