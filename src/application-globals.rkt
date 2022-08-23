@@ -1,0 +1,73 @@
+#lang racket/base
+(require net/http-easy
+         "config.rkt")
+
+(provide
+ ; timeout durations for http-easy requests
+ timeouts
+ ; generates a consistent template for wiki page content to sit in
+ generate-wiki-page)
+
+(module+ test
+  (require rackunit
+           html-writing))
+
+(define timeouts (make-timeout-config #:lease 5 #:connect 5))
+
+(define (generate-wiki-page source-url wikiname title content)
+  (define (required-styles origin)
+    (map (λ (dest-path) (format dest-path origin))
+         '(#;"~a/load.php?lang=en&modules=skin.fandomdesktop.styles&only=styles&skin=fandomdesktop"
+           #;"~a/load.php?lang=en&modules=ext.gadget.dungeonsWiki%2CearthWiki%2Csite-styles%2Csound-styles&only=styles&skin=fandomdesktop"
+           #;"~a/load.php?lang=en&modules=site.styles&only=styles&skin=fandomdesktop"
+           ; combine the above entries into a single request for potentially extra speed - fandom.com doesn't even do this!
+           "~a/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop"
+           "~a/wikia.php?controller=ThemeApi&method=themeVariables")))
+  `(html
+    (head
+     (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
+     (title ,(format "~a | ~a" title (config-get 'application-name)))
+     (style ":root { --theme-page-background-color: #dfdfe0 }") ; fallback in case styles don't load fast enough
+     ,@(map (λ (url)
+              `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
+            (required-styles (format "https://~a.fandom.com" wikiname)))
+     (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css"))))
+    (body (@ (class "skin-fandomdesktop theme-fandomdesktop-light"))
+          (div (@ (class "main-container"))
+               (div (@ (class "fandom-community-header__background tileHorizontally header")))
+               (div (@ (class "page"))
+                    (main (@ (class "page__main"))
+                          (div (@ (class "custom-top"))
+                               (h1 (@ (class "page-title")) ,title)
+                               (nav (@ (class "sitesearch"))
+                                    (form (@ (action ,(format "/~a/search" wikiname)))
+                                          (label "Search "
+                                                 (input (@ (type "text") (name "q")))))))
+                          (div (@ (id "content") #;(class "page-content"))
+                               (div (@ (id "mw-content-text"))
+                                    ,content))
+                          (footer (@ (class "custom-footer"))
+                                  (img (@ (class "my-logo") (src "/static/breezewiki.svg")))
+                                  (div (@ (class "custom-footer__cols"))
+                                       (div
+                                        (p
+                                         (a (@ (href "https://gitdab.com/cadence/breezewiki"))
+                                            ,(format "~a source code" (config-get 'application-name))))
+                                        (p
+                                         (a (@ (href "https://lists.sr.ht/~cadence/breezewiki-discuss"))
+                                            "Discussions / Bug reports / Feature requests"))
+                                        ,(if (config-get 'instance-is-official)
+                                             `(p ,(format "This instance is run by the ~a developer, " (config-get 'application-name))
+                                                 (a (@ (href "https://cadence.moe/contact"))
+                                                    "Cadence."))
+                                             `(p
+                                               ,(format "This unofficial instance is based off the ~a source code, but is not administered by its developer." (config-get 'application-name)))))
+                                       (div
+                                        (p "This page displays proxied content from "
+                                           (a (@ (href ,source-url) (rel "noreferrer")) ,source-url)
+                                           ". Text content is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
+                                           (a (@ (href "https://www.fandom.com/licensing")) "see license info.")
+                                           " Media files may have different copying restrictions.")
+                                        (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application-name))))))))))))
+(module+ test
+  (check-not-false (xexp->html (generate-wiki-page "" "test" "test" '(template)))))

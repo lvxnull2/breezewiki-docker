@@ -1,0 +1,206 @@
+/* reset the reset */
+blockquote, code, del, details, div, dl, dt, em, fieldset, figcaption, figure, h1, h2, h3, h4, h5, h6, li
+, ol, p, pre, q, span, strong, ul {
+    font-family: initial;
+    margin: initial;
+    padding: initial;
+    border: initial;
+}
+ul, ol {
+    list-style-type: initial;
+    padding-left: 2em;
+    margin: 0.8em 0;
+}
+ol {
+    list-style-type: decimal;
+}
+sup {
+    vertical-align: super;
+}
+sub {
+    vertical-align: sub;
+}
+
+/* general page appearance */
+body.skin-fandomdesktop, button, input, textarea, .wikitable {
+    font-family: initial;
+    font-size: 18px;
+    line-height: 1.5;
+}
+h1, h2, h3, h4, h5, h6 {
+    margin: 1.2em 0 0.6em;
+}
+p {
+    margin: 0.6em 0;
+}
+#content dt {
+    font-weight: bold;
+}
+
+/* dotted underline for elements with hoverable title text */
+[title]:not(a):not(.new) {
+    text-decoration: dotted underline;
+}
+
+/* top bit with title and search bar */
+.custom-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+}
+.page-title {
+    margin-top: 0;
+}
+
+/* custom footer with source and license info */
+.custom-footer {
+    font-size: 16px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--theme-page-text-color);
+}
+.custom-footer__cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+.my-logo {
+    margin-bottom: 8px;
+}
+
+/* page framing */
+.main-container {
+    margin: 0;
+    min-width: auto;
+    width: auto;
+}
+.page {
+    margin: 5vw;
+}
+.page__main {
+    background-color: var(--theme-page-background-color);
+    padding: 3vw;
+}
+.page table {
+    color: var(--theme-page-text-color); /* no idea why this needs to be specified, it should inherit from .page */
+}
+
+/* table of contents */
+.toc {
+    background-color: var(--custom-table-background);
+}
+.toctitle {
+    background-color: var(--custom-table-header-background);
+}
+.toc ul li a {
+    line-height: 1.2;
+}
+.toc ul ul {
+    margin-left: 1em;
+}
+.toc ul li a, .toc ul li a .tocnumber {
+    transition-duration: 0s;
+}
+.toctogglespan {
+    display: none;
+}
+.tocnumber {
+    min-width: 1em; /* align that nice and good */
+}
+
+/* don't display links for editing navboxes */
+.va-navbox-editlink {
+    display: none;
+}
+
+/* allow tables to scroll horizontally if needed */
+.table-scroller {
+    overflow: auto;
+}
+
+/* float right. reorganised from their sheet */
+.tright {
+    clear: right;
+    float: right;
+    margin: 0 0 16px 20px;
+}
+
+/* indicate wikipedia links */
+.extiw::after {
+    vertical-align: super;
+    content: "[🡕]";
+    font-family: serif;
+    font-size: smaller;
+}
+.extiw[href*="wikipedia.org"]::after {
+    content: "[W]";
+}
+
+/* figure captions */
+figure img {
+    display: inline-block;
+}
+figcaption, .lightbox-caption, .thumbcaption {
+    margin-top: 4px;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+/* screenshot galleries */
+.gallery, .wikia-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    list-style-type: none;
+    padding: 0;
+}
+
+/* show tabs always */
+.wds-tabs__wrapper {
+    display: none;
+}
+.wds-tab__content {
+    display: block;
+}
+
+/* category list columns */
+@media (min-width: 700px) {
+    .my-category-list {
+        columns: 3;
+    }
+}
+
+/* animated slots */
+#mw-content-text .animated > :not(.animated-active), #mw-content-text .animated > .animated-subframe > :not(.animated-active) {
+    display: inline-block;
+}
+.animated-slot {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    width: 32px;
+    height: 32px;
+}
+.animated-slot > * {
+    animation: slide-up calc(var(--steps) * 1s) steps(var(--steps)) infinite;
+}
+@keyframes slide-up {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(calc(-34px * var(--steps)));
+    }
+}
+
+/* search results */
+.my-result {
+    margin-bottom: 6px;
+}
+.my-result__link {
+    font-size: 1.2em;
+}
+.my-result__info {
+    font-size: 0.8em;
+    color: var(--theme-page-text-color--hover);
+    margin-left: 1.2em;
+}

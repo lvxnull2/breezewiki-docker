@@ -1,0 +1,12 @@
+# Emacs crud files
+*~
+.#*
+\#*#
+
+# Experiments
+*.experiment
+*.typedattempt
+*.untyped
+
+# Personal
+/config.txt
