@@ -23,7 +23,8 @@
         #".svg" #"image/svg+xml"))
 
 (serve/launch/wait
- #:port (config-get 'port)
+ #:listen-ip (if (config-true? 'debug) "127.0.0.1" #f)
+ #:port (string->number (config-get 'port))
  (λ (quit)
    (sequencer:make
     (pathprocedure:make "/proxy" page-proxy)
@@ -38,5 +39,5 @@
                                  #:path->mime-type
                                  (lambda (u)
                                    (hash-ref mime-types (path-get-extension u)))
-                                 #:cache-no-cache (config-get 'debug) #;"browser applies heuristics if unset"))
+                                 #:cache-no-cache (config-true? 'debug) #;"browser applies heuristics if unset"))
     (lift:make page-not-found))))

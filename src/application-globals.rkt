@@ -47,9 +47,10 @@
                                (div (@ (id "mw-content-text"))
                                     ,content))
                           (footer (@ (class "custom-footer"))
-                                  (img (@ (class "my-logo") (src "/static/breezewiki.svg")))
                                   (div (@ (class "custom-footer__cols"))
                                        (div
+                                        (p
+                                         (img (@ (class "my-logo") (src "/static/breezewiki.svg"))))
                                         (p
                                          (a (@ (href "https://gitdab.com/cadence/breezewiki"))
                                             ,(format "~a source code" (config-get 'application-name))))
@@ -61,7 +62,7 @@
                                                  (a (@ (href "https://cadence.moe/contact"))
                                                     "Cadence."))
                                              `(p
-                                               ,(format "This unofficial instance is based off the ~a source code, but is not administered by its developer." (config-get 'application-name)))))
+                                               ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application-name)))))
                                        (div
                                         (p "This page displays proxied content from "
                                            (a (@ (href ,source-url) (rel "noreferrer")) ,source-url)
