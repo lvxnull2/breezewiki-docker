@@ -1,7 +1,10 @@
 #lang racket/base
+(require racket/runtime-path)
 
 (provide
  config-get)
+
+(define-runtime-path path-config "../config.txt")
 
 (define (config-get key)
   (hash-ref config key))
@@ -18,7 +21,7 @@
     default-config
     (with-handlers ([exn:fail:filesystem:errno? (λ (exn)
                                                   '())])
-      (call-with-input-file "../config.txt"
+      (call-with-input-file path-config
         (λ (in)
           (let loop ([alist '()])
             (let ([key (read in)]

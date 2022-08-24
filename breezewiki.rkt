@@ -1,5 +1,6 @@
 #lang racket/base
 (require racket/path
+         racket/runtime-path
          net/url
          web-server/servlet-dispatch
          web-server/dispatchers/filesystem-map
@@ -14,6 +15,8 @@
          "src/page-proxy.rkt"
          "src/page-wiki.rkt"
          "src/page-search.rkt")
+
+(define-runtime-path path-static "static")
 
 (define mime-types
   (hash #".css" #"text/css"
@@ -30,7 +33,7 @@
     (filter:make #rx"^/static/" (files:make
                                  #:url->path
                                  (lambda (u)
-                                   ((make-url->path "static")
+                                   ((make-url->path path-static)
                                     (struct-copy url u [path (cdr (url-path u))])))
                                  #:path->mime-type
                                  (lambda (u)
