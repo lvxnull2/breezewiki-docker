@@ -81,9 +81,6 @@ p {
     background-color: var(--theme-page-background-color);
     padding: 3vw;
 }
-.page table {
-    color: var(--theme-page-text-color); /* no idea why this needs to be specified, it should inherit from .page */
-}
 
 /* table of contents */
 .toc {
@@ -118,6 +115,20 @@ p {
     overflow: auto;
 }
 
+/* table overrides for dark theme pages */
+/* these colours look good in all wikis I tried. colours that don't look good:
+   --theme-page-background-color--secondary is bad for fallout
+   --theme-page-accent-mix-color is bad for minecraft */
+.wikitable > tr > th, .wikitable > * > tr > th, .va-table th {
+    background-color: var(--theme-page-dynamic-color-1--inverted);
+}
+.wikitable td, .va-table td {
+    background-color: var(--theme-page-text-mix-color-95);
+}
+.page table {
+    color: var(--theme-page-text-color); /* no idea why this needs to be specified, it should inherit from .page */
+}
+
 /* float right. reorganised from their sheet */
 .tright {
     clear: right;
@@ -126,7 +137,7 @@ p {
 }
 
 /* indicate wikipedia links */
-.extiw::after {
+.extiw::after, .external::after {
     vertical-align: super;
     content: "[🡕]";
     font-family: serif;
@@ -173,22 +184,23 @@ figcaption, .lightbox-caption, .thumbcaption {
 #mw-content-text .animated > :not(.animated-active), #mw-content-text .animated > .animated-subframe > :not(.animated-active) {
     display: inline-block;
 }
-.animated-slot {
+.animated-slot__outer {
     display: inline-block;
     position: relative;
     overflow: hidden;
     width: 32px;
     height: 32px;
 }
-.animated-slot > * {
+.animated-slot__inner {
+    display: inline-block;
     animation: slide-up calc(var(--steps) * 1s) steps(var(--steps)) infinite;
 }
 @keyframes slide-up {
     0% {
-        transform: translateY(0);
+        margin-top: 0px;
     }
     100% {
-        transform: translateY(calc(-34px * var(--steps)));
+        margin-top: calc(-34px * var(--steps));
     }
 }
 

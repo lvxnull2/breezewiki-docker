@@ -168,8 +168,9 @@
                        (λ (v) (and (has-class? "animated" attributes)
                                    ((length v) . > . 1)))
                        (λ (v)
-                         `((span (@ (class "animated-slot") (style ,(format "--steps: ~a" (length v))))
-                                 ,@v)))))
+                         `((span (@ (class "animated-slot__outer") (style ,(format "--steps: ~a" (length v))))
+                                 (span (@ (class "animated-slot__inner"))
+                                       ,@v))))))
                children))]))
    tree))
 (module+ test
