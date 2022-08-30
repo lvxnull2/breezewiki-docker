@@ -1,5 +1,6 @@
 #lang racket/base
-(require racket/runtime-path
+(require racket/pretty
+         racket/runtime-path
          ini)
 
 (provide
@@ -48,4 +49,6 @@
         (printf "note: ~a items loaded from config file~n" (length l)))))))
 
 (when (config-true? 'debug)
-  (printf "config: ~v~n" config))
+  (parameterize ([pretty-print-columns 80])
+    (display "config: ")
+    (pretty-write (hash->list config))))
