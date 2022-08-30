@@ -61,9 +61,7 @@
   (define new-uri (struct-copy url old-uri [path new-path]))
   (define new-req (struct-copy request old-req [uri new-uri]))
   ((files:make
-    #:url->path (lambda (u)
-                  (println u)
-                  ((make-url->path path-static) u))
+    #:url->path (lambda (u) ((make-url->path path-static) u))
     #:path->mime-type (lambda (u) (ext->mime-type (path-get-extension u)))
     #:cache-no-cache (config-true? 'debug) #;"browser applies heuristics if unset")
    conn new-req))
