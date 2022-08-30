@@ -42,7 +42,8 @@
                 (div (@ (class "collapsible-content"))
                      (p "Another page link: "
                         (a (@ (data-test-wikilink) (href "https://test.fandom.com/wiki/Another_Page") (title "Another Page"))
-                           "Another Page"))))))))
+                           "Another Page"))))
+           (iframe (@ (src "https://example.com/iframe-src")))))))
 
 (define (preprocess-html-wiki html)
   (define (rr* find replace contents)
@@ -95,10 +96,10 @@
         return-no-element]
        ; display a link instead of an iframe
        [(eq? element-type 'iframe)
-        (let ([src (car (dict-ref attributes 'src null))])
-          `(a
-            ((class "iframe-alternative") (href ,src))
-            (,(format "Embedded media: ~a" src))))]
+        (define src (car (dict-ref attributes 'src null)))
+        `(a
+          ((class "iframe-alternative") (href ,src))
+          (,(format "Embedded media: ~a" src)))]
        [#t
         (list element-type
               ;; attributes
@@ -193,7 +194,13 @@
                                        ((query-selector
                                          (λ (t a c) (dict-has-key? a 'data-test-collapsesection))
                                          transformed))))
-                "collapsible collapsetoggle-inline"))
+                "collapsible collapsetoggle-inline")
+  ; check that iframes are gone
+  (check-false ((query-selector (λ (t a c) (eq? t 'iframe)) transformed)))
+  (check-equal? (let* ([alternative ((query-selector (λ (t a c) (has-class? "iframe-alternative" a)) transformed))]
+                       [link ((query-selector (λ (t a c) (eq? t 'a)) alternative))])
+                  (get-attribute 'href (bits->attributes link)))
+                "https://example.com/iframe-src"))
 
 (define (page-wiki req)
   (define wikiname (path/param-path (first (url-path (request-uri req)))))

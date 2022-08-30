@@ -33,11 +33,11 @@
          (ul (@ (class "my-category-list"))
              ,@(map
                 (λ (result)
-                  (let* ([title (jp "/title" result)]
-                         [page-path (regexp-replace* #rx" " title "_")])
-                    `(li
-                      (a (@ (href ,(format "/~a/wiki/~a" wikiname page-path)))
-                         ,title))))
+                  (define title (jp "/title" result))
+                  (define page-path (regexp-replace* #rx" " title "_"))
+                  `(li
+                    (a (@ (href ,(format "/~a/wiki/~a" wikiname page-path)))
+                       ,title)))
                 members)))))
 
 (define (page-category req)

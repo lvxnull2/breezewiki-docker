@@ -100,20 +100,22 @@
   (check-false (element-is-content? '(@ (alt "Cute cat."))))
   (check-true (element-is-content? "hi")))
 
+; get the actual attributes, leaving out the @ signs
 (define (xattributes->attributes xattrs)
   (filter pair? xattrs))
 
 (define (bits->attributes bits)
+ ; (append) is a clean and general approach to finding and combining any attributes
   (xattributes->attributes (apply append (filter element-is-xattributes? bits))))
 (module+ test
   (check-equal? (bits->attributes demo-attributes)
                 '((title "Inside joke.") (style "color: blue"))))
 
 (define (get-attribute name attributes)
-  (let ([a (assq name attributes)])
-    (if (pair? a)
-        (cadr a)
-        #f)))
+  (define a (assq name attributes))
+  (if (pair? a)
+      (cadr a)
+      #f))
 (module+ test
   (check-equal? (get-attribute 'title (bits->attributes demo-attributes)) "Inside joke."))
 
@@ -131,20 +133,17 @@
   (generator
    ()
    (let loop ([element element])
-     (let* ([element-type (car element)]
-            ; (append) is a clean and general approach to finding and combining any attributes
-            ; (filter pair?) is to get the actual attributes and leaves out the @ signs
-            [attributes (bits->attributes (cdr element))]
-            ; only recurse through real children
-            [children (filter element-is-element? (cdr element))])
-       (cond
-         [(equal? element-type '*DECL*) #f]
-         [(equal? element-type '@) #f]
-         [#t
-          (when (selector element-type attributes children)
-            (yield element))
-          (for ([child children]) (loop child))])))
-   #f))
+     (define element-type (car element))
+     (define attributes (bits->attributes (cdr element)))
+     (define children (filter element-is-element? (cdr element))) ; only recurse through real children
+     (cond
+       [(equal? element-type '*DECL*) #f]
+       [(equal? element-type '@) #f]
+       [#t
+        (when (selector element-type attributes children)
+          (yield element))
+        (for ([child children]) (loop child))]))
+  #f))
 (module+ test
   (let ([result (query-selector (attribute-selector 'title "Really.")
                                 demo-document)])
@@ -155,24 +154,21 @@
 
 (define (update-tree transformer element)
   (let loop ([element element])
-    (let* ([element-type (car element)]
-           ; (append) is a clean and general approach to finding and combining any attributes
-           ; (filter pair?) is to get the actual attributes and leaves out the @ signs
-           [attributes (bits->attributes (cdr element))]
-           ; provide elements and strings
-           [contents (filter element-is-content? (cdr element))])
-      (if (or (equal? element-type '*DECL)
-              (equal? element-type '@))
-          ; special element, do nothing
-          element
-          ; regular element, transform it
-          (match (transformer element element-type attributes contents)
-            [(list element-type attributes contents)
-             (append (list element-type)
-                     (if (pair? attributes) (list (append '(@) attributes)) (list))
-                     (map (λ (content)
-                            (if (element-is-element? content) (loop content) content))
-                          contents))])))))
+    (define element-type (car element))
+    (define attributes (bits->attributes (cdr element)))
+    (define contents (filter element-is-content? (cdr element))) ; provide elements and strings
+    (if (or (equal? element-type '*DECL)
+            (equal? element-type '@))
+        ; special element, do nothing
+        element
+        ; regular element, transform it
+        (match (transformer element element-type attributes contents)
+          [(list element-type attributes contents)
+           (append (list element-type)
+                   (if (pair? attributes) (list (append '(@) attributes)) (list))
+                   (map (λ (content)
+                          (if (element-is-element? content) (loop content) content))
+                        contents))]))))
 
 (define (has-class? name attributes)
   (and (member name (string-split (or (get-attribute 'class attributes) "") " ")) #t))

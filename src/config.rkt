@@ -24,26 +24,28 @@
   (make-hasheq
    (append
     default-config
-    (with-handlers ([exn:fail:filesystem:errno?
-                     (λ (exn)
-                       (begin0
-                           '()
-                         (displayln "note: config file not detected, using defaults")))]
-                    [exn:fail:contract?
-                     (λ (exn)
-                       (begin0
-                           '()
-                         (displayln "note: config file empty or missing [] section, using defaults")))])
-      (let ([l (hash->list
-                (hash-ref
-                 (ini->hash
-                  (call-with-input-file path-config
-                    (λ (in)
-                      (read-ini in))))
-                 '||))])
-            (begin0
-                l
-              (printf "note: ~a items loaded from config file~n" (length l))))))))
+    (with-handlers
+      ([exn:fail:filesystem:errno?
+        (λ (exn)
+          (begin0
+              '()
+            (displayln "note: config file not detected, using defaults")))]
+       [exn:fail:contract?
+        (λ (exn)
+          (begin0
+              '()
+            (displayln "note: config file empty or missing [] section, using defaults")))])
+      (define l
+        (hash->list
+         (hash-ref
+          (ini->hash
+           (call-with-input-file path-config
+             (λ (in)
+               (read-ini in))))
+          '||)))
+      (begin0
+          l
+        (printf "note: ~a items loaded from config file~n" (length l)))))))
 
 (when (config-true? 'debug)
   (printf "config: ~v~n" config))

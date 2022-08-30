@@ -70,16 +70,16 @@
   (define real-error-port (thread-receive))
   (say-loading-once! real-error-port)
   (let loop ()
-    (let ([line (read-line i)])
-      (cond
-        [(eof-object? line)
-         (void)]
-        [(string-contains? line "[load")
-         (display "." real-error-port)
-         (loop)]
-        [#t
-         (displayln line real-error-port)
-         (loop)]))))
+    (define line (read-line i))
+    (cond
+      [(eof-object? line)
+       (void)]
+      [(string-contains? line "[load")
+       (display "." real-error-port)
+       (loop)]
+      [#t
+       (displayln line real-error-port)
+       (loop)])))
 
 ;; Only to be called from reloader-main
 (define (do-reload!)
