@@ -49,6 +49,7 @@
         (printf "note: ~a items loaded from config file~n" (length l)))))))
 
 (when (config-true? 'debug)
+  ; all values here are optimised for maximum prettiness
   (parameterize ([pretty-print-columns 80])
     (display "config: ")
     (pretty-write (hash->list config))))

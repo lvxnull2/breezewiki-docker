@@ -1,17 +1,11 @@
 #lang racket/base
-(require racket/path
-         racket/runtime-path
-         net/url
-         web-server/servlet-dispatch
-         web-server/dispatchers/filesystem-map
+(require web-server/servlet-dispatch
          (prefix-in pathprocedure: web-server/dispatchers/dispatch-pathprocedure)
          (prefix-in sequencer: web-server/dispatchers/dispatch-sequencer)
          (prefix-in lift: web-server/dispatchers/dispatch-lift)
          (prefix-in filter: web-server/dispatchers/dispatch-filter)
-         (prefix-in files: web-server/dispatchers/dispatch-files)
          "src/config.rkt"
-         "src/reloadable.rkt"
-         "src/server-utils.rkt")
+         "src/reloadable.rkt")
 
 (define-syntax-rule (require-reloadable filename varname)
   (define varname
@@ -23,13 +17,12 @@
 (require-reloadable "src/page-not-found.rkt" page-not-found)
 (require-reloadable "src/page-proxy.rkt" page-proxy)
 (require-reloadable "src/page-search.rkt" page-search)
+(require-reloadable "src/page-static.rkt" static-dispatcher)
 (require-reloadable "src/page-wiki.rkt" page-wiki)
 
 (when (not (config-true? 'debug))
   (set-reload-poll-interval! #f))
 (reload!)
-
-(define-runtime-path path-static "static")
 
 (serve/launch/wait
  #:listen-ip (if (config-true? 'debug) "127.0.0.1" #f)
@@ -41,13 +34,5 @@
     (filter:make #rx"^/[a-z-]+/wiki/Category:.+$" (lift:make page-category))
     (filter:make #rx"^/[a-z-]+/wiki/.+$" (lift:make page-wiki))
     (filter:make #rx"^/[a-z-]+/search$" (lift:make page-search))
-    (filter:make #rx"^/static/" (files:make
-                                 #:url->path
-                                 (lambda (u)
-                                   ((make-url->path path-static)
-                                    (struct-copy url u [path (cdr (url-path u))])))
-                                 #:path->mime-type
-                                 (lambda (u)
-                                   (ext->mime-type (path-get-extension u)))
-                                 #:cache-no-cache (config-true? 'debug) #;"browser applies heuristics if unset"))
+    static-dispatcher
     (lift:make page-not-found))))
