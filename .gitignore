@@ -10,6 +10,9 @@
 
 # Compiled
 compiled
+/breezewiki
+/dist
+/breezewiki-dist
 
 # Personal
 /config.ini

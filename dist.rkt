@@ -10,24 +10,14 @@
          (prefix-in filter: web-server/dispatchers/dispatch-filter)
          (prefix-in files: web-server/dispatchers/dispatch-files)
          "src/config.rkt"
-         "src/reloadable.rkt"
          "src/server-utils.rkt")
 
-(define-syntax-rule (require-reloadable filename varname)
-  (define varname
-    (reloadable-entry-point->procedure
-     (make-reloadable-entry-point (quote varname) filename))))
-
-(require-reloadable "src/page-category.rkt" page-category)
-(require-reloadable "src/page-home.rkt" page-home)
-(require-reloadable "src/page-not-found.rkt" page-not-found)
-(require-reloadable "src/page-proxy.rkt" page-proxy)
-(require-reloadable "src/page-search.rkt" page-search)
-(require-reloadable "src/page-wiki.rkt" page-wiki)
-
-(when (not (config-true? 'debug))
-  (set-reload-poll-interval! #f))
-(reload!)
+(require (only-in "src/page-category.rkt" page-category))
+(require (only-in "src/page-home.rkt" page-home))
+(require (only-in "src/page-not-found.rkt" page-not-found))
+(require (only-in "src/page-proxy.rkt" page-proxy))
+(require (only-in "src/page-search.rkt" page-search))
+(require (only-in "src/page-wiki.rkt" page-wiki))
 
 (define-runtime-path path-static "static")
 
