@@ -57,9 +57,13 @@
                                   (div (@ (class "internal-footer"))
                                        (img (@ (class "my-logo") (src "/static/breezewiki.svg")))
                                        ,(if (config-get 'instance-is-official)
-                                            `(p ,(format "This instance is run by the ~a developer, " (config-get 'application-name))
+                                            `(div
+                                              (p ,(format "This instance is run by the ~a developer, " (config-get 'application-name))
                                                 (a (@ (href "https://cadence.moe/contact"))
                                                    "Cadence."))
+                                              (p "Hosting generously provided by "
+                                                 (a (@ (href "://alphamethyl.barr0w.net/"))
+                                                    "alphamethyl.")))
                                             `(p
                                               ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application-name))))
                                        (p "Text content on wikis run by Fandom is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
