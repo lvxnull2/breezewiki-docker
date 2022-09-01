@@ -62,7 +62,7 @@
                                                 (a (@ (href "https://cadence.moe/contact"))
                                                    "Cadence."))
                                               (p "Hosting generously provided by "
-                                                 (a (@ (href "://alphamethyl.barr0w.net/"))
+                                                 (a (@ (href "http://alphamethyl.barr0w.net/"))
                                                     "alphamethyl.")))
                                             `(p
                                               ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application-name))))
