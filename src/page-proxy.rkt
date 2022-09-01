@@ -4,9 +4,6 @@
          racket/port
          ; libs
          (prefix-in easy: net/http-easy)
-         ; html libs
-         html-parsing
-         html-writing
          ; web server libs
          net/url
          web-server/http
