@@ -190,8 +190,8 @@
                                 #:code 500
                                 #:mime-type #"text/plain"
                                 (λ (out)
-                                  (for ([port (list (current-output-port) out)])
-                                    (parameterize ([current-error-port out])
+                                  (for ([port (list (current-error-port) out)])
+                                    (parameterize ([current-error-port port])
                                       (displayln "Exception raised in Racket code at response generation time:" (current-error-port))
                                       ((error-display-handler) (exn-message e) e))))))])
     body ...))
