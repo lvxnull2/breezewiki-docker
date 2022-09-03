@@ -62,7 +62,11 @@ p {
 }
 .custom-footer__cols {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+}
+@media (min-width: 560px) {
+    .custom-footer__cols {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 .my-logo {
     margin-bottom: 8px;
