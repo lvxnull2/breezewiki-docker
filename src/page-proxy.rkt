@@ -24,6 +24,7 @@
              #:code (easy:response-status-code dest-r)
              #:mime-type (easy:response-headers-ref dest-r 'content-type)
              (λ (out)
-               (copy-port (easy:response-output dest-r) out)))))
+               (copy-port (easy:response-output dest-r) out)
+               (easy:response-close! dest-r)))))
          (next-dispatcher))]
     [#f (next-dispatcher)]))
