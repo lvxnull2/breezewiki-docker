@@ -5,6 +5,8 @@
 (provide
  ; timeout durations for http-easy requests
  timeouts
+ ; generates a consistent footer
+ application-footer
  ; generates a consistent template for wiki page content to sit in
  generate-wiki-page)
 
@@ -13,6 +15,38 @@
            html-writing))
 
 (define timeouts (make-timeout-config #:lease 5 #:connect 5))
+
+(define (application-footer source-url)
+  `(footer (@ (class "custom-footer"))
+           (div (@ (class ,(if source-url "custom-footer__cols" "internal-footer")))
+                (div (p
+                      (img (@ (class "my-logo") (src "/static/breezewiki.svg"))))
+                     (p
+                      (a (@ (href "https://gitdab.com/cadence/breezewiki"))
+                         ,(format "~a source code" (config-get 'application_name))))
+                     (p
+                      (a (@ (href "https://docs.breezewiki.com"))
+                         "Documentation and more information"))
+                     (p
+                      (a (@ (href "https://lists.sr.ht/~cadence/breezewiki-discuss"))
+                         "Discussions / Bug reports / Feature requests"))
+                     ,(if (config-true? 'instance_is_official)
+                          `(p ,(format "This instance is run by the ~a developer, " (config-get 'application_name))
+                              (a (@ (href "https://cadence.moe/contact"))
+                                 "Cadence."))
+                          `(p
+                            ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application_name)))))
+                ,(if source-url
+                     `(div (p "This page displays proxied content from "
+                              (a (@ (href ,source-url) (rel "noreferrer")) ,source-url)
+                              ". Text content is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
+                              (a (@ (href "https://www.fandom.com/licensing")) "see license info.")
+                              " Media files may have different copying restrictions.")
+                           (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))
+                     `(div (p "Text content on wikis run by Fandom is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
+                              (a (@ (href "https://www.fandom.com/licensing")) "see license info.")
+                              " Media files and official Fandom documents have different copying restrictions.")
+                           (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))))))
 
 (define (generate-wiki-page source-url wikiname title content)
   (define (required-styles origin)
@@ -46,29 +80,6 @@
                           (div (@ (id "content") #;(class "page-content"))
                                (div (@ (id "mw-content-text"))
                                     ,content))
-                          (footer (@ (class "custom-footer"))
-                                  (div (@ (class "custom-footer__cols"))
-                                       (div
-                                        (p
-                                         (img (@ (class "my-logo") (src "/static/breezewiki.svg"))))
-                                        (p
-                                         (a (@ (href "https://gitdab.com/cadence/breezewiki"))
-                                            ,(format "~a source code" (config-get 'application_name))))
-                                        (p
-                                         (a (@ (href "https://lists.sr.ht/~cadence/breezewiki-discuss"))
-                                            "Discussions / Bug reports / Feature requests"))
-                                        ,(if (config-get 'instance_is_official)
-                                             `(p ,(format "This instance is run by the ~a developer, " (config-get 'application_name))
-                                                 (a (@ (href "https://cadence.moe/contact"))
-                                                    "Cadence."))
-                                             `(p
-                                               ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application_name)))))
-                                       (div
-                                        (p "This page displays proxied content from "
-                                           (a (@ (href ,source-url) (rel "noreferrer")) ,source-url)
-                                           ". Text content is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
-                                           (a (@ (href "https://www.fandom.com/licensing")) "see license info.")
-                                           " Media files may have different copying restrictions.")
-                                        (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))))))))))
+                          ,(application-footer source-url)))))))
 (module+ test
   (check-not-false (xexp->html (generate-wiki-page "" "test" "test" '(template)))))
