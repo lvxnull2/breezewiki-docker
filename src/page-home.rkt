@@ -38,7 +38,7 @@
 (define body
   `(html
     (head
-     (meta (@ (name ")viewport") (content "width=device-width, initial-scale=1")))
+     (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
      (title "About | BreezeWiki")
      (link (@ (rel "stylesheet") (type "text/css") (href "/static/internal.css")))
      (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css"))))

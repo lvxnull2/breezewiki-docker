@@ -15,6 +15,7 @@
 (require-reloadable "src/page-proxy.rkt" page-proxy)
 (require-reloadable "src/page-search.rkt" page-search)
 (require-reloadable "src/page-static.rkt" static-dispatcher)
+(require-reloadable "src/page-subdomain.rkt" subdomain-dispatcher)
 (require-reloadable "src/page-wiki.rkt" page-wiki)
 
 (reload!)
@@ -34,6 +35,7 @@
       page-proxy
       page-search
       page-wiki
-      static-dispatcher))))
+      static-dispatcher
+      subdomain-dispatcher))))
 (define server-t (thread start))
 (define quit (channel-get ch))
