@@ -1,10 +1,7 @@
 #lang racket/base
 (require web-server/servlet-dispatch
-         (prefix-in pathprocedure: web-server/dispatchers/dispatch-pathprocedure)
-         (prefix-in sequencer: web-server/dispatchers/dispatch-sequencer)
-         (prefix-in lift: web-server/dispatchers/dispatch-lift)
-         (prefix-in filter: web-server/dispatchers/dispatch-filter)
          "src/config.rkt"
+         "src/dispatcher-tree.rkt"
          "src/reloadable.rkt")
 
 (define-syntax-rule (require-reloadable filename varname)
@@ -20,8 +17,6 @@
 (require-reloadable "src/page-static.rkt" static-dispatcher)
 (require-reloadable "src/page-wiki.rkt" page-wiki)
 
-(when (not (config-true? 'debug))
-  (set-reload-poll-interval! #f))
 (reload!)
 
 (define ch (make-channel))
@@ -31,13 +26,14 @@
    #:port (string->number (config-get 'port))
    (λ (quit)
      (channel-put ch (lambda () (semaphore-post quit)))
-     (sequencer:make
-      (pathprocedure:make "/" page-home)
-      (pathprocedure:make "/proxy" page-proxy)
-      (filter:make #rx"^/[a-z-]+/wiki/Category:.+$" (lift:make page-category))
-      (filter:make #rx"^/[a-z-]+/wiki/.+$" (lift:make page-wiki))
-      (filter:make #rx"^/[a-z-]+/search$" (lift:make page-search))
-      static-dispatcher
-      (lift:make page-not-found)))))
+     (dispatcher-tree
+      ; order of these does not matter
+      page-category
+      page-home
+      page-not-found
+      page-proxy
+      page-search
+      page-wiki
+      static-dispatcher))))
 (define server-t (thread start))
 (define quit (channel-get ch))
