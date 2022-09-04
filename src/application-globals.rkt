@@ -26,7 +26,7 @@
   `(html
     (head
      (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
-     (title ,(format "~a | ~a" title (config-get 'application-name)))
+     (title ,(format "~a | ~a" title (config-get 'application_name)))
      (style ":root { --theme-page-background-color: #dfdfe0 }") ; fallback in case styles don't load fast enough
      ,@(map (λ (url)
               `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
@@ -53,22 +53,22 @@
                                          (img (@ (class "my-logo") (src "/static/breezewiki.svg"))))
                                         (p
                                          (a (@ (href "https://gitdab.com/cadence/breezewiki"))
-                                            ,(format "~a source code" (config-get 'application-name))))
+                                            ,(format "~a source code" (config-get 'application_name))))
                                         (p
                                          (a (@ (href "https://lists.sr.ht/~cadence/breezewiki-discuss"))
                                             "Discussions / Bug reports / Feature requests"))
-                                        ,(if (config-get 'instance-is-official)
-                                             `(p ,(format "This instance is run by the ~a developer, " (config-get 'application-name))
+                                        ,(if (config-get 'instance_is_official)
+                                             `(p ,(format "This instance is run by the ~a developer, " (config-get 'application_name))
                                                  (a (@ (href "https://cadence.moe/contact"))
                                                     "Cadence."))
                                              `(p
-                                               ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application-name)))))
+                                               ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application_name)))))
                                        (div
                                         (p "This page displays proxied content from "
                                            (a (@ (href ,source-url) (rel "noreferrer")) ,source-url)
                                            ". Text content is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
                                            (a (@ (href "https://www.fandom.com/licensing")) "see license info.")
                                            " Media files may have different copying restrictions.")
-                                        (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application-name))))))))))))
+                                        (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))))))))))
 (module+ test
   (check-not-false (xexp->html (generate-wiki-page "" "test" "test" '(template)))))

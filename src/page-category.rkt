@@ -59,7 +59,7 @@
 
    (define data (easy:response-json dest-res))
    (define body (generate-results-page dest-url wikiname prefixed-category data))
-   (when (config-get 'debug)
+   (when (config-true? 'debug)
      ; used for its side effects
      ; convert to string with error checking, error will be raised if xexp is invalid
      (xexp->html body))

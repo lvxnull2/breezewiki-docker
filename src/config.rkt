@@ -16,10 +16,11 @@
   (hash-ref config key))
 
 (define default-config
-  '((port . "10416")
+  '((application_name . "BreezeWiki")
+    (canonical_origin . "")
     (debug . "false")
-    (instance-is-official . "false") ; please don't turn this on, or you will make me very upset
-    (application-name . "BreezeWiki")))
+    (instance_is_official . "false") ; please don't turn this on, or you will make me very upset
+    (port . "10416")))
 
 (define config
   (make-hasheq
