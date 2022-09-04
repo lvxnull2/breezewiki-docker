@@ -60,7 +60,7 @@
                           (footer (@ (class "custom-footer"))
                                   (div (@ (class "internal-footer"))
                                        (img (@ (class "my-logo") (src "/static/breezewiki.svg")))
-                                       ,(if (config-get 'instance_is_official)
+                                       ,(if (config-true? 'instance_is_official)
                                             `(div
                                               (p ,(format "This instance is run by the ~a developer, " (config-get 'application_name))
                                                 (a (@ (href "https://cadence.moe/contact"))
