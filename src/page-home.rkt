@@ -1,6 +1,7 @@
 #lang racket/base
 
-(require html-writing
+(require net/url
+         html-writing
          web-server/http
          "xexpr-utils.rkt"
          "config.rkt")
@@ -31,7 +32,10 @@
                       ,(apply format "~a: ~a" x))))
             examples))
     (h2 "How to use")
-    (p "While browsing any page on Fandom, you can replace \"fandom.com\" in the address bar with \"breezewiki.com\" to see the BreezeWiki version of that page.")
+    (p ,(format "While browsing any page on Fandom, you can replace \"fandom.com\" in the address bar with \"~a\" to see the BreezeWiki version of that page."
+               (if (config-true? 'canonical_origin)
+                   (url-host (string->url (config-get 'canonical_origin)))
+                   "breezewiki.com")))
     (p "After that, you can click the links to navigate around the pages.")
     (p "To get back to Fandom, click the link that's at the bottom of the page.")))
 
