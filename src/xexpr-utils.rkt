@@ -158,7 +158,8 @@
     (define attributes (bits->attributes (cdr element)))
     (define contents (filter element-is-content? (cdr element))) ; provide elements and strings
     (if (or (equal? element-type '*DECL)
-            (equal? element-type '@))
+            (equal? element-type '@)
+            (equal? element-type '&))
         ; special element, do nothing
         element
         ; regular element, transform it
@@ -169,6 +170,10 @@
                    (map (λ (content)
                           (if (element-is-element? content) (loop content) content))
                         contents))]))))
+(module+ test
+  ; check (& x) sequences are preserved
+  (check-equal? (update-tree (λ (e t a c) (list t a c)) '(body "Hey" (& nbsp) (a (@ (href "/")))))
+                '(body "Hey" (& nbsp) (a (@ (href "/"))))))
 
 (define (has-class? name attributes)
   (and (member name (string-split (or (get-attribute 'class attributes) "") " ")) #t))
