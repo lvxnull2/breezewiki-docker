@@ -15,6 +15,7 @@
 
 (define examples
   '(("crosscode" "CrossCode_Wiki")
+    ("pokemon" "Eevee")
     ("minecraft" "Bricks")
     ("undertale" "Hot_Dog...%3F")
     ("tardis" "Eleanor_Blake")
