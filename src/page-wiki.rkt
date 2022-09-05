@@ -13,6 +13,7 @@
          web-server/http
          web-server/dispatchers/dispatch
          ; my libs
+         "config.rkt"
          "pure-utils.rkt"
          "xexpr-utils.rkt"
          "url-utils.rkt"
@@ -231,12 +232,17 @@
             (define body
               (generate-wiki-page source-url wikiname title (update-tree-wiki page wikiname)))
             (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
+            (define headers (if redirect-msg
+                                (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
+                                       [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
+                                  (list (header #"Refresh" value)))
+                                (list)))
+            (when (config-true? 'debug)
+              ; used for its side effects
+              ; convert to string with error checking, error will be raised if xexp is invalid
+              (xexp->html body))
             (response/output
              #:code 200
-             #:headers (if redirect-msg
-                           (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
-                                  [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
-                             (list (header #"Refresh" value)))
-                           (list))
+             #:headers headers
              (λ (out)
                (write-html body out))))))]))
