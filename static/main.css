@@ -22,7 +22,7 @@ sub {
 }
 
 /* general page appearance */
-body.skin-fandomdesktop, button, input, textarea, .wikitable {
+body.skin-fandomdesktop, button, input, textarea, .wikitable, .va-table {
     font-family: initial;
     font-size: 18px;
     line-height: 1.5;
