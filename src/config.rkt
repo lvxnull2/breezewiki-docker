@@ -20,7 +20,8 @@
     (canonical_origin . "")
     (debug . "false")
     (instance_is_official . "false") ; please don't turn this on, or you will make me very upset
-    (port . "10416")))
+    (port . "10416")
+    (strict_proxy . "true")))
 
 (define config
   (make-hasheq
