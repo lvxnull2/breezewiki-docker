@@ -1,6 +1,9 @@
 #lang racket/base
-(require net/http-easy
-         "config.rkt")
+(require racket/string
+         net/http-easy
+         "config.rkt"
+         "xexpr-utils.rkt"
+         "url-utils.rkt")
 
 (provide
  ; timeout durations for http-easy requests
@@ -50,7 +53,11 @@
 
 (define (generate-wiki-page source-url wikiname title content)
   (define (required-styles origin)
-    (map (λ (dest-path) (format dest-path origin))
+    (map (λ (dest-path)
+           (define url (format dest-path origin))
+           (if (config-true? 'strict_proxy)
+               (u-proxy-url url)
+               url))
          '(#;"~a/load.php?lang=en&modules=skin.fandomdesktop.styles&only=styles&skin=fandomdesktop"
            #;"~a/load.php?lang=en&modules=ext.gadget.dungeonsWiki%2CearthWiki%2Csite-styles%2Csound-styles&only=styles&skin=fandomdesktop"
            #;"~a/load.php?lang=en&modules=site.styles&only=styles&skin=fandomdesktop"
@@ -82,4 +89,16 @@
                                     ,content))
                           ,(application-footer source-url)))))))
 (module+ test
-  (check-not-false (xexp->html (generate-wiki-page "" "test" "test" '(template)))))
+  (define page
+    (parameterize ([(config-parameter 'strict_proxy) "true"])
+      (generate-wiki-page "" "test" "test" '(template))))
+  ; check the page is a valid xexp
+  (check-not-false (xexp->html page))
+  ; check the stylesheet is proxied
+  (check-true (string-prefix?
+               (get-attribute 'href
+                              (bits->attributes
+                               ((query-selector
+                                 (λ (t a c) (eq? t 'link))
+                                 page))))
+               "/proxy?dest=https%3A%2F%2Ftest.fandom.com")))

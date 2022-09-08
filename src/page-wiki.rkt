@@ -64,7 +64,7 @@
   (check-equal? (preprocess-html-wiki "<figure class=\"thumb tright\" style=\"width: 150px\"><a class=\"image\"><img></a><noscript><a><img></a></noscript><figcaption class=\"thumbcaption\"> 	<p class=\"caption\">Caption text.</p></figcaption></figure>")
                 "<figure class=\"thumb tright\" style=\"width: 150px\"><a class=\"image\"><img></a><noscript><a><img></a></noscript><figcaption class=\"thumbcaption\"><span class=\"caption\">Caption text.</span></figcaption></figure>"))
 
-(define (update-tree-wiki tree wikiname #:strict-proxy? strict-proxy?)
+(define (update-tree-wiki tree wikiname)
   (update-tree
    (λ (element element-type attributes children)
      ;; replace whole element?
@@ -154,10 +154,10 @@
                                             "url("
                                             (u-proxy-url url)
                                             ")")))))
-                ; and also their links, if strict-proxy is set
+                ; and also their links, if strict_proxy is set
                 (curry u
                        (λ (v)
-                         (and strict-proxy?
+                         (and (config-true? 'strict_proxy)
                               (eq? element-type 'a)
                               (has-class? "image-thumbnail" v)))
                        (λ (v) (attribute-maybe-update 'href u-proxy-url v)))
@@ -183,7 +183,9 @@
                children))]))
    tree))
 (module+ test
-  (define transformed (update-tree-wiki wiki-document "test" #:strict-proxy? #t))
+  (define transformed
+    (parameterize ([(config-parameter 'strict_proxy) "true"])
+      (update-tree-wiki wiki-document "test")))
   ; check that wikilinks are changed to be local
   (check-equal? (get-attribute 'href (bits->attributes
                                       ((query-selector
@@ -249,7 +251,7 @@
            (next-dispatcher)
            (response-handler
             (define body
-              (generate-wiki-page source-url wikiname title (update-tree-wiki page wikiname #:strict-proxy? (config-true? 'strict_proxy))))
+              (generate-wiki-page source-url wikiname title (update-tree-wiki page wikiname)))
             (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
             (define headers (if redirect-msg
                                 (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
