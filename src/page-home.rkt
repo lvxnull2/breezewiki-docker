@@ -24,22 +24,25 @@
 
 (define content
   `((h2 "BreezeWiki makes wiki pages on Fandom readable")
-    (p "It removes ads, videos, and suggested content, leaving you with a clean page that doesn't consume all your data.")
-    (p "If you're looking for an \"alternative\" to Fandom for writing pages, you should look elsewhere. BreezeWiki only lets you read existing pages.")
+    (p "It removes ads, videos, and suggested content, leaving you with a clean page that doesn't slow down your device or use up your data.")
     (p "BreezeWiki can also be called an \"alternative frontend for Fandom\".")
+    (p ,(format "To use BreezeWiki, just replace \"fandom.com\" with \"~a\", and you'll instantly be teleported to a better world."
+               (if (config-true? 'canonical_origin)
+                   (url-host (string->url (config-get 'canonical_origin)))
+                   "breezewiki.com")))
     (h2 "Example pages")
     (ul
      ,@(map (λ (x)
               `(li (a (@ (href ,(apply format "/~a/wiki/~a" x)))
                       ,(apply format "~a: ~a" x))))
             examples))
-    (h2 "How to use")
-    (p ,(format "While browsing any page on Fandom, you can replace \"fandom.com\" in the address bar with \"~a\" to see the BreezeWiki version of that page."
-               (if (config-true? 'canonical_origin)
-                   (url-host (string->url (config-get 'canonical_origin)))
-                   "breezewiki.com")))
-    (p "After that, you can click the links to navigate around the pages.")
-    (p "To get back to Fandom, click the link that's at the bottom of the page.")))
+    (h2 "Testimonials")
+    (p (@ (class "testimonial")) ">you are so right that fandom still sucks even with adblock somehow. even zapping all the stupid padding it still sucks —Minimus")
+    (p (@ (class "testimonial")) ">attempting to go to a wiki's forum page with breezewiki doesn't work, which is based honestly —Tom Skeleton")
+    (p (@ (class "testimonial")) ">Fandom pages crashing and closing, taking forever to load and locking up as they load the ads on the site... they are causing the site to crash because they are trying to load video ads both at the top and bottom of the site as well as two or three banner ads, then a massive top of site ad and eventually my anti-virus shuts the whole site down because it's literally pulling more resources than WoW in ultra settings... —Anonymous")
+    (h2 "What BreezeWiki isn't")
+    (p "BreezeWiki isn't an \"alternative\" to Fandom, and it doesn't let you edit or write new pages.")
+    (p "If you want to create your own wiki, try Miraheze!")))
 
 (define body
   `(html
