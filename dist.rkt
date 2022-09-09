@@ -7,6 +7,7 @@
 (require (only-in "src/page-home.rkt" page-home))
 (require (only-in "src/page-not-found.rkt" page-not-found))
 (require (only-in "src/page-proxy.rkt" page-proxy))
+(require (only-in "src/page-redirect-wiki-home.rkt" redirect-wiki-home))
 (require (only-in "src/page-search.rkt" page-search))
 (require (only-in "src/page-static.rkt" static-dispatcher))
 (require (only-in "src/page-subdomain.rkt" subdomain-dispatcher))
@@ -24,5 +25,6 @@
     page-proxy
     page-search
     page-wiki
+    redirect-wiki-home
     static-dispatcher
     subdomain-dispatcher)))
