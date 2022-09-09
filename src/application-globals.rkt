@@ -1,6 +1,8 @@
 #lang racket/base
 (require racket/string
-         net/http-easy
+         (prefix-in easy: net/http-easy)
+         html-writing
+         web-server/http
          "config.rkt"
          "xexpr-utils.rkt"
          "url-utils.rkt")
@@ -11,13 +13,15 @@
  ; generates a consistent footer
  application-footer
  ; generates a consistent template for wiki page content to sit in
- generate-wiki-page)
+ generate-wiki-page
+ ; generates a minimal but complete redirect to another page
+ generate-redirect)
 
 (module+ test
   (require rackunit
            html-writing))
 
-(define timeouts (make-timeout-config #:lease 5 #:connect 5))
+(define timeouts (easy:make-timeout-config #:lease 5 #:connect 5))
 
 (define (application-footer source-url)
   `(footer (@ (class "custom-footer"))
@@ -102,3 +106,19 @@
                                  (λ (t a c) (eq? t 'link))
                                  page))))
                "/proxy?dest=https%3A%2F%2Ftest.fandom.com")))
+
+(define (generate-redirect dest)
+  (define dest-bytes (string->bytes/utf-8 dest))
+  (response/output
+   #:code 302
+   #:headers (list (header #"Location" dest-bytes))
+   (λ (out)
+     (write-html
+      `(html
+        (head
+         (title "Redirecting..."))
+        (body
+         "Redirecting to "
+         (a (@ (href ,dest)) ,dest)
+         "..."))
+      out))))

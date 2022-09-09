@@ -67,5 +67,6 @@
               (filter:make #rx"^/[a-z-]+/wiki/Category:.+$" (lift:make (hash-ref ds 'page-category)))
               (filter:make #rx"^/[a-z-]+/wiki/.+$" (lift:make (hash-ref ds 'page-wiki)))
               (filter:make #rx"^/[a-z-]+/search$" (lift:make (hash-ref ds 'page-search)))
+              (filter:make #rx"^/[a-z-]+(/(wiki(/)?)?)?$" (lift:make (hash-ref ds 'redirect-wiki-home)))
               (hash-ref ds 'static-dispatcher)
               (lift:make (hash-ref ds 'page-not-found)))))))

@@ -13,6 +13,7 @@
 (require-reloadable "src/page-home.rkt" page-home)
 (require-reloadable "src/page-not-found.rkt" page-not-found)
 (require-reloadable "src/page-proxy.rkt" page-proxy)
+(require-reloadable "src/page-redirect-wiki-home.rkt" redirect-wiki-home)
 (require-reloadable "src/page-search.rkt" page-search)
 (require-reloadable "src/page-static.rkt" static-dispatcher)
 (require-reloadable "src/page-subdomain.rkt" subdomain-dispatcher)
@@ -35,6 +36,7 @@
       page-proxy
       page-search
       page-wiki
+      redirect-wiki-home
       static-dispatcher
       subdomain-dispatcher))))
 (define server-t (thread start))
