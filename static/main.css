@@ -110,6 +110,11 @@ p {
     display: none;
 }
 
+/* don't display sections on home pages encouraging new editors */
+#fpcommunity {
+    display: none;
+}
+
 /* don't allow images to extend past the edge of the page */
 img {
     max-width: 100%;
