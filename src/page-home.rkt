@@ -30,6 +30,8 @@
                (if (config-true? 'canonical_origin)
                    (url-host (string->url (config-get 'canonical_origin)))
                    "breezewiki.com")))
+    (p "If you'd like to be automatically sent to BreezeWiki every time in the future, "
+       (a (@ (href "https://docs.breezewiki.com/Automatic_Redirection.html")) "check out the tutorial in the manual."))
     (h2 "Example pages")
     (ul
      ,@(map (λ (x)
