@@ -13,14 +13,18 @@
          web-server/http
          web-server/dispatchers/dispatch
          ; my libs
+         "application-globals.rkt"
          "config.rkt"
          "pure-utils.rkt"
          "xexpr-utils.rkt"
-         "url-utils.rkt"
-         "application-globals.rkt")
+         "url-utils.rkt")
 
 (provide
- page-wiki)
+ ; used by the web server
+ page-wiki
+ ; used by page-category, and similar pages that are partially wiki pages
+ update-tree-wiki
+ preprocess-html-wiki)
 
 (module+ test
   (require rackunit)

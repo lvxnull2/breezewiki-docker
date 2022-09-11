@@ -66,13 +66,12 @@
            #;"~a/load.php?lang=en&modules=ext.gadget.dungeonsWiki%2CearthWiki%2Csite-styles%2Csound-styles&only=styles&skin=fandomdesktop"
            #;"~a/load.php?lang=en&modules=site.styles&only=styles&skin=fandomdesktop"
            ; combine the above entries into a single request for potentially extra speed - fandom.com doesn't even do this!
-           "~a/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop"
-           "~a/wikia.php?controller=ThemeApi&method=themeVariables")))
+           "~a/wikia.php?controller=ThemeApi&method=themeVariables"
+           "~a/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop")))
   `(html
     (head
      (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
      (title ,(format "~a | ~a" title (config-get 'application_name)))
-     (style ":root { --theme-page-background-color: #dfdfe0 }") ; fallback in case styles don't load fast enough
      ,@(map (λ (url)
               `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
             (required-styles (format "https://~a.fandom.com" wikiname)))

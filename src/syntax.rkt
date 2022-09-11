@@ -2,8 +2,10 @@
 (require (for-syntax racket/base))
 
 (provide
- ; help make a nested if where the false results are the same
- if/out)
+ ; help make a nested if. if/in will gain the same false form of its containing if/out.
+ if/out
+ ; let, but the value for each variable is evaluated within a thread
+ thread-let)
 
 (module+ test
   (require rackunit)
@@ -15,7 +17,10 @@
 ;; it's in a submodule so that it can be required in both levels, for testing
 
 (module transform racket/base
-  (provide transform-if/out)
+  (provide
+   transform-if/out
+   transform-thread-let)
+
   (define (transform-if/out stx)
     (define tree (cdr (syntax->datum stx))) ; condition true false
     (define else (cddr tree)) ; the else branch cons cell
@@ -37,7 +42,27 @@
           [(pair? node) (cons (walk (car node)) (walk (cdr node)))]
           ; something else that can't be recursed into, so pass it through
           [#t node])))
-    (datum->syntax stx (cons 'if result))))
+    (datum->syntax stx (cons 'if result)))
+
+  (define (transform-thread-let stx)
+    (define tree (cdr (syntax->datum stx)))
+    (define defs (car tree))
+    (define forms (cdr tree))
+    (when (eq? (length forms) 0)
+      (error (format "thread-let: bad syntax (need some forms to execute after the threads)~n  forms: ~a" forms)))
+    (define counter (build-list (length defs) values))
+    (datum->syntax
+     stx
+     `(let ([chv (build-vector ,(length defs) (λ (_) (make-channel)))])
+        ,@(map (λ (n)
+                 (define def (list-ref defs n))
+                 `(thread (λ () (channel-put (vector-ref chv ,n) (let _ () ,@(cdr def))))))
+               counter)
+        (let ,(map (λ (n)
+                     (define def (list-ref defs n))
+                     `(,(car def) (channel-get (vector-ref chv ,n))))
+                   counter)
+            ,@forms)))))
 
 ;; the syntax definitions and their tests go below here
 
@@ -52,3 +77,32 @@
   (check-equal? (if/out #f (if/in #t 'yes) 'no) 'no)
   (check-equal? (if/out #t (if/in #f 'yes) 'no) 'no)
   (check-equal? (if/out #f (if/in #f 'yes) 'no) 'no))
+
+(define-syntax (thread-let stx)
+  (transform-thread-let stx))
+(module+ test
+  ; check that it is transformed as expected
+  (check-syntax-equal?
+   (transform-thread-let
+    #'(thread-let ([a (hey "this is a")]
+                   [b (hey "this is b")])
+                  (list a b)))
+   #'(let ([chv (build-vector 2 (λ (_) (make-channel)))])
+       (thread (λ () (channel-put (vector-ref chv 0) (let _ () (hey "this is a")))))
+       (thread (λ () (channel-put (vector-ref chv 1) (let _ () (hey "this is b")))))
+       (let ([a (channel-get (vector-ref chv 0))]
+             [b (channel-get (vector-ref chv 1))])
+         (list a b))))
+  ; check that they actually execute concurrently
+  (define ch (make-channel))
+  (check-equal? (thread-let ([a (begin
+                                  (channel-put ch 'a)
+                                  (channel-get ch))]
+                             [b (begin0
+                                    (channel-get ch)
+                                  (channel-put ch 'b))])
+                            (list a b))
+                '(b a))
+  ; check that it assigns the correct value to the correct variable
+  (check-equal? (thread-let ([a (sleep 0) 'a] [b 'b]) (list a b))
+                '(a b)))
