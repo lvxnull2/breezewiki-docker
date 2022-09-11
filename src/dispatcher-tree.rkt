@@ -1,5 +1,6 @@
 #lang racket/base
-(require (for-syntax racket/base)
+(require "syntax.rkt"
+         (for-syntax racket/base)
          racket/string
          net/url
          (prefix-in host: web-server/dispatchers/dispatch-host)
@@ -14,29 +15,6 @@
  dispatcher-tree
  ; procedure to make the tree from the hashmap
  make-dispatcher-tree)
-
-(define-syntax (if/out stx)
-  (define tree (cdr (syntax->datum stx))) ; condition true false
-  (define else (cddr tree)) ; the else branch cons cell
-  (define result
-   (let walk ([node tree])
-     (cond
-       ; normally, node should be a full cons cell (a pair) but it might be something else.
-       ; situation: reached the end of a list, empty cons cell
-       [(null? node) node]
-       ; situation: reached the end of a list, cons cdr was non-list
-       [(symbol? node) node]
-       ; normal situation, full cons cell
-       ; -- don't go replacing through nested if/out
-       [(and (pair? node) (eq? 'if/out (car node))) node]
-       ; -- replace if/in
-       [(and (pair? node) (eq? 'if/in (car node)))
-        (append '(if) (cdr node) else)]
-       ; recurse down pair head and tail
-       [(pair? node) (cons (walk (car node)) (walk (cdr node)))]
-       ; something else that can't be recursed into, so pass it through
-       [#t node])))
-  (datum->syntax stx (cons 'if result)))
 
 ; make a hashmap out of the provided names and call make-dispatcher-tree with it
 (define-syntax (dispatcher-tree stx)
