@@ -1,10 +1,16 @@
 /* reset the reset */
-blockquote, code, del, details, div, dl, dt, em, fieldset, figcaption, figure, h1, h2, h3, h4, h5, h6, li
-, ol, p, pre, q, span, strong, ul {
-    font-family: initial;
+blockquote, code, del, details, div, dl, dt, em, fieldset, figcaption, figure, h1, h2, h3, h4, h5, h6, li, ol, p, pre, q, span, strong, ul {
+    font-family: sans-serif;
     margin: initial;
     padding: initial;
     border: initial;
+}
+input, textarea {
+    font-family: sans-serif;
+}
+pre, code {
+    font-family: monospace;
+    font-size: 0.85em;
 }
 ul, ol {
     list-style-type: initial;
@@ -23,7 +29,6 @@ sub {
 
 /* general page appearance */
 body.skin-fandomdesktop, button, input, textarea, .wikitable, .va-table {
-    font-family: initial;
     font-size: 18px;
     line-height: 1.5;
 }
@@ -230,6 +235,13 @@ figcaption, .lightbox-caption, .thumbcaption {
     /* category list columns */
     .my-category-list {
         columns: 3;
+    }
+}
+
+@media (max-width: 699px) { /* narrower than 700 px */
+    /* fit more text on screen */
+    body.skin-fandomdesktop, button, input, textarea, .wikitable, .va-table {
+        font-size: 16px;
     }
 }
 
