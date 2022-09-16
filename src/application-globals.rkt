@@ -4,6 +4,7 @@
          html-writing
          web-server/http
          "config.rkt"
+         "data.rkt"
          "xexpr-utils.rkt"
          "url-utils.rkt")
 
@@ -23,7 +24,8 @@
 
 (define timeouts (easy:make-timeout-config #:lease 5 #:connect 5))
 
-(define (application-footer source-url)
+(define (application-footer source-url #:license [license-in #f])
+  (define license (or license-in license-default))
   `(footer (@ (class "custom-footer"))
            (div (@ (class ,(if source-url "custom-footer__cols" "internal-footer")))
                 (div (p
@@ -46,8 +48,8 @@
                 ,(if source-url
                      `(div (p "This page displays proxied content from "
                               (a (@ (href ,source-url) (rel "noreferrer")) ,source-url)
-                              ". Text content is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
-                              (a (@ (href "https://www.fandom.com/licensing")) "see license info.")
+                              ,(format ". Text content is available under the ~a license, " (license-text license))
+                              (a (@ (href ,(license-url license))) "see license info.")
                               " Media files may have different copying restrictions.")
                            (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))
                      `(div (p "Text content on wikis run by Fandom is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
@@ -60,8 +62,9 @@
          #:source-url source-url
          #:wikiname wikiname
          #:title title
-         #:body-class [body-class-in ""])
-  (define body-class (if (equal? "" body-class-in)
+         #:body-class [body-class-in #f]
+         #:license [license #f])
+  (define body-class (if (not body-class-in)
                          "skin-fandomdesktop"
                          body-class-in))
   (define (required-styles origin)
@@ -98,7 +101,7 @@
                           (div (@ (id "content") #;(class "page-content"))
                                (div (@ (id "mw-content-text"))
                                     ,content))
-                          ,(application-footer source-url)))))))
+                          ,(application-footer source-url #:license license)))))))
 (module+ test
   (define page
     (parameterize ([(config-parameter 'strict_proxy) "true"])

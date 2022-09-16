@@ -16,7 +16,9 @@
          ; my libs
          "application-globals.rkt"
          "config.rkt"
+         "data.rkt"
          "pure-utils.rkt"
+         "syntax.rkt"
          "xexpr-utils.rkt"
          "url-utils.rkt")
 
@@ -148,7 +150,7 @@
                        (λ (v) (and (eq? element-type 'a)
                                    (has-class? "image" v)))
                        (λ (v) (dict-update v 'rel (λ (s)
-                                                             (list (string-append (car s) " noreferrer")))
+                                                    (list (string-append (car s) " noreferrer")))
                                            '(""))))
                 ; proxy images from inline styles
                 (curry attribute-maybe-update 'style
@@ -235,49 +237,53 @@
   (define path (string-join (map path/param-path (cddr (url-path (request-uri req)))) "/"))
   (define source-url (format "https://~a.fandom.com/wiki/~a" wikiname path))
 
-  (define dest-url (format "~a/api.php?~a"
-                           origin
-                           (params->query `(("action" . "parse")
-                                            ("page" . ,path)
-                                            ("prop" . "text|headhtml|langlinks")
-                                            ("formatversion" . "2")
-                                            ("format" . "json")))))
-  (printf "out: ~a~n" dest-url)
-  (define dest-res (easy:get dest-url #:timeouts timeouts))
+  (thread-let
+   ([dest-res (define dest-url
+                (format "~a/api.php?~a"
+                        origin
+                        (params->query `(("action" . "parse")
+                                         ("page" . ,path)
+                                         ("prop" . "text|headhtml|langlinks")
+                                         ("formatversion" . "2")
+                                         ("format" . "json")))))
+              (printf "out: ~a~n" dest-url)
+              (easy:get dest-url #:timeouts timeouts)]
+    [license (license-auto wikiname)])
 
-  (cond
-    [(eq? 200 (easy:response-status-code dest-res))
-     (let* ([data (easy:response-json dest-res)]
-            [title (jp "/parse/title" data "")]
-            [page-html (jp "/parse/text" data "")]
-            [page-html (preprocess-html-wiki page-html)]
-            [page (html->xexp page-html)]
-            [head-html (jp "/parse/headhtml" data "")]
-            [body-class (match (regexp-match #rx"<body [^>]*class=\"([^\"]*)" head-html)
-                          [(list _ classes) classes]
-                          [_ ""])])
-       (if (equal? "missingtitle" (jp "/error/code" data #f))
-           (next-dispatcher)
-           (response-handler
-            (define body
-              (generate-wiki-page
-               (update-tree-wiki page wikiname)
-               #:source-url source-url
-               #:wikiname wikiname
-               #:title title
-               #:body-class body-class))
-            (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
-            (define headers (if redirect-msg
-                                (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
-                                       [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
-                                  (list (header #"Refresh" value)))
-                                (list)))
-            (when (config-true? 'debug)
-              ; used for its side effects
-              ; convert to string with error checking, error will be raised if xexp is invalid
-              (xexp->html body))
-            (response/output
-             #:code 200
-             #:headers headers
-             (λ (out)
-               (write-html body out))))))]))
+   (cond
+     [(eq? 200 (easy:response-status-code dest-res))
+      (let* ([data (easy:response-json dest-res)]
+             [title (jp "/parse/title" data "")]
+             [page-html (jp "/parse/text" data "")]
+             [page-html (preprocess-html-wiki page-html)]
+             [page (html->xexp page-html)]
+             [head-html (jp "/parse/headhtml" data "")]
+             [body-class (match (regexp-match #rx"<body [^>]*class=\"([^\"]*)" head-html)
+                           [(list _ classes) classes]
+                           [_ ""])])
+        (if (equal? "missingtitle" (jp "/error/code" data #f))
+            (next-dispatcher)
+            (response-handler
+             (define body
+               (generate-wiki-page
+                (update-tree-wiki page wikiname)
+                #:source-url source-url
+                #:wikiname wikiname
+                #:title title
+                #:body-class body-class
+                #:license license))
+             (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
+             (define headers (if redirect-msg
+                                 (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
+                                        [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
+                                   (list (header #"Refresh" value)))
+                                 (list)))
+             (when (config-true? 'debug)
+               ; used for its side effects
+               ; convert to string with error checking, error will be raised if xexp is invalid
+               (xexp->html body))
+             (response/output
+              #:code 200
+              #:headers headers
+              (λ (out)
+                (write-html body out))))))])))

@@ -10,8 +10,10 @@
          web-server/http
          (only-in web-server/dispatchers/dispatch next-dispatcher)
          #;(only-in web-server/http/redirect redirect-to)
-         "config.rkt"
          "application-globals.rkt"
+         "config.rkt"
+         "data.rkt"
+         "syntax.rkt"
          "url-utils.rkt"
          "xexpr-utils.rkt")
 
@@ -23,12 +25,13 @@
   (define search-json-data
     '#hasheq((batchcomplete . #t) (query . #hasheq((search . (#hasheq((ns . 0) (pageid . 219) (size . 1482) (snippet . "") (timestamp . "2022-08-21T08:54:23Z") (title . "Gacha Capsule") (wordcount . 214)) #hasheq((ns . 0) (pageid . 201) (size . 1198) (snippet . "") (timestamp . "2022-07-11T17:52:47Z") (title . "Badges") (wordcount . 181)))))))))
 
-(define (generate-results-page dest-url wikiname query data)
+(define (generate-results-page dest-url wikiname query data #:license [license #f])
   (define search-results (jp "/query/search" data))
   (generate-wiki-page
    #:source-url dest-url
    #:wikiname wikiname
    #:title "Search Results"
+   #:license license
    `(div (@ (class "mw-parser-output"))
          (p ,(format "~a results found for " (length search-results))
             (strong ,query))
@@ -54,29 +57,32 @@
   (response-handler
    (define wikiname (path/param-path (first (url-path (request-uri req)))))
    (define query (dict-ref (url-query (request-uri req)) 'q #f))
-
    (define origin (format "https://~a.fandom.com" wikiname))
-   (define dest-url (format "~a/api.php?~a"
-                            origin
-                            (params->query `(("action" . "query")
-                                             ("list" . "search")
-                                             ("srsearch" . ,query)
-                                             ("formatversion" . "2")
-                                             ("format" . "json")))))
-   (printf "out: ~a~n" dest-url)
-   (define dest-res (easy:get dest-url #:timeouts timeouts))
+   (define dest-url
+     (format "~a/api.php?~a"
+             origin
+             (params->query `(("action" . "query")
+                              ("list" . "search")
+                              ("srsearch" . ,query)
+                              ("formatversion" . "2")
+                              ("format" . "json")))))
 
-   (define data (easy:response-json dest-res))
+   (thread-let
+    ([dest-res (printf "out: ~a~n" dest-url)
+               (easy:get dest-url #:timeouts timeouts)]
+     [license (license-auto wikiname)])
 
-   (define body (generate-results-page dest-url wikiname query data))
-   (when (config-true? 'debug)
-     ; used for its side effects
-     ; convert to string with error checking, error will be raised if xexp is invalid
-     (xexp->html body))
-   (response/output
-    #:code 200
-    (λ (out)
-      (write-html body out)))))
+    (define data (easy:response-json dest-res))
+
+    (define body (generate-results-page dest-url wikiname query data #:license license))
+    (when (config-true? 'debug)
+      ; used for its side effects
+      ; convert to string with error checking, error will be raised if xexp is invalid
+      (xexp->html body))
+    (response/output
+     #:code 200
+     (λ (out)
+       (write-html body out))))))
 (module+ test
   (check-not-false ((query-selector (attribute-selector 'href "/test/wiki/Gacha_Capsule")
                                     (generate-results-page "" "test" "Gacha" search-json-data)))))

@@ -14,6 +14,7 @@
          #;(only-in web-server/http/redirect redirect-to)
          "application-globals.rkt"
          "config.rkt"
+         "data.rkt"
          "page-wiki.rkt"
          "syntax.rkt"
          "url-utils.rkt"
@@ -33,13 +34,15 @@
          #:prefixed-category prefixed-category
          #:members-data members-data
          #:page page
-         #:body-class body-class)
+         #:body-class [body-class #f]
+         #:license [license #f])
   (define members (jp "/query/categorymembers" members-data))
   (generate-wiki-page
    #:source-url source-url
    #:wikiname wikiname
    #:title prefixed-category
    #:body-class body-class
+   #:license license
    `(div
      ,(update-tree-wiki page wikiname)
      (hr)
@@ -85,7 +88,8 @@
                                            ("format" . "json")))))
                 (printf "out: ~a~n" dest-url)
                 (define dest-res (easy:get dest-url #:timeouts timeouts))
-                (easy:response-json dest-res)])
+                (easy:response-json dest-res)]
+     [license (license-auto wikiname)])
 
     (define page-html (preprocess-html-wiki (jp "/parse/text" page-data "")))
     (define page (html->xexp page-html))
@@ -93,15 +97,14 @@
     (define body-class (match (regexp-match #rx"<body [^>]*class=\"([^\"]*)" head-html)
                          [(list _ classes) classes]
                          [_ ""]))
-    (println head-html)
-    (println body-class)
     (define body (generate-results-page
                   #:source-url source-url
                   #:wikiname wikiname
                   #:prefixed-category prefixed-category
                   #:members-data members-data
                   #:page page
-                  #:body-class body-class))
+                  #:body-class body-class
+                  #:license license))
 
     (when (config-true? 'debug)
       ; used for its side effects
@@ -117,5 +120,5 @@
                                      #:source-url ""
                                      #:wikiname "test"
                                      #:prefixed-category "Category:Items"
-                                     #:category-data category-json-data
+                                     #:members-data category-json-data
                                      #:page '(div "page text"))))))

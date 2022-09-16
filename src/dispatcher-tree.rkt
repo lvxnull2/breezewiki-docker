@@ -12,7 +12,9 @@
 
 (provide
  ; syntax to make the hashmap from names
- dispatcher-tree)
+ dispatcher-tree
+ ; procedure to make the tree from the hashmap
+ make-dispatcher-tree)
 
 ; make a hashmap out of the provided names and call make-dispatcher-tree with it
 (define-syntax (dispatcher-tree stx)
