@@ -1,6 +1,7 @@
 #lang racket/base
 (require racket/dict
          racket/list
+         racket/match
          racket/string
          (prefix-in easy: net/http-easy)
          ; html libs
@@ -26,12 +27,19 @@
   (define category-json-data
     '#hasheq((batchcomplete . #t) (continue . #hasheq((cmcontinue . "page|4150504c45|41473") (continue . "-||"))) (query . #hasheq((categorymembers . (#hasheq((ns . 0) (pageid . 25049) (title . "Item (entity)")) #hasheq((ns . 0) (pageid . 128911) (title . "3D")) #hasheq((ns . 0) (pageid . 124018) (title . "A Very Fine Item")) #hasheq((ns . 0) (pageid . 142208) (title . "Amethyst Shard")) #hasheq((ns . 0) (pageid . 121612) (title . "Ankle Monitor")))))))))
 
-(define (generate-results-page dest-url wikiname prefixed-category members-data page)
+(define (generate-results-page
+         #:source-url source-url
+         #:wikiname wikiname
+         #:prefixed-category prefixed-category
+         #:members-data members-data
+         #:page page
+         #:body-class body-class)
   (define members (jp "/query/categorymembers" members-data))
   (generate-wiki-page
-   dest-url
-   wikiname
-   prefixed-category
+   #:source-url source-url
+   #:wikiname wikiname
+   #:title prefixed-category
+   #:body-class body-class
    `(div
      ,(update-tree-wiki page wikiname)
      (hr)
@@ -55,31 +63,45 @@
    (define source-url (format "~a/wiki/~a" origin prefixed-category))
 
    (thread-let
-    ([members-data (define dest-url (format "~a/api.php?~a"
-                                       origin
-                                       (params->query `(("action" . "query")
-                                                        ("list" . "categorymembers")
-                                                        ("cmtitle" . ,prefixed-category)
-                                                        ("cmlimit" . "max")
-                                                        ("formatversion" . "2")
-                                                        ("format" . "json")))))
-              (printf "out: ~a~n" dest-url)
-              (define dest-res (easy:get dest-url #:timeouts timeouts))
-              (easy:response-json dest-res)]
-     [page-data (define dest-url (format "~a/api.php?~a"
-                                    origin
-                                    (params->query `(("action" . "parse")
-                                                     ("page" . ,prefixed-category)
-                                                     ("prop" . "text")
-                                                     ("formatversion" . "2")
-                                                     ("format" . "json")))))
-           (printf "out: ~a~n" dest-url)
-           (define dest-res (easy:get dest-url #:timeouts timeouts))
-           (easy:response-json dest-res)])
+    ([members-data (define dest-url
+                     (format "~a/api.php?~a"
+                             origin
+                             (params->query `(("action" . "query")
+                                              ("list" . "categorymembers")
+                                              ("cmtitle" . ,prefixed-category)
+                                              ("cmlimit" . "max")
+                                              ("formatversion" . "2")
+                                              ("format" . "json")))))
+                   (printf "out: ~a~n" dest-url)
+                   (define dest-res (easy:get dest-url #:timeouts timeouts))
+                   (easy:response-json dest-res)]
+     [page-data (define dest-url
+                  (format "~a/api.php?~a"
+                          origin
+                          (params->query `(("action" . "parse")
+                                           ("page" . ,prefixed-category)
+                                           ("prop" . "text|headhtml|langlinks")
+                                           ("formatversion" . "2")
+                                           ("format" . "json")))))
+                (printf "out: ~a~n" dest-url)
+                (define dest-res (easy:get dest-url #:timeouts timeouts))
+                (easy:response-json dest-res)])
 
     (define page-html (preprocess-html-wiki (jp "/parse/text" page-data "")))
     (define page (html->xexp page-html))
-    (define body (generate-results-page source-url wikiname prefixed-category members-data page))
+    (define head-html (jp "/parse/headhtml" page-data ""))
+    (define body-class (match (regexp-match #rx"<body [^>]*class=\"([^\"]*)" head-html)
+                         [(list _ classes) classes]
+                         [_ ""]))
+    (println head-html)
+    (println body-class)
+    (define body (generate-results-page
+                  #:source-url source-url
+                  #:wikiname wikiname
+                  #:prefixed-category prefixed-category
+                  #:members-data members-data
+                  #:page page
+                  #:body-class body-class))
 
     (when (config-true? 'debug)
       ; used for its side effects
@@ -91,5 +113,9 @@
        (write-html body out))))))
 (module+ test
   (check-not-false ((query-selector (attribute-selector 'href "/test/wiki/Ankle_Monitor")
-                                    (generate-results-page "" "test" "Category:Items" category-json-data
-                                                           '(div "page text"))))))
+                                    (generate-results-page
+                                     #:source-url ""
+                                     #:wikiname "test"
+                                     #:prefixed-category "Category:Items"
+                                     #:category-data category-json-data
+                                     #:page '(div "page text"))))))

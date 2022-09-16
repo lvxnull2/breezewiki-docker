@@ -2,6 +2,7 @@
 (require racket/dict
          racket/function
          racket/list
+         racket/match
          racket/string
          ; libs
          (prefix-in easy: net/http-easy)
@@ -238,7 +239,7 @@
                            origin
                            (params->query `(("action" . "parse")
                                             ("page" . ,path)
-                                            ("prop" . "text")
+                                            ("prop" . "text|headhtml|langlinks")
                                             ("formatversion" . "2")
                                             ("format" . "json")))))
   (printf "out: ~a~n" dest-url)
@@ -250,12 +251,21 @@
             [title (jp "/parse/title" data "")]
             [page-html (jp "/parse/text" data "")]
             [page-html (preprocess-html-wiki page-html)]
-            [page (html->xexp page-html)])
+            [page (html->xexp page-html)]
+            [head-html (jp "/parse/headhtml" data "")]
+            [body-class (match (regexp-match #rx"<body [^>]*class=\"([^\"]*)" head-html)
+                          [(list _ classes) classes]
+                          [_ ""])])
        (if (equal? "missingtitle" (jp "/error/code" data #f))
            (next-dispatcher)
            (response-handler
             (define body
-              (generate-wiki-page source-url wikiname title (update-tree-wiki page wikiname)))
+              (generate-wiki-page
+               (update-tree-wiki page wikiname)
+               #:source-url source-url
+               #:wikiname wikiname
+               #:title title
+               #:body-class body-class))
             (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
             (define headers (if redirect-msg
                                 (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]

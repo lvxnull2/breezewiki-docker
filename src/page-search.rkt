@@ -26,9 +26,9 @@
 (define (generate-results-page dest-url wikiname query data)
   (define search-results (jp "/query/search" data))
   (generate-wiki-page
-   dest-url
-   wikiname
-   "Search Results"
+   #:source-url dest-url
+   #:wikiname wikiname
+   #:title "Search Results"
    `(div (@ (class "mw-parser-output"))
          (p ,(format "~a results found for " (length search-results))
             (strong ,query))

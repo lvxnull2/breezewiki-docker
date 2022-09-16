@@ -55,7 +55,15 @@
                               " Media files and official Fandom documents have different copying restrictions.")
                            (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))))))
 
-(define (generate-wiki-page source-url wikiname title content)
+(define (generate-wiki-page
+         content
+         #:source-url source-url
+         #:wikiname wikiname
+         #:title title
+         #:body-class [body-class-in ""])
+  (define body-class (if (equal? "" body-class-in)
+                         "skin-fandomdesktop"
+                         body-class-in))
   (define (required-styles origin)
     (map (λ (dest-path)
            (define url (format dest-path origin))
@@ -76,7 +84,7 @@
               `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
             (required-styles (format "https://~a.fandom.com" wikiname)))
      (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css"))))
-    (body (@ (class "skin-fandomdesktop theme-fandomdesktop-light"))
+    (body (@ (class ,body-class))
           (div (@ (class "main-container"))
                (div (@ (class "fandom-community-header__background tileHorizontally header")))
                (div (@ (class "page"))
@@ -94,7 +102,11 @@
 (module+ test
   (define page
     (parameterize ([(config-parameter 'strict_proxy) "true"])
-      (generate-wiki-page "" "test" "test" '(template))))
+      (generate-wiki-page
+       '(template)
+       #:source-url ""
+       #:title "test"
+       #:wikiname "test")))
   ; check the page is a valid xexp
   (check-not-false (xexp->html page))
   ; check the stylesheet is proxied
