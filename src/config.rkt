@@ -78,3 +78,9 @@
                    (hash->list (make-hasheq combined-alist))
                    symbol<?
                    #:key car))))
+
+(when (not (config-true? 'debug))
+  (when (not (config-true? 'canonical_origin))
+    (displayln
+     (string-append "warning: configuring canonical_origin is highly recommended for production!\n"
+                    "         see https://docs.breezewiki.com/Configuration.html"))))
