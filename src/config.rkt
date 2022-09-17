@@ -58,7 +58,7 @@
         [e-ref (λ (name) (bytes->string/latin-1 (environment-variables-ref (current-environment-variables) name)))])
     (map (λ (name) (cons (string->symbol (string-downcase (substring (bytes->string/latin-1 name) 3)))
                          (e-ref name)))
-         (filter (λ (name) (string-prefix? (bytes->string/latin-1 name) "BW_")) e-names))))
+         (filter (λ (name) (string-prefix? (string-downcase (bytes->string/latin-1 name)) "bw_")) e-names))))
 (when (> (length env-alist) 0)
   (printf "note: ~a items loaded from environment variables~n" (length env-alist)))
 
