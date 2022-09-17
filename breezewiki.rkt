@@ -10,6 +10,7 @@
      (make-reloadable-entry-point (quote varname) filename))))
 
 (require-reloadable "src/page-category.rkt" page-category)
+(require-reloadable "src/page-global-search.rkt" page-global-search)
 (require-reloadable "src/page-home.rkt" page-home)
 (require-reloadable "src/page-not-found.rkt" page-not-found)
 (require-reloadable "src/page-proxy.rkt" page-proxy)
@@ -31,6 +32,7 @@
      (dispatcher-tree
       ; order of these does not matter
       page-category
+      page-global-search
       page-home
       page-not-found
       page-proxy

@@ -27,11 +27,20 @@
     (p "It removes ads, videos, and suggested content, leaving you with a clean page that doesn't slow down your device or use up your data.")
     (p "BreezeWiki can also be called an \"alternative frontend for Fandom\".")
     (p ,(format "To use BreezeWiki, just replace \"fandom.com\" with \"~a\", and you'll instantly be teleported to a better world."
-               (if (config-true? 'canonical_origin)
-                   (url-host (string->url (config-get 'canonical_origin)))
-                   "breezewiki.com")))
+                (if (config-true? 'canonical_origin)
+                    (url-host (string->url (config-get 'canonical_origin)))
+                    "breezewiki.com")))
     (p "If you'd like to be automatically sent to BreezeWiki every time in the future, "
        (a (@ (href "https://docs.breezewiki.com/Automatic_Redirection.html")) "check out the tutorial in the manual."))
+    (h2 "Find a page")
+    (form (@ (action "/search"))
+          (label (@ (class "paired__label"))
+                 "Wiki name"
+                 (input (@ (name "wikiname") (class "paired__input") (type "text") (placeholder "pokemon") (required))))
+          (label (@ (class "paired__label"))
+                 "Search query"
+                 (input (@ (name "q") (class "paired__input") (type "text") (placeholder "Eevee") (required))))
+          (button "Search"))
     (h2 "Example pages")
     (ul
      ,@(map (λ (x)

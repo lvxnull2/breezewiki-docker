@@ -42,6 +42,7 @@
              (sequencer:make
               (pathprocedure:make "/" (hash-ref ds 'page-home))
               (pathprocedure:make "/proxy" (hash-ref ds 'page-proxy))
+              (pathprocedure:make "/search" (hash-ref ds 'page-global-search))
               (filter:make #rx"^/[a-z-]+/wiki/Category:.+$" (lift:make (hash-ref ds 'page-category)))
               (filter:make #rx"^/[a-z-]+/wiki/.+$" (lift:make (hash-ref ds 'page-wiki)))
               (filter:make #rx"^/[a-z-]+/search$" (lift:make (hash-ref ds 'page-search)))
