@@ -1,6 +1,8 @@
 #lang racket/base
-(require racket/pretty
+(require racket/function
+         racket/pretty
          racket/runtime-path
+         racket/string
          ini)
 
 (provide
@@ -51,7 +53,16 @@
         l
       (printf "note: ~a items loaded from config file~n" (length l)))))
 
-(define combined-alist (append default-config loaded-alist))
+(define env-alist
+  (let ([e-names (environment-variables-names (current-environment-variables))]
+        [e-ref (λ (name) (bytes->string/latin-1 (environment-variables-ref (current-environment-variables) name)))])
+    (map (λ (name) (cons (string->symbol (string-downcase (substring (bytes->string/latin-1 name) 3)))
+                         (e-ref name)))
+         (filter (λ (name) (string-prefix? (bytes->string/latin-1 name) "BW_")) e-names))))
+(when (> (length env-alist) 0)
+  (printf "note: ~a items loaded from environment variables~n" (length env-alist)))
+
+(define combined-alist (append default-config loaded-alist env-alist))
 
 (define config
   (make-hasheq
