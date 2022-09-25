@@ -31,7 +31,7 @@
 (define (generate-results-page
          #:source-url source-url
          #:wikiname wikiname
-         #:prefixed-category prefixed-category
+         #:title title
          #:members-data members-data
          #:page page
          #:body-class [body-class #f]
@@ -40,13 +40,13 @@
   (generate-wiki-page
    #:source-url source-url
    #:wikiname wikiname
-   #:title prefixed-category
+   #:title title
    #:body-class body-class
    #:license license
    `(div
      ,(update-tree-wiki page wikiname)
      (hr)
-     (h2 ,(format "All Pages in ~a" prefixed-category))
+     (h2 ,(format "All Pages in ~a" title))
      (div (@ (class "mw-parser-output"))
           (ul (@ (class "my-category-list"))
               ,@(map
@@ -91,6 +91,7 @@
                 (easy:response-json dest-res)]
      [license (license-auto wikiname)])
 
+    (define title (preprocess-html-wiki (jp "/parse/title" page-data prefixed-category)))
     (define page-html (preprocess-html-wiki (jp "/parse/text" page-data "")))
     (define page (html->xexp page-html))
     (define head-html (jp "/parse/headhtml" page-data ""))
@@ -100,7 +101,7 @@
     (define body (generate-results-page
                   #:source-url source-url
                   #:wikiname wikiname
-                  #:prefixed-category prefixed-category
+                  #:title title
                   #:members-data members-data
                   #:page page
                   #:body-class body-class
@@ -119,6 +120,6 @@
                                     (generate-results-page
                                      #:source-url ""
                                      #:wikiname "test"
-                                     #:prefixed-category "Category:Items"
+                                     #:title "Category:Items"
                                      #:members-data category-json-data
                                      #:page '(div "page text"))))))
