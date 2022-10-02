@@ -57,7 +57,7 @@
 
 (: is-fandom-url? (String -> Boolean))
 (define (is-fandom-url? url)
-  (regexp-match? #rx"^https://static.wikia.nocookie.net/|^https://[a-z-]*.fandom.com/" url))
+  (regexp-match? #px"^https://static.wikia.nocookie.net/|^https://[a-zA-Z0-9-]{3,50}.fandom.com/" url))
 (module+ test
   (check-true (is-fandom-url? "https://static.wikia.nocookie.net/wikiname/images/2/2f/SomeImage.jpg/revision/latest?cb=20110210094136"))
   (check-true (is-fandom-url? "https://test.fandom.com/wiki/Some_Page"))
