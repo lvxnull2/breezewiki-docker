@@ -8,7 +8,8 @@
          (prefix-in sequencer: web-server/dispatchers/dispatch-sequencer)
          (prefix-in lift: web-server/dispatchers/dispatch-lift)
          (prefix-in filter: web-server/dispatchers/dispatch-filter)
-         "config.rkt")
+         "config.rkt"
+         "url-utils.rkt")
 
 (provide
  ; syntax to make the hashmap from names
@@ -43,9 +44,9 @@
               (pathprocedure:make "/" (hash-ref ds 'page-home))
               (pathprocedure:make "/proxy" (hash-ref ds 'page-proxy))
               (pathprocedure:make "/search" (hash-ref ds 'page-global-search))
-              (filter:make #px"^/[a-zA-Z0-9-]{3,50}/wiki/Category:.+$" (lift:make (hash-ref ds 'page-category)))
-              (filter:make #px"^/[a-zA-Z0-9-]{3,50}/wiki/.+$" (lift:make (hash-ref ds 'page-wiki)))
-              (filter:make #px"^/[a-zA-Z0-9-]{3,50}/search$" (lift:make (hash-ref ds 'page-search)))
-              (filter:make #px"^/[a-zA-Z0-9-]{3,50}(/(wiki(/)?)?)?$" (lift:make (hash-ref ds 'redirect-wiki-home)))
+              (filter:make (pregexp (format "^/~a/wiki/Category:.+$" wikiname-regex)) (lift:make (hash-ref ds 'page-category)))
+              (filter:make (pregexp (format "^/~a/wiki/.+$" wikiname-regex)) (lift:make (hash-ref ds 'page-wiki)))
+              (filter:make (pregexp (format "^/~a/search$" wikiname-regex)) (lift:make (hash-ref ds 'page-search)))
+              (filter:make (pregexp (format "^/~a(/(wiki(/)?)?)?$" wikiname-regex)) (lift:make (hash-ref ds 'redirect-wiki-home)))
               (hash-ref ds 'static-dispatcher)
               (lift:make (hash-ref ds 'page-not-found)))))))
