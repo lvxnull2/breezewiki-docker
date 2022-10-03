@@ -188,7 +188,8 @@
                        (λ (v)
                          (and (config-true? 'strict_proxy)
                               (eq? element-type 'a)
-                              (has-class? "image-thumbnail" v)))
+                              (or (has-class? "image-thumbnail" v)
+                                  (has-class? "image" v))))
                        (λ (v) (attribute-maybe-update 'href u-proxy-url v)))
                 ; proxy images from src attributes, if strict_proxy is set
                 (curry u
