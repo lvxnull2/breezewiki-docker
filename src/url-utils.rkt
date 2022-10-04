@@ -5,7 +5,7 @@
 
 (provide
  ; regex to match wiki names
- wikiname-regex
+ px-wikiname
  ; make a query string from an association list of strings
  params->query
  ; make a proxied version of a fandom url
@@ -18,7 +18,7 @@
 (module+ test
   (require "typed-rackunit.rkt"))
 
-(define wikiname-regex "[a-zA-Z0-9-]{3,50}")
+(define px-wikiname "[a-zA-Z0-9-]{3,50}")
 
 ;; https://url.spec.whatwg.org/#urlencoded-serializing
 
@@ -64,7 +64,7 @@
 
 (: is-fandom-url? (String -> Boolean))
 (define (is-fandom-url? url)
-  (regexp-match? (pregexp (format "^https://static\\.wikia\\.nocookie\\.net/|^https://~a\\.fandom\\.com/" wikiname-regex)) url))
+  (regexp-match? (pregexp (format "^https://static\\.wikia\\.nocookie\\.net/|^https://~a\\.fandom\\.com/" px-wikiname)) url))
 (module+ test
   (check-true (is-fandom-url? "https://static.wikia.nocookie.net/wikiname/images/2/2f/SomeImage.jpg/revision/latest?cb=20110210094136"))
   (check-true (is-fandom-url? "https://test.fandom.com/wiki/Some_Page"))

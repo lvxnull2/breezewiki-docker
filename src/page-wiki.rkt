@@ -143,7 +143,7 @@
                        (λ (href)
                          ((compose1
                            (λ (href) (regexp-replace #rx"^(/wiki/.*)" href (format "/~a\\1" wikiname)))
-                           (λ (href) (regexp-replace (pregexp (format "^https://(~a)\\.fandom\\.com(/wiki/.*)" wikiname-regex)) href "/\\1\\2")))
+                           (λ (href) (regexp-replace (pregexp (format "^https://(~a)\\.fandom\\.com(/wiki/.*)" px-wikiname)) href "/\\1\\2")))
                           href)))
                 ; add noreferrer to a.image
                 (curry u
