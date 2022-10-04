@@ -1,6 +1,7 @@
 #lang typed/racket/base
 (require racket/string
          "pure-utils.rkt")
+(require/typed "config.rkt" [config-true? (Symbol -> Boolean)])
 
 (provide
  ; make a query string from an association list of strings
@@ -8,7 +9,9 @@
  ; make a proxied version of a fandom url
  u-proxy-url
  ; check whether a url is on a domain controlled by fandom
- is-fandom-url?)
+ is-fandom-url?
+  ; prints "out: <url>"
+ log-outgoing)
 
 (module+ test
   (require "typed-rackunit.rkt"))
@@ -69,3 +72,8 @@
    is-fandom-url?
    (λ ([v : String]) (string-append "/proxy?" (params->query `(("dest" . ,url)))))
    url))
+
+(: log-outgoing (String -> Void))
+(define (log-outgoing url-string)
+  (when (config-true? 'log_outgoing)
+    (printf "out: ~a~n" url-string)))

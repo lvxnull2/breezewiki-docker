@@ -68,7 +68,7 @@
                               ("format" . "json")))))
 
    (thread-let
-    ([dest-res (printf "out: ~a~n" dest-url)
+    ([dest-res (log-outgoing dest-url)
                (easy:get dest-url #:timeouts timeouts)]
      [license (license-auto wikiname)])
 

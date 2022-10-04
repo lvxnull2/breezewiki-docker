@@ -20,7 +20,7 @@
                              ("siprop" . "rightsinfo")
                              ("format" . "json")
                              ("formatversion" . "2")))))
-  (printf "out: ~a~n" dest-url)
+  (log-outgoing dest-url)
   (define res (easy:get dest-url))
   (define data (easy:response-json res))
   (license (jp "/query/rightsinfo/text" data)

@@ -246,7 +246,7 @@
                                          ("prop" . "text|headhtml|langlinks")
                                          ("formatversion" . "2")
                                          ("format" . "json")))))
-              (printf "out: ~a~n" dest-url)
+              (log-outgoing dest-url)
               (easy:get dest-url #:timeouts timeouts)]
     [license (license-auto wikiname)])
 

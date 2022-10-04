@@ -75,7 +75,7 @@
                                               ("cmlimit" . "max")
                                               ("formatversion" . "2")
                                               ("format" . "json")))))
-                   (printf "out: ~a~n" dest-url)
+                   (log-outgoing dest-url)
                    (define dest-res (easy:get dest-url #:timeouts timeouts))
                    (easy:response-json dest-res)]
      [page-data (define dest-url
@@ -86,7 +86,7 @@
                                            ("prop" . "text|headhtml|langlinks")
                                            ("formatversion" . "2")
                                            ("format" . "json")))))
-                (printf "out: ~a~n" dest-url)
+                (log-outgoing dest-url)
                 (define dest-res (easy:get dest-url #:timeouts timeouts))
                 (easy:response-json dest-res)]
      [license (license-auto wikiname)])
