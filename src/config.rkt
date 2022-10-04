@@ -1,23 +1,32 @@
-#lang racket/base
+#lang typed/racket/base
 (require racket/function
          racket/pretty
          racket/runtime-path
-         racket/string
-         ini)
+         racket/string)
+(require/typed ini
+  [#:opaque Ini ini?]
+  [read-ini (Input-Port -> Ini)]
+  [ini->hash (Ini -> (Immutable-HashTable Symbol (Immutable-HashTable Symbol String)))])
 
 (provide
  config-parameter
  config-true?
  config-get)
 
+(module+ test
+  (require "typed-rackunit.rkt"))
+
 (define-runtime-path path-config "../config.ini")
 
+(: config-parameter (Symbol -> (Parameterof String)))
 (define (config-parameter key)
   (hash-ref config key))
 
+(: config-true? (Symbol -> Boolean))
 (define (config-true? key)
   (not (member ((config-parameter key)) '("" "false"))))
 
+(: config-get (Symbol -> String))
 (define (config-get key)
   ((config-parameter key)))
 
@@ -56,18 +65,24 @@
 
 (define env-alist
   (let ([e-names (environment-variables-names (current-environment-variables))]
-        [e-ref (λ (name) (bytes->string/latin-1 (environment-variables-ref (current-environment-variables) name)))])
-    (map (λ (name) (cons (string->symbol (string-downcase (substring (bytes->string/latin-1 name) 3)))
-                         (e-ref name)))
-         (filter (λ (name) (string-prefix? (string-downcase (bytes->string/latin-1 name)) "bw_")) e-names))))
+        [e-ref (λ ([name : Bytes])
+                 (bytes->string/latin-1
+                  (cast (environment-variables-ref (current-environment-variables) name)
+                        Bytes)))])
+    (map (λ ([name : Bytes])
+           (cons (string->symbol (string-downcase (substring (bytes->string/latin-1 name) 3)))
+                 (e-ref name)))
+         (filter (λ ([name : Bytes]) (string-prefix? (string-downcase (bytes->string/latin-1 name))
+                                                     "bw_"))
+                 e-names))))
 (when (> (length env-alist) 0)
   (printf "note: ~a items loaded from environment variables~n" (length env-alist)))
 
 (define combined-alist (append default-config loaded-alist env-alist))
 
 (define config
-  (make-hasheq
-   (map (λ (pair)
+  (make-immutable-hasheq
+   (map (λ ([pair : (Pairof Symbol String)])
           (cons (car pair) (make-parameter (cdr pair))))
         combined-alist)))
 
@@ -75,8 +90,8 @@
   ; all values here are optimised for maximum prettiness
   (parameterize ([pretty-print-columns 80])
     (display "config: ")
-    (pretty-write (sort
-                   (hash->list (make-hasheq combined-alist))
+    (pretty-write ((inst sort (Pairof Symbol String))
+                   (hash->list (make-immutable-hasheq combined-alist))
                    symbol<?
                    #:key car))))
 
@@ -85,3 +100,10 @@
     (displayln
      (string-append "warning: configuring canonical_origin is highly recommended for production!\n"
                     "         see https://docs.breezewiki.com/Configuration.html"))))
+
+(module+ test
+  ; this is just a sanity check
+  (parameterize ([(config-parameter 'application_name) "JeffWiki"]
+                 [(config-parameter 'strict_proxy) ""])
+    (check-equal? (config-get 'application_name) "JeffWiki")
+    (check-false (config-true? 'strict_proxy))))

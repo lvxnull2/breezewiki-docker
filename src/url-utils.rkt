@@ -1,7 +1,7 @@
 #lang typed/racket/base
 (require racket/string
+         "config.rkt"
          "pure-utils.rkt")
-(require/typed "config.rkt" [config-true? (Symbol -> Boolean)])
 
 (provide
  ; regex to match wiki names
