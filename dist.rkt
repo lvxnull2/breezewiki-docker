@@ -13,6 +13,7 @@
 (require (only-in "src/page-static.rkt" static-dispatcher))
 (require (only-in "src/page-subdomain.rkt" subdomain-dispatcher))
 (require (only-in "src/page-wiki.rkt" page-wiki))
+(require (only-in "src/page-file.rkt" page-file))
 
 (serve/launch/wait
  #:listen-ip (if (config-true? 'debug) "127.0.0.1" #f)
@@ -27,6 +28,7 @@
     page-proxy
     page-search
     page-wiki
+    page-file
     redirect-wiki-home
     static-dispatcher
     subdomain-dispatcher)))

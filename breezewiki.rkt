@@ -19,6 +19,7 @@
 (require-reloadable "src/page-static.rkt" static-dispatcher)
 (require-reloadable "src/page-subdomain.rkt" subdomain-dispatcher)
 (require-reloadable "src/page-wiki.rkt" page-wiki)
+(require-reloadable "src/page-file.rkt" page-file)
 
 (reload!)
 
@@ -38,6 +39,7 @@
       page-proxy
       page-search
       page-wiki
+      page-file
       redirect-wiki-home
       static-dispatcher
       subdomain-dispatcher))))
