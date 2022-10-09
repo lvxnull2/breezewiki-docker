@@ -248,7 +248,7 @@
                                          ("format" . "json")))))
               (log-outgoing dest-url)
               (easy:get dest-url #:timeouts timeouts)]
-    [license (license-auto wikiname)])
+    [license (siteinfo-license (siteinfo-fetch wikiname))])
 
    (cond
      [(eq? 200 (easy:response-status-code dest-res))

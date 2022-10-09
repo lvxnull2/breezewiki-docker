@@ -1,33 +1,34 @@
 #lang racket/base
-(require (prefix-in easy: net/http-easy)
+(require racket/list
+         (prefix-in easy: net/http-easy)
+         memo
          "url-utils.rkt"
          "xexpr-utils.rkt")
 
 (provide
+ (struct-out siteinfo)
  (struct-out license)
- license-default
- license-auto)
+ siteinfo-fetch
+ license-default)
 
+(struct siteinfo (sitename basepage license) #:transparent)
 (struct license (text url) #:transparent)
+
 (define license-default (license "CC-BY-SA" "https://www.fandom.com/licensing"))
-(define license-hash (make-hash))
-(define (license-fetch wikiname)
+
+(define/memoize (siteinfo-fetch wikiname) #:hash hash
   (define dest-url
     (format "https://~a.fandom.com/api.php?~a"
             wikiname
             (params->query '(("action" . "query")
                              ("meta" . "siteinfo")
-                             ("siprop" . "rightsinfo")
+                             ("siprop" . "general|rightsinfo")
                              ("format" . "json")
                              ("formatversion" . "2")))))
   (log-outgoing dest-url)
   (define res (easy:get dest-url))
   (define data (easy:response-json res))
-  (license (jp "/query/rightsinfo/text" data)
-           (jp "/query/rightsinfo/url" data)))
-(define (license-auto wikiname)
-  (if (hash-has-key? license-hash wikiname)
-      (hash-ref license-hash wikiname)
-      (let ([result (license-fetch wikiname)])
-        (hash-set! license-hash wikiname result)
-        result)))
+  (siteinfo (jp "/query/general/sitename" data)
+            (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
+            (license (jp "/query/rightsinfo/text" data)
+                     (jp "/query/rightsinfo/url" data))))

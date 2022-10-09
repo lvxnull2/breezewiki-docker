@@ -89,7 +89,7 @@
                 (log-outgoing dest-url)
                 (define dest-res (easy:get dest-url #:timeouts timeouts))
                 (easy:response-json dest-res)]
-     [license (license-auto wikiname)])
+     [license (siteinfo-license (siteinfo-fetch wikiname))])
 
     (define title (preprocess-html-wiki (jp "/parse/title" page-data prefixed-category)))
     (define page-html (preprocess-html-wiki (jp "/parse/text" page-data "")))

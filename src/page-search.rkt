@@ -70,7 +70,7 @@
    (thread-let
     ([dest-res (log-outgoing dest-url)
                (easy:get dest-url #:timeouts timeouts)]
-     [license (license-auto wikiname)])
+     [license (siteinfo-license (siteinfo-fetch wikiname))])
 
     (define data (easy:response-json dest-res))
 
