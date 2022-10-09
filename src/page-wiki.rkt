@@ -248,7 +248,7 @@
                                          ("format" . "json")))))
               (log-outgoing dest-url)
               (easy:get dest-url #:timeouts timeouts)]
-    [license (siteinfo-license (siteinfo-fetch wikiname))])
+    [siteinfo (siteinfo-fetch wikiname)])
 
    (cond
      [(eq? 200 (easy:response-status-code dest-res))
@@ -271,7 +271,7 @@
                 #:wikiname wikiname
                 #:title title
                 #:body-class body-class
-                #:license license))
+                #:siteinfo siteinfo))
              (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
              (define headers (if redirect-msg
                                  (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]

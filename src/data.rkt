@@ -6,15 +6,17 @@
          "xexpr-utils.rkt")
 
 (provide
- (struct-out siteinfo)
- (struct-out license)
+ (struct-out siteinfo^)
+ (struct-out license^)
  siteinfo-fetch
+ siteinfo-default
  license-default)
 
-(struct siteinfo (sitename basepage license) #:transparent)
-(struct license (text url) #:transparent)
+(struct siteinfo^ (sitename basepage license) #:transparent)
+(struct license^ (text url) #:transparent)
 
-(define license-default (license "CC-BY-SA" "https://www.fandom.com/licensing"))
+(define license-default (license^ "CC-BY-SA" "https://www.fandom.com/licensing"))
+(define siteinfo-default (siteinfo^ "Test Wiki" "Main_Page" license-default))
 
 (define/memoize (siteinfo-fetch wikiname) #:hash hash
   (define dest-url
@@ -28,7 +30,7 @@
   (log-outgoing dest-url)
   (define res (easy:get dest-url))
   (define data (easy:response-json res))
-  (siteinfo (jp "/query/general/sitename" data)
-            (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
-            (license (jp "/query/rightsinfo/text" data)
-                     (jp "/query/rightsinfo/url" data))))
+  (siteinfo^ (jp "/query/general/sitename" data)
+             (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
+             (license^ (jp "/query/rightsinfo/text" data)
+                       (jp "/query/rightsinfo/url" data))))

@@ -35,14 +35,14 @@
          #:members-data members-data
          #:page page
          #:body-class [body-class #f]
-         #:license [license #f])
+         #:siteinfo [siteinfo #f])
   (define members (jp "/query/categorymembers" members-data))
   (generate-wiki-page
    #:source-url source-url
    #:wikiname wikiname
    #:title title
    #:body-class body-class
-   #:license license
+   #:siteinfo siteinfo
    `(div
      ,(update-tree-wiki page wikiname)
      (hr)
@@ -89,7 +89,7 @@
                 (log-outgoing dest-url)
                 (define dest-res (easy:get dest-url #:timeouts timeouts))
                 (easy:response-json dest-res)]
-     [license (siteinfo-license (siteinfo-fetch wikiname))])
+     [siteinfo (siteinfo-fetch wikiname)])
 
     (define title (preprocess-html-wiki (jp "/parse/title" page-data prefixed-category)))
     (define page-html (preprocess-html-wiki (jp "/parse/text" page-data "")))
@@ -105,7 +105,7 @@
                   #:members-data members-data
                   #:page page
                   #:body-class body-class
-                  #:license license))
+                  #:siteinfo siteinfo))
 
     (when (config-true? 'debug)
       ; used for its side effects

@@ -25,13 +25,13 @@
   (define search-json-data
     '#hasheq((batchcomplete . #t) (query . #hasheq((search . (#hasheq((ns . 0) (pageid . 219) (size . 1482) (snippet . "") (timestamp . "2022-08-21T08:54:23Z") (title . "Gacha Capsule") (wordcount . 214)) #hasheq((ns . 0) (pageid . 201) (size . 1198) (snippet . "") (timestamp . "2022-07-11T17:52:47Z") (title . "Badges") (wordcount . 181)))))))))
 
-(define (generate-results-page dest-url wikiname query data #:license [license #f])
+(define (generate-results-page dest-url wikiname query data #:siteinfo [siteinfo #f])
   (define search-results (jp "/query/search" data))
   (generate-wiki-page
    #:source-url dest-url
    #:wikiname wikiname
    #:title "Search Results"
-   #:license license
+   #:siteinfo siteinfo
    `(div (@ (class "mw-parser-output"))
          (p ,(format "~a results found for " (length search-results))
             (strong ,query))
@@ -70,11 +70,11 @@
    (thread-let
     ([dest-res (log-outgoing dest-url)
                (easy:get dest-url #:timeouts timeouts)]
-     [license (siteinfo-license (siteinfo-fetch wikiname))])
+     [siteinfo (siteinfo-fetch wikiname)])
 
     (define data (easy:response-json dest-res))
 
-    (define body (generate-results-page dest-url wikiname query data #:license license))
+    (define body (generate-results-page dest-url wikiname query data #:siteinfo siteinfo))
     (when (config-true? 'debug)
       ; used for its side effects
       ; convert to string with error checking, error will be raised if xexp is invalid

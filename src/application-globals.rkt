@@ -48,8 +48,8 @@
                 ,(if source-url
                      `(div (p "This page displays proxied content from "
                               (a (@ (href ,source-url) (rel "noreferrer")) ,source-url)
-                              ,(format ". Text content is available under the ~a license, " (license-text license))
-                              (a (@ (href ,(license-url license))) "see license info.")
+                              ,(format ". Text content is available under the ~a license, " (license^-text license))
+                              (a (@ (href ,(license^-url license))) "see license info.")
                               " Media files may have different copying restrictions.")
                            (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))
                      `(div (p "Text content on wikis run by Fandom is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
@@ -63,7 +63,8 @@
          #:wikiname wikiname
          #:title title
          #:body-class [body-class-in #f]
-         #:license [license #f])
+         #:siteinfo [siteinfo-in #f])
+  (define siteinfo (or siteinfo-in siteinfo-default))
   (define body-class (if (not body-class-in)
                          "skin-fandomdesktop"
                          body-class-in))
@@ -82,7 +83,10 @@
   `(html
     (head
      (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
-     (title ,(format "~a | ~a" title (config-get 'application_name)))
+     (title ,(format "~a | ~a+~a"
+                     title
+                     (regexp-replace #rx" ?Wiki$" (siteinfo^-sitename siteinfo) "")
+                     (config-get 'application_name)))
      ,@(map (λ (url)
               `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
             (required-styles (format "https://~a.fandom.com" wikiname)))
@@ -101,7 +105,7 @@
                           (div (@ (id "content") #;(class "page-content"))
                                (div (@ (id "mw-content-text"))
                                     ,content))
-                          ,(application-footer source-url #:license license)))))))
+                          ,(application-footer source-url #:license (siteinfo^-license siteinfo))))))))
 (module+ test
   (define page
     (parameterize ([(config-parameter 'strict_proxy) "true"])
