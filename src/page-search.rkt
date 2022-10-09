@@ -81,7 +81,7 @@
       (xexp->html body))
     (response/output
      #:code 200
-     #:headers (list referrer-policy)
+     #:headers (build-headers always-headers)
      (λ (out)
        (write-html body out))))))
 (module+ test

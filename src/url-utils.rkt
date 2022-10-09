@@ -2,6 +2,8 @@
 (require racket/string
          "config.rkt"
          "pure-utils.rkt")
+(require/typed web-server/http/request-structs
+               [#:opaque Header header?])
 
 (provide
  ; regex to match wiki names
@@ -13,7 +15,9 @@
  ; check whether a url is on a domain controlled by fandom
  is-fandom-url?
   ; prints "out: <url>"
- log-outgoing)
+ log-outgoing
+ ; pass in a header, headers, or something useless. they'll all combine into a list
+ build-headers)
 
 (module+ test
   (require "typed-rackunit.rkt"))
@@ -81,3 +85,16 @@
 (define (log-outgoing url-string)
   (when (config-true? 'log_outgoing)
     (printf "out: ~a~n" url-string)))
+
+(: build-headers ((U Header (Listof Header) False Void) * -> (Listof Header)))
+(define (build-headers . fs)
+  (apply
+   append
+   (map (λ ([f : (U Header (Listof Header) False Void)])
+         (cond
+           [(not f) null]
+           [(void? f) null]
+           [(null? f) null]
+           [(header? f) (list f)]
+           [(pair? f) f]))
+       fs)))

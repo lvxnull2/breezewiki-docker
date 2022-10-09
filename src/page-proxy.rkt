@@ -8,6 +8,7 @@
          net/url
          web-server/http
          (only-in web-server/dispatchers/dispatch next-dispatcher)
+         "application-globals.rkt"
          "url-utils.rkt"
          "xexpr-utils.rkt")
 
@@ -26,6 +27,7 @@
               (response/output
                #:code (easy:response-status-code dest-r)
                #:mime-type (easy:response-headers-ref dest-r 'content-type)
+               #:headers (build-headers always-headers)
                (λ (out)
                  (copy-port (easy:response-output dest-r) out)
                  (easy:response-close! dest-r))))))

@@ -277,11 +277,13 @@
                 #:body-class body-class
                 #:siteinfo siteinfo))
              (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
-             (define headers (if redirect-msg
-                                 (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
-                                        [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
-                                   (list (header #"Refresh" value) referrer-policy))
-                                 (list referrer-policy)))
+             (define headers
+               (build-headers
+                always-headers
+                (when redirect-msg
+                    (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
+                           [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
+                      (header #"Refresh" value)))))
              (when (config-true? 'debug)
                ; used for its side effects
                ; convert to string with error checking, error will be raised if xexp is invalid

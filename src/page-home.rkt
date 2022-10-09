@@ -4,6 +4,7 @@
          html-writing
          web-server/http
          "application-globals.rkt"
+         "url-utils.rkt"
          "xexpr-utils.rkt"
          "config.rkt")
 
@@ -81,6 +82,7 @@
 (define (page-home req)
   (response/output
    #:code 200
+   #:headers (build-headers always-headers)
    (λ (out)
      (write-html body out))))
 
