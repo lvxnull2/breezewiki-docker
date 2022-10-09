@@ -2,6 +2,7 @@
 (require net/url
          web-server/http
          "application-globals.rkt"
+         "data.rkt"
          "url-utils.rkt"
          "xexpr-utils.rkt")
 
@@ -11,5 +12,6 @@
 (define (redirect-wiki-home req)
   (response-handler
    (define wikiname (path/param-path (car (url-path (request-uri req)))))
-   (define dest (format "/~a/wiki/Main_Page" wikiname))
+   (define siteinfo (siteinfo-fetch wikiname))
+   (define dest (format "/~a/wiki/~a" wikiname (or (siteinfo^-basepage siteinfo) "Main_Page")))
    (generate-redirect dest)))
