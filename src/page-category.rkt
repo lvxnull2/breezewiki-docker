@@ -113,6 +113,7 @@
       (xexp->html body))
     (response/output
      #:code 200
+     #:headers (list referrer-policy)
      (λ (out)
        (write-html body out))))))
 (module+ test

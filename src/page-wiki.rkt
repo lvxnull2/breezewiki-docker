@@ -152,15 +152,17 @@
                        (λ (v) (dict-update v 'rel (λ (s)
                                                     (list (string-append (car s) " noreferrer")))
                                            '(""))))
-                ; proxy images from inline styles
-                (curry attribute-maybe-update 'style
-                       (λ (style)
-                         (regexp-replace #rx"url\\(['\"]?(.*?)['\"]?\\)" style
-                                         (λ (whole url)
-                                           (string-append
-                                            "url("
-                                            (u-proxy-url url)
-                                            ")")))))
+                ; proxy images from inline styles, if strict_proxy is set
+                (curry u
+                       (λ (v) (config-true? 'strict_proxy))
+                       (λ (v) (attribute-maybe-update 'style
+                         (λ (style)
+                           (regexp-replace #rx"url\\(['\"]?(.*?)['\"]?\\)" style
+                                           (λ (whole url)
+                                             (string-append
+                                              "url("
+                                              (u-proxy-url url)
+                                              ")")))) v)))
                 ; and also their links, if strict_proxy is set
                 (curry u
                        (λ (v)
@@ -168,8 +170,10 @@
                               (eq? element-type 'a)
                               (has-class? "image-thumbnail" v)))
                        (λ (v) (attribute-maybe-update 'href u-proxy-url v)))
-                ; proxy images from src attributes
-                (curry attribute-maybe-update 'src u-proxy-url)
+                ; proxy images from src attributes, if strict_proxy is set
+                (curry u
+                       (λ (v) (config-true? 'strict_proxy))
+                       (λ (v) (attribute-maybe-update 'src u-proxy-url v)))
                 ; don't lazyload images
                 (curry u
                        (λ (v) (dict-has-key? v 'data-src))
@@ -276,8 +280,8 @@
              (define headers (if redirect-msg
                                  (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
                                         [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
-                                   (list (header #"Refresh" value)))
-                                 (list)))
+                                   (list (header #"Refresh" value) referrer-policy))
+                                 (list referrer-policy)))
              (when (config-true? 'debug)
                ; used for its side effects
                ; convert to string with error checking, error will be raised if xexp is invalid

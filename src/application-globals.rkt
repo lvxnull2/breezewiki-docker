@@ -9,6 +9,8 @@
          "url-utils.rkt")
 
 (provide
+ ; header to not send referers to fandom
+ referrer-policy
  ; timeout durations for http-easy requests
  timeouts
  ; generates a consistent footer
@@ -22,6 +24,7 @@
   (require rackunit
            html-writing))
 
+(define referrer-policy (header #"Referrer-Policy" #"no-referrer"))
 (define timeouts (easy:make-timeout-config #:lease 5 #:connect 5))
 
 (define (application-footer source-url #:license [license-in #f])
