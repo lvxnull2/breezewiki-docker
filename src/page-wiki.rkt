@@ -51,6 +51,17 @@
                      (p "Another page link: "
                         (a (@ (data-test-wikilink) (href "https://test.fandom.com/wiki/Another_Page") (title "Another Page"))
                            "Another Page"))))
+           (figure (@ (class "thumb tnone"))
+                   (a (@ (href "https://static.wikia.nocookie.net/nice-image.png") (class "image"))
+                      (img (@ (src "data:image/gif;base64,R0lGODlhAQABAIABAAAAAP///yH5BAEAAAEALAAAAAABAAEAQAICTAEAOw%3D%3D")
+                              (data-src "https://static.wikia.nocookie.net/nice-image-thumbnail.png")
+                              (class "thumbimage lazyload"))))
+                   (noscript
+                    (a (@ (href "https://static.wikia.nocookie.net/nice-image.png") (class "image"))
+                       (img (@ (src "https://static.wikia.nocookie.net/nice-image-thumbnail.png")
+                               (data-src "https://static.wikia.nocookie.net/nice-image-thumbnail.png")
+                               (class "thumbimage")))))
+                   (figcaption "Test figure!"))
            (iframe (@ (src "https://example.com/iframe-src")))))))
 
 (define (preprocess-html-wiki html)
@@ -108,6 +119,15 @@
         `(a
           ((class "iframe-alternative") (href ,src))
           (,(format "Embedded media: ~a" src)))]
+       ; remove noscript versions of images because they are likely lower quality than the script versions
+       [(and (eq? element-type 'noscript)
+             (match children
+               ; either the noscript has a.image as a first child...
+               [(list (list 'a (list '@ a-att ...) _)) (has-class? "image" a-att)]
+               ; or the noscript has img as a first child
+               [(list (list 'img _)) #t]
+               [_ #f]))
+        return-no-element]
        [#t
         (list element-type
               ;; attributes
@@ -233,7 +253,9 @@
                                       ((query-selector
                                         (λ (t a c) (and (eq? t 'a) (has-class? "image-thumbnail" a)))
                                         transformed))))
-                "/proxy?dest=https%3A%2F%2Fstatic.wikia.nocookie.net%2Fnice-image.png"))
+                "/proxy?dest=https%3A%2F%2Fstatic.wikia.nocookie.net%2Fnice-image.png")
+  ; check that noscript images are removed
+  (check-equal? ((query-selector (λ (t a c) (eq? t 'noscript)) transformed)) #f))
 
 (define (page-wiki req)
   (define wikiname (path/param-path (first (url-path (request-uri req)))))
