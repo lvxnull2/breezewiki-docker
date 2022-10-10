@@ -79,23 +79,24 @@
          (p ,(if (non-empty-string? video-embed-code)
                  `""
                  `(span (a (@ (href ,maybe-proxied-raw-image-url)) "View original file") ". "))
-            "Added by "
+            "Uploaded by "
             (a (@ (href ,(format "/~a/wiki/User:~a" wikiname username))) ,username)
-            "."
-            ,(if is-posted-in
-                 `(span " Posted in "
-                        ,@(map (λ (article)
-                                 (define page-path (jp "/title" article))
-                                 (define title (jp "/titleText" article page-path))
-                                 `(span ,(if (eq? (car smaller-article-list) article) "" ", ")
-                                        (a (@ (href ,(format "/~a/wiki/~a" wikiname page-path)))
-                                           ,title)))
-                               smaller-article-list)
-                        ,(if (eq? article-list-is-smaller 1) "…" "."))
-                 `""))
+            ".")
          ,(if (string? image-description)
               (update-tree-wiki (html->xexp (preprocess-html-wiki image-description)) wikiname)
-              ""))))
+              ; file license info might be displayed in the description, example: /lgbtqia/wiki/File:Rainbow_Flag1.svg
+              `(p "This file is likely protected by copyright. Consider the file's license and fair use law before reusing it."))
+         ,(if is-posted-in
+              `(p "This file is used in "
+                  ,@(map (λ (article)
+                           (define page-path (jp "/title" article))
+                           (define title (jp "/titleText" article page-path))
+                           `(span ,(if (eq? (car smaller-article-list) article) "" ", ")
+                                  (a (@ (href ,(format "/~a/wiki/~a" wikiname page-path)))
+                                     ,title)))
+                         smaller-article-list)
+                  ,(if (eq? article-list-is-smaller 1) "…" "."))
+              `""))))
 
 (define (page-file req)
   (define wikiname (path/param-path (first (url-path (request-uri req)))))
