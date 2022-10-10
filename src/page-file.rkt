@@ -31,8 +31,7 @@
              (rawImageUrl . "https://static.wikia.nocookie.net/examplefile")
              (userName . "blankie")
              (isPostedIn . #t)
-             (smallerArticleList . (#hasheq((title . "Example_article")
-                                            (titleText . "Example article"))))
+             (smallerArticleList . (#hasheq((titleText . "Test:Example article"))))
              (articleListIsSmaller . 0)
              (exists . #t)
              (imageDescription . #f))))
@@ -89,8 +88,8 @@
          ,(if is-posted-in
               `(p "This file is used in "
                   ,@(map (λ (article)
-                           (define page-path (jp "/title" article))
-                           (define title (jp "/titleText" article page-path))
+                           (define title (jp "/titleText" article))
+                           (define page-path (regexp-replace* #rx" " title "_"))
                            `(span ,(if (eq? (car smaller-article-list) article) "" ", ")
                                   (a (@ (href ,(format "/~a/wiki/~a" wikiname page-path)))
                                      ,title)))
