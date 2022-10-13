@@ -22,7 +22,7 @@
 (module+ test
   (require "typed-rackunit.rkt"))
 
-(define px-wikiname "[a-zA-Z0-9-]{3,50}")
+(define px-wikiname "[a-zA-Z0-9-]{1,50}")
 
 ;; https://url.spec.whatwg.org/#urlencoded-serializing
 
