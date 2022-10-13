@@ -44,6 +44,7 @@
               (pathprocedure:make "/" (hash-ref ds 'page-home))
               (pathprocedure:make "/proxy" (hash-ref ds 'page-proxy))
               (pathprocedure:make "/search" (hash-ref ds 'page-global-search))
+              (pathprocedure:make "/buddyfight/wiki/It_Doesn't_Work!!" (hash-ref ds 'page-it-works))
               (filter:make (pregexp (format "^/~a/wiki/Category:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-category)))
               (filter:make (pregexp (format "^/~a/wiki/File:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-file)))
               (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-wiki)))

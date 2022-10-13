@@ -12,6 +12,7 @@
 (require-reloadable "src/page-category.rkt" page-category)
 (require-reloadable "src/page-global-search.rkt" page-global-search)
 (require-reloadable "src/page-home.rkt" page-home)
+(require-reloadable "src/page-it-works.rkt" page-it-works)
 (require-reloadable "src/page-not-found.rkt" page-not-found)
 (require-reloadable "src/page-proxy.rkt" page-proxy)
 (require-reloadable "src/page-redirect-wiki-home.rkt" redirect-wiki-home)
@@ -35,6 +36,7 @@
       page-category
       page-global-search
       page-home
+      page-it-works
       page-not-found
       page-proxy
       page-search
