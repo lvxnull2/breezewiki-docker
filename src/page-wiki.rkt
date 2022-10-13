@@ -52,7 +52,7 @@
                         (a (@ (data-test-wikilink) (href "https://test.fandom.com/wiki/Another_Page") (title "Another Page"))
                            "Another Page"))))
            (figure (@ (class "thumb tnone"))
-                   (a (@ (href "https://static.wikia.nocookie.net/nice-image.png") (class "image"))
+                   (a (@ (href "https://static.wikia.nocookie.net/nice-image.png") (class "image") (data-test-figure-a))
                       (img (@ (src "data:image/gif;base64,R0lGODlhAQABAIABAAAAAP///yH5BAEAAAEALAAAAAABAAEAQAICTAEAOw%3D%3D")
                               (data-src "https://static.wikia.nocookie.net/nice-image-thumbnail.png")
                               (class "thumbimage lazyload"))))
@@ -253,6 +253,11 @@
   (check-equal? (get-attribute 'href (bits->attributes
                                       ((query-selector
                                         (λ (t a c) (and (eq? t 'a) (has-class? "image-thumbnail" a)))
+                                        transformed))))
+                "/proxy?dest=https%3A%2F%2Fstatic.wikia.nocookie.net%2Fnice-image.png")
+  (check-equal? (get-attribute 'href (bits->attributes
+                                      ((query-selector
+                                        (λ (t a c) (member '(data-test-figure-a) a))
                                         transformed))))
                 "/proxy?dest=https%3A%2F%2Fstatic.wikia.nocookie.net%2Fnice-image.png")
   ; check that noscript images are removed
