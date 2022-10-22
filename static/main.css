@@ -225,6 +225,66 @@ figcaption, .lightbox-caption, .thumbcaption {
     margin-left: 1.2em;
 }
 
+/* (breezewiki) search suggestions */
+.bw-search-form {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-gap: 0px 5px;
+}
+.bw-ss__container {
+    grid-column: 2;
+    position: relative;
+}
+.bw-ss__list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    background: white;
+    color: black;
+    border: solid #808080;
+    border-width: 0px 1px 1px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+    z-index: 99;
+
+    display: none;
+}
+.bw-ss__list--focus {
+    display: block;
+}
+.bw-ss__list--loading {
+    background: #c0c0c0;
+}
+.bw-ss__input--accepted {
+    background: #fffbc0;
+}
+.bw-ss__preview {
+    padding: 0px 2px;
+    font-style: italic;
+    color: #555;
+}
+.bw-ss__item {
+    display: grid; /* make buttons take the full size */
+}
+.bw-ss__item:hover {
+    background-color: #ddd;
+}
+.bw-ss__button {
+    appearance: none;
+    -moz-appearance: none;
+    border: none;
+    margin: 0;
+    line-height: inherit;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    padding: 0px 2px;
+    text-align: left;
+}
+
 /* media queries */
 
 /* for reference, cell phone screens are generally 400 px wide, definitely less than 500 px */

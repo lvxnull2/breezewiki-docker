@@ -1,5 +1,6 @@
 #lang racket/base
 (require racket/string
+         json
          (prefix-in easy: net/http-easy)
          html-writing
          web-server/http
@@ -94,7 +95,11 @@
      ,@(map (λ (url)
               `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
             (required-styles (format "https://~a.fandom.com" wikiname)))
-     (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css"))))
+     (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css")))
+     (script "const BWData = "
+             ,(jsexpr->string (hasheq 'wikiname wikiname
+                                      'strict_proxy (config-true? 'strict_proxy))))
+     (script (@ (type "module") (src "/static/search-suggestions.js"))))
     (body (@ (class ,body-class))
           (div (@ (class "main-container"))
                (div (@ (class "fandom-community-header__background tileHorizontally header")))
@@ -103,9 +108,12 @@
                           (div (@ (class "custom-top"))
                                (h1 (@ (class "page-title")) ,title)
                                (nav (@ (class "sitesearch"))
-                                    (form (@ (action ,(format "/~a/search" wikiname)))
-                                          (label "Search "
-                                                 (input (@ (type "text") (name "q")))))))
+                                    (form (@ (action ,(format "/~a/search" wikiname))
+                                             (class "bw-search-form")
+                                             (id "bw-pr-search"))
+                                          (label (@ (for "bw-search-input")) "Search ")
+                                          (input (@ (type "text") (name "q") (id "bw-search-input") (autocomplete "off")))
+                                          (div (@ (class "bw-ss__container"))))))
                           (div (@ (id "content") #;(class "page-content"))
                                (div (@ (id "mw-content-text"))
                                     ,content))
