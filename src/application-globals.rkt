@@ -99,7 +99,9 @@
      (script "const BWData = "
              ,(jsexpr->string (hasheq 'wikiname wikiname
                                       'strict_proxy (config-true? 'strict_proxy))))
-     (script (@ (type "module") (src "/static/search-suggestions.js"))))
+     ,(if (config-true? 'feature_search_suggestions)
+          '(script (@ (type "module") (src "/static/search-suggestions.js")))
+          ""))
     (body (@ (class ,body-class))
           (div (@ (class "main-container"))
                (div (@ (class "fandom-community-header__background tileHorizontally header")))

@@ -34,6 +34,7 @@
   '((application_name . "BreezeWiki")
     (canonical_origin . "")
     (debug . "false")
+    (feature_search_suggestions . "true")
     (instance_is_official . "false") ; please don't turn this on, or you will make me very upset
     (log_outgoing . "true")
     (port . "10416")
