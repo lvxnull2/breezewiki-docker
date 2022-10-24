@@ -5,8 +5,8 @@
          json
          net/http-easy
          html-parsing
-         "src/xexpr-utils.rkt"
-         "src/url-utils.rkt")
+         "../src/xexpr-utils.rkt"
+         "../src/url-utils.rkt")
 
 (define output-file "wiki-names.json")
 (define limit "5000")
