@@ -269,7 +269,7 @@ figcaption, .lightbox-caption, .thumbcaption {
 .bw-ss__item {
     display: grid; /* make buttons take the full size */
 }
-.bw-ss__item:hover {
+.bw-ss__button:hover, .bw-ss__button:focus {
     background-color: #ddd;
 }
 .bw-ss__button {

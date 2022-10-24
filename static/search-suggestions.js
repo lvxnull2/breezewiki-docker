@@ -1,17 +1,20 @@
-import {h, htm, render, useState, useEffect, createContext, useContext} from "./preact.js"
+import {h, htm, render, useState, useEffect, createContext, useContext, signal, computed, effect} from "./preact.js"
 const html = htm.bind(h)
 const classNames = classArr => classArr.filter(el => el).join(" ")
 
-const form = document.getElementById("bw-pr-search")
+const eForm = document.getElementById("bw-pr-search-form")
+const eInput = document.getElementById("bw-pr-search-input")
+const eSuggestions = document.getElementById("bw-pr-search-suggestions")
 
-const AcceptSuggestion = createContext(null)
 const hitsPromise = new Map()
 const hitsDone = new Set()
 
-function Suggestion(props) {
-	const acceptSuggestion = useContext(AcceptSuggestion)
-	return html`<li class="bw-ss__item"><button type="button" class="bw-ss__button" onClick=${() => acceptSuggestion(props)}>${props.title}</button></li>`
-}
+const query = signal("")
+const focus = signal(false)
+const st = signal("ready")
+const suggestions = signal([])
+
+// processing functions
 
 function fetchSuggestions(query, setSuggestions) {
 	if (query === "") query = "\0"
@@ -36,58 +39,53 @@ function fetchSuggestions(query, setSuggestions) {
 	return promise
 }
 
-function SuggestionList(props) {
-	return html`
-<div class="bw-ss__container">
-	<ul class=${classNames(["bw-ss__list", props.focus && "bw-ss__list--focus", `bw-ss__list--${props.st}`])}>
-		${props.hits.map(hit => html`<${Suggestion} ...${hit} />`)}
-	</ul>
-</div>`
+function acceptSuggestion(hit) {
+	st.value = "accepted"
+	query.value = hit.title
+	const dest = new URL(hit.url).pathname.match("/wiki/.*")
+	location = `/${BWData.wikiname}${dest}`
 }
 
-function ControlledInput() {
-	const [query, setQuery] = useState("")
-	const [focus, setFocus] = useState(false)
-	const [st, setSt] = useState("ready")
-	const [suggestions, setSuggestions] = useState([])
+// suggestion list view
 
-	useEffect(() => {
-		if (st === "accepted") return
-		setSt("loading")
-		fetchSuggestions(query).then(s => {
-			setSuggestions(s)
-			if (hitsDone.size === hitsPromise.size) {
-				setSt("ready")
-			}
-		})
-	}, [query])
+function Suggestion(hit) {
+	return html`<li class="bw-ss__item"><button type="button" class="bw-ss__button" onClick=${() => acceptSuggestion(hit)}>${hit.title}</button></li>`
+}
 
-	function acceptSuggestion(suggestion) {
-		setQuery(suggestion.title)
-		setSt("accepted")
-		const dest = new URL(suggestion.url).pathname.match("/wiki/.*")
-		location = `/${BWData.wikiname}${dest}`
-	}
+function SuggestionList() {
+	return html`
+<ul class=${classNames(["bw-ss__list", focus.value && "bw-ss__list--focus", `bw-ss__list--${st.value}`])}>
+	${suggestions.value.map(hit => html`<${Suggestion} ...${hit} />`)}
+</ul>`
+}
 
-	useEffect(() => {
-		function listener(event) {
-			if (event.type === "focusin") setFocus(true)
-			else setFocus(false)
-		}
-		form.addEventListener("focusin", listener)
-		form.addEventListener("focusout", listener)
-		return () => {
-			form.removeEventListener("focusin", listener)
-			form.removeEventListener("focusout", listener)
+render(html`<${SuggestionList} />`, eSuggestions)
+
+// input view
+
+effect(() => {
+	if (st.peek() === "accepted") return // lock results from changing during navigation
+	st.value = "loading"
+	fetchSuggestions(query.value).then(res => {
+		suggestions.value = res
+		if (hitsDone.size === hitsPromise.size) {
+			st.value = "ready"
 		}
 	})
+})
 
+document.addEventListener("pageshow", () => {
+	st.value = "ready" // unlock results from changing after returning to page
+})
+
+function SuggestionInput() {
 	return html`
-<${AcceptSuggestion.Provider} value=${acceptSuggestion}>
-	<label for="bw-search-input">Search </label>
-	<input type="text" name="q" id="bw-search-input" autocomplete="off" onInput=${e => setQuery(e.target.value)} value=${query} class=${classNames(["bw-ss__input", `bw-ss__input--${st}`])} />
-	<${SuggestionList} hits=${suggestions} focus=${focus} st=${st}/>
-</${AcceptSuggestion.Provider}`
+<input type="text" name="q" id="bw-search-input" autocomplete="off" onInput=${e => query.value = e.target.value} value=${query.value} class=${classNames(["bw-ss__input", `bw-ss__input--${st.value}`])} />`
 }
 
-render(html`<${ControlledInput} />`, form)
+render(html`<${SuggestionInput} />`, eInput)
+
+// form focus
+
+eForm.addEventListener("focusin", () => focus.value = true)
+eForm.addEventListener("focusout", () => focus.value = false)
