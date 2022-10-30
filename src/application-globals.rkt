@@ -8,6 +8,7 @@
          "config.rkt"
          "data.rkt"
          "niwa-data.rkt"
+         "static-data.rkt"
          "pure-utils.rkt"
          "xexpr-utils.rkt"
          "url-utils.rkt")
@@ -37,7 +38,7 @@
   `(footer (@ (class "custom-footer"))
            (div (@ (class ,(if source-url "custom-footer__cols" "internal-footer")))
                 (div (p
-                      (img (@ (class "my-logo") (src "/static/breezewiki.svg"))))
+                      (img (@ (class "my-logo") (src ,(get-static-url "breezewiki.svg")))))
                      (p
                       (a (@ (href "https://gitdab.com/cadence/breezewiki"))
                          ,(format "~a source code" (config-get 'application_name))))
@@ -127,14 +128,13 @@
      ,@(map (λ (url)
               `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
             (required-styles (format "https://~a.fandom.com" wikiname)))
-     (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css")))
+     (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "main.css"))))
      (script "const BWData = "
              ,(jsexpr->string (hasheq 'wikiname wikiname
                                       'strict_proxy (config-true? 'strict_proxy))))
      ,(if (config-true? 'feature_search_suggestions)
-          '(script (@ (type "module") (src "/static/search-suggestions.js")))
-          ""))
-    (body (@ (class ,body-class))
+          `(script (@ (type "module") (src ,(get-static-url "search-suggestions.js"))))
+          "")
           (div (@ (class "main-container"))
                (div (@ (class "fandom-community-header__background tileHorizontally header")))
                (div (@ (class "page"))

@@ -49,7 +49,7 @@
      "Icaruspedia"
      "https://www.kidicaruswiki.org/wiki/Main_Page"
      "/images/logos/icaruspedia.png"
-     "Icaruspedia is the Kid Icarus wiki that keeps flying to new heights. After going independent on January 8, 2012, Icaruspedia has worked to become the largest and most trusted independent source of Kid Icarus information. Just like Pit, they\"ll keep on fighting until the job is done.")
+     "Icaruspedia is the Kid Icarus wiki that keeps flying to new heights. After going independent on January 8, 2012, Icaruspedia has worked to become the largest and most trusted independent source of Kid Icarus information. Just like Pit, they'll keep on fighting until the job is done.")
     (("splatoon" "uk-splatoon" "splatoon3" "splatoon2")
      "Inkipedia"
      "https://splatoonwiki.org/wiki/Main_Page"
@@ -145,7 +145,7 @@
            "xexpr-utils.rkt")
   (define r (get "https://www.niwanetwork.org/members/"))
   (define x (html->xexp (bytes->string/utf-8 (response-body r))))
-  (define english ((query-selector (λ (e a c) (println a) (equal? (get-attribute 'id a) "content1")) x)))
+  (define english ((query-selector (λ (e a c) (equal? (get-attribute 'id a) "content1")) x)))
   (define gen (query-selector (λ (e a c) (has-class? "member" a)) english))
   (for/list ([item (in-producer gen #f)])
     (define links (query-selector (λ (e a c) (eq? e 'a)) item))

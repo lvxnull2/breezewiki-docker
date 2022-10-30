@@ -64,5 +64,7 @@
   ((files:make
     #:url->path (lambda (u) ((make-url->path path-static) u))
     #:path->mime-type (lambda (u) (ext->mime-type (path-get-extension u)))
-    #:cache-no-cache (config-true? 'debug) #;"browser applies heuristics if unset")
+    #:cache-no-cache (config-true? 'debug)
+    #:cache-immutable (not (config-true? 'debug))
+    #:cache-max-age (if (config-true? 'debug) #f 604800))
    conn new-req))
