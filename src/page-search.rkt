@@ -30,7 +30,7 @@
   (generate-wiki-page
    #:source-url dest-url
    #:wikiname wikiname
-   #:title "Search Results"
+   #:title query
    #:siteinfo siteinfo
    `(div (@ (class "mw-parser-output"))
          (p ,(format "~a results found for " (length search-results))
