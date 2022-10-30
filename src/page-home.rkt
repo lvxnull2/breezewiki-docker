@@ -15,13 +15,11 @@
   (require rackunit))
 
 (define examples
-  '(("crosscode" "CrossCode_Wiki")
-    ("pokemon" "Eevee")
-    ("minecraft" "Bricks")
+  '(("minecraft" "Bricks")
+    ("crosscode" "CrossCode_Wiki")
     ("undertale" "Hot_Dog...%3F")
     ("tardis" "Eleanor_Blake")
-    ("fireemblem" "God-Shattering_Star")
-    ("fallout" "Pip-Boy_3000")))
+    ("zelda" "Boomerang")))
 
 (define content
   `((h2 "BreezeWiki makes wiki pages on Fandom readable")
@@ -53,6 +51,8 @@
     (p (@ (class "testimonial")) ">you are so right that fandom still sucks even with adblock somehow. even zapping all the stupid padding it still sucks —Minimus")
     (p (@ (class "testimonial")) ">attempting to go to a wiki's forum page with breezewiki doesn't work, which is based honestly —Tom Skeleton")
     (p (@ (class "testimonial")) ">Fandom pages crashing and closing, taking forever to load and locking up as they load the ads on the site... they are causing the site to crash because they are trying to load video ads both at the top and bottom of the site as well as two or three banner ads, then a massive top of site ad and eventually my anti-virus shuts the whole site down because it's literally pulling more resources than WoW in ultra settings... —Anonymous")
+    (p (@ (class "testimonial")) ">reblogs EXTREMELY appreciated I want that twink* (*fandom wiki) obliterated —footlong")
+
     (h2 "What BreezeWiki isn't")
     (p "BreezeWiki isn't an \"alternative\" to Fandom, and it doesn't let you edit or write new pages.")
     (p "If you want to create your own wiki, try Miraheze!")))
@@ -63,7 +63,8 @@
      (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
      (title "About | BreezeWiki")
      (link (@ (rel "stylesheet") (type "text/css") (href "/static/internal.css")))
-     (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css"))))
+     (link (@ (rel "stylesheet") (type "text/css") (href "/static/main.css")))
+     (link (@ (rel "icon") (href "/static/breezewiki-icon.svg"))))
     (body (@ (class "skin-fandomdesktop theme-fandomdesktop-light internal"))
           (div (@ (class "main-container"))
                (div (@ (class "fandom-community-header__background tileBoth header")))

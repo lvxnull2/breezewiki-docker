@@ -1,11 +1,14 @@
 #lang racket/base
-(require racket/string
+(require racket/list
+         racket/string
          json
          (prefix-in easy: net/http-easy)
          html-writing
          web-server/http
          "config.rkt"
          "data.rkt"
+         "niwa-data.rkt"
+         "pure-utils.rkt"
          "xexpr-utils.rkt"
          "url-utils.rkt")
 
@@ -62,6 +65,35 @@
                               " Media files and official Fandom documents have different copying restrictions.")
                            (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))))))
 
+;; generate a notice with a link if a fandom wiki has a replacement as part of NIWA or similar
+;; if the wiki has no replacement, display nothing
+(define (niwa-notice wikiname title)
+  (define ind (findf (λ (item) (member wikiname (first item))) niwa-data))
+  (if ind
+      (let* ([search-page (format "/Special:Search?~a"
+                                  (params->query `(("search" . ,title)
+                                                   ("go" . "Go"))))]
+             [go (if (string-suffix? (third ind) "/")
+                     (regexp-replace "/$" (third ind) (λ (_) search-page))
+                     (let* ([_ (println (regexp-match "/(w[^./]*)/" (third ind)))] [joiner (second (regexp-match "/(w[^./]*)/" (third ind)))])
+                       (regexp-replace "/w[^./]*/.*$" (third ind) (λ (_) (format "/~a~a" joiner search-page)))))])
+        `(aside (@ (class "niwa__notice"))
+                (h1 (@ (class "niwa__header")) ,(second ind) " has its own website separate from Fandom.")
+                (a (@ (class "niwa__go") (href ,go)) "Read " ,title " on " ,(second ind) " →")
+                (div (@ (class "niwa__cols"))
+                     (div (@ (class "niwa__left"))
+                          (p "Most major Nintendo wikis are part of the "
+                             (a (@ (href "https://www.niwanetwork.org/about/")) "Nintendo Independent Wiki Alliance")
+                             " and have their own wikis off Fandom. You can help this wiki by "
+                             (a (@ (href ,go)) "visiting it directly."))
+                          (p ,(fifth ind))
+                          (div (@ (class "niwa__divider")))
+                          (p "Why are you seeing this message? Fandom refuses to delete or archive their copy of this wiki, so that means their pages will appear high up in search results. Fandom hopes to get clicks from readers who don't know any better.")
+                          (p (@ (class "niwa__feedback")) (a (@ (href "https://www.kotaku.com.au/2022/10/massive-zelda-wiki-reclaims-independence-six-months-before-tears-of-the-kingdom/")) "More info") " / " (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "Feedback on this notice?")))
+                     (div (@ (class "niwa__right"))
+                          (img (@ (class "niwa__logo") (src ,(format "https://www.niwanetwork.org~a" (fourth ind)))))))))
+      ""))
+
 (define (generate-wiki-page
          content
          #:source-url source-url
@@ -107,6 +139,7 @@
                (div (@ (class "fandom-community-header__background tileHorizontally header")))
                (div (@ (class "page"))
                     (main (@ (class "page__main"))
+                          ,(niwa-notice wikiname title)
                           (div (@ (class "custom-top"))
                                (h1 (@ (class "page-title")) ,title)
                                (nav (@ (class "sitesearch"))
