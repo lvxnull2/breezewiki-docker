@@ -75,9 +75,9 @@
                                   (params->query `(("search" . ,title)
                                                    ("go" . "Go"))))]
              [go (if (string-suffix? (third ind) "/")
-                     (regexp-replace "/$" (third ind) (λ (_) search-page))
-                     (let* ([_ (println (regexp-match "/(w[^./]*)/" (third ind)))] [joiner (second (regexp-match "/(w[^./]*)/" (third ind)))])
-                       (regexp-replace "/w[^./]*/.*$" (third ind) (λ (_) (format "/~a~a" joiner search-page)))))])
+                     (regexp-replace #rx"/$" (third ind) (λ (_) search-page))
+                     (let* ([joiner (second (regexp-match #rx"/(w[^./]*)/" (third ind)))])
+                       (regexp-replace #rx"/w[^./]*/.*$" (third ind) (λ (_) (format "/~a~a" joiner search-page)))))])
         `(aside (@ (class "niwa__notice"))
                 (h1 (@ (class "niwa__header")) ,(second ind) " has its own website separate from Fandom.")
                 (a (@ (class "niwa__go") (href ,go)) "Read " ,title " on " ,(second ind) " →")
@@ -100,12 +100,10 @@
          #:source-url source-url
          #:wikiname wikiname
          #:title title
-         #:body-class [body-class-in #f]
+         #:head-data [head-data-in #f]
          #:siteinfo [siteinfo-in #f])
   (define siteinfo (or siteinfo-in siteinfo-default))
-  (define body-class (if (not body-class-in)
-                         "skin-fandomdesktop"
-                         body-class-in))
+  (define head-data (or head-data-in ((head-data-getter wikiname))))
   (define (required-styles origin)
     (map (λ (dest-path)
            (define url (format dest-path origin))
@@ -135,6 +133,10 @@
      ,(if (config-true? 'feature_search_suggestions)
           `(script (@ (type "module") (src ,(get-static-url "search-suggestions.js"))))
           "")
+     (link (@ (rel "icon") (href ,(u (λ (v) (config-true? 'strict_proxy))
+                                     (λ (v) (u-proxy-url v))
+                                     (head-data^-icon-url head-data))))))
+    (body (@ (class ,(head-data^-body-class head-data)))
           (div (@ (class "main-container"))
                (div (@ (class "fandom-community-header__background tileHorizontally header")))
                (div (@ (class "page"))

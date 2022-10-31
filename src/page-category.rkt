@@ -34,14 +34,14 @@
          #:title title
          #:members-data members-data
          #:page page
-         #:body-class [body-class #f]
+         #:head-data [head-data #f]
          #:siteinfo [siteinfo #f])
   (define members (jp "/query/categorymembers" members-data))
   (generate-wiki-page
    #:source-url source-url
    #:wikiname wikiname
    #:title title
-   #:body-class body-class
+   #:head-data head-data
    #:siteinfo siteinfo
    `(div
      ,(update-tree-wiki page wikiname)
@@ -94,17 +94,14 @@
     (define title (preprocess-html-wiki (jp "/parse/title" page-data prefixed-category)))
     (define page-html (preprocess-html-wiki (jp "/parse/text" page-data "")))
     (define page (html->xexp page-html))
-    (define head-html (jp "/parse/headhtml" page-data ""))
-    (define body-class (match (regexp-match #rx"<body [^>]*class=\"([^\"]*)" head-html)
-                         [(list _ classes) classes]
-                         [_ ""]))
+    (define head-data ((head-data-getter wikiname) page-data))
     (define body (generate-results-page
                   #:source-url source-url
                   #:wikiname wikiname
                   #:title title
                   #:members-data members-data
                   #:page page
-                  #:body-class body-class
+                  #:head-data head-data
                   #:siteinfo siteinfo))
 
     (when (config-true? 'debug)

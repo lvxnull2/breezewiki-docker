@@ -289,10 +289,7 @@
              [page-html (jp "/parse/text" data "")]
              [page-html (preprocess-html-wiki page-html)]
              [page (html->xexp page-html)]
-             [head-html (jp "/parse/headhtml" data "")]
-             [body-class (match (regexp-match #rx"<body [^>]*class=\"([^\"]*)" head-html)
-                           [(list _ classes) classes]
-                           [_ ""])])
+             [head-data ((head-data-getter wikiname) data)])
         (if (equal? "missingtitle" (jp "/error/code" data #f))
             (next-dispatcher)
             (response-handler
@@ -302,7 +299,7 @@
                 #:source-url source-url
                 #:wikiname wikiname
                 #:title title
-                #:body-class body-class
+                #:head-data head-data
                 #:siteinfo siteinfo))
              (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
              (define headers

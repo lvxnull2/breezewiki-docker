@@ -137,7 +137,7 @@
      "Founded on April 23, 2005 as Zelda Wiki, today's Zeldapedia is your definitive source for encyclopedic information on The Legend of Zelda series, as well as all of the latest Zelda news.")))
 
 ;; get the current dataset so it can be stored above
-(module+ test
+(module+ fetch
   (require racket/generator
            racket/list
            net/http-easy
