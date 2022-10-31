@@ -23,7 +23,7 @@
 
 (define license-default (license^ "CC-BY-SA" "https://www.fandom.com/licensing"))
 (define siteinfo-default (siteinfo^ "Test Wiki" "Main_Page" license-default))
-(define head-data-default (head-data^ "skin-fandomdesktop" (get-static-url "breezewiki-icon.svg")))
+(define head-data-default (head-data^ "skin-fandomdesktop" (get-static-url "breezewiki-favicon.svg")))
 
 (define/memoize (siteinfo-fetch wikiname) #:hash hash
   (define dest-url

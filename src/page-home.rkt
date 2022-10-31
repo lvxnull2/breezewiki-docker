@@ -4,6 +4,7 @@
          html-writing
          web-server/http
          "application-globals.rkt"
+         "data.rkt"
          "static-data.rkt"
          "url-utils.rkt"
          "xexpr-utils.rkt"
@@ -65,7 +66,7 @@
      (title "About | BreezeWiki")
      (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "internal.css"))))
      (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "main.css"))))
-     (link (@ (rel "icon") (href ,(get-static-url "breezewiki-icon.svg")))))
+     (link (@ (rel "icon") (href ,(head-data^-icon-url head-data-default)))))
     (body (@ (class "skin-fandomdesktop theme-fandomdesktop-light internal"))
           (div (@ (class "main-container"))
                (div (@ (class "fandom-community-header__background tileBoth header")))
