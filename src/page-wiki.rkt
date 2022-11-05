@@ -175,14 +175,15 @@
                 ; proxy images from inline styles, if strict_proxy is set
                 (curry u
                        (λ (v) (config-true? 'strict_proxy))
-                       (λ (v) (attribute-maybe-update 'style
-                         (λ (style)
-                           (regexp-replace #rx"url\\(['\"]?(.*?)['\"]?\\)" style
-                                           (λ (whole url)
-                                             (string-append
-                                              "url("
-                                              (u-proxy-url url)
-                                              ")")))) v)))
+                       (λ (v) (attribute-maybe-update
+                               'style
+                               (λ (style)
+                                 (regexp-replace #rx"url\\(['\"]?(.*?)['\"]?\\)" style
+                                                 (λ (whole url)
+                                                   (string-append
+                                                    "url("
+                                                    (u-proxy-url url)
+                                                    ")")))) v)))
                 ; and also their links, if strict_proxy is set
                 (curry u
                        (λ (v)

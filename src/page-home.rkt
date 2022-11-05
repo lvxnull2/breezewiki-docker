@@ -60,25 +60,27 @@
     (p "If you want to create your own wiki, try Miraheze!")))
 
 (define body
-  `(html
-    (head
-     (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
-     (title "About | BreezeWiki")
-     (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "internal.css"))))
-     (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "main.css"))))
-     (link (@ (rel "icon") (href ,(head-data^-icon-url head-data-default)))))
-    (body (@ (class "skin-fandomdesktop theme-fandomdesktop-light internal"))
-          (div (@ (class "main-container"))
-               (div (@ (class "fandom-community-header__background tileBoth header")))
-               (div (@ (class "page"))
-                    (main (@ (class "page__main"))
-                          (div (@ (class "custom-top"))
-                               (h1 (@ (class "page-title"))
-                                   "About BreezeWiki"))
-                          (div (@ (id "content") #;(class "page-content"))
-                               (div (@ (id "mw-content-text"))
-                                    ,@content))
-                          ,(application-footer #f)))))))
+  `(*TOP*
+    (*DECL* DOCTYPE html)
+    (html
+     (head
+      (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
+      (title "About | BreezeWiki")
+      (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "internal.css"))))
+      (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "main.css"))))
+      (link (@ (rel "icon") (href ,(head-data^-icon-url head-data-default)))))
+     (body (@ (class "skin-fandomdesktop theme-fandomdesktop-light internal"))
+           (div (@ (class "main-container"))
+                (div (@ (class "fandom-community-header__background tileBoth header")))
+                (div (@ (class "page"))
+                     (main (@ (class "page__main"))
+                           (div (@ (class "custom-top"))
+                                (h1 (@ (class "page-title"))
+                                    "About BreezeWiki"))
+                           (div (@ (id "content") #;(class "page-content"))
+                                (div (@ (id "mw-content-text"))
+                                     ,@content))
+                           ,(application-footer #f))))))))
 (module+ test
   (check-not-false (xexp->html body)))
 

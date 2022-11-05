@@ -116,46 +116,48 @@
            ; combine the above entries into a single request for potentially extra speed - fandom.com doesn't even do this!
            "~a/wikia.php?controller=ThemeApi&method=themeVariables"
            "~a/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop")))
-  `(html
-    (head
-     (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
-     (title ,(format "~a | ~a+~a"
-                     title
-                     (regexp-replace #rx" ?Wiki$" (siteinfo^-sitename siteinfo) "")
-                     (config-get 'application_name)))
-     ,@(map (λ (url)
-              `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
-            (required-styles (format "https://~a.fandom.com" wikiname)))
-     (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "main.css"))))
-     (script "const BWData = "
-             ,(jsexpr->string (hasheq 'wikiname wikiname
-                                      'strict_proxy (config-true? 'strict_proxy))))
-     ,(if (config-true? 'feature_search_suggestions)
-          `(script (@ (type "module") (src ,(get-static-url "search-suggestions.js"))))
-          "")
-     (link (@ (rel "icon") (href ,(u (λ (v) (config-true? 'strict_proxy))
-                                     (λ (v) (u-proxy-url v))
-                                     (head-data^-icon-url head-data))))))
-    (body (@ (class ,(head-data^-body-class head-data)))
-          (div (@ (class "main-container"))
-               (div (@ (class "fandom-community-header__background tileHorizontally header")))
-               (div (@ (class "page"))
-                    (main (@ (class "page__main"))
-                          ,(niwa-notice wikiname title)
-                          (div (@ (class "custom-top"))
-                               (h1 (@ (class "page-title")) ,title)
-                               (nav (@ (class "sitesearch"))
-                                    (form (@ (action ,(format "/~a/search" wikiname))
-                                             (class "bw-search-form")
-                                             (id "bw-pr-search-form"))
-                                          (label (@ (for "bw-search-input")) "Search ")
-                                          (div (@ (id "bw-pr-search-input"))
-                                               (input (@ (type "text") (name "q") (id "bw-search-input") (autocomplete "off"))))
-                                          (div (@ (class "bw-ss__container") (id "bw-pr-search-suggestions"))))))
-                          (div (@ (id "content") #;(class "page-content"))
-                               (div (@ (id "mw-content-text"))
-                                    ,content))
-                          ,(application-footer source-url #:license (siteinfo^-license siteinfo))))))))
+  `(*TOP*
+    (*DECL* DOCTYPE html)
+    (html
+     (head
+      (meta (@ (name "viewport") (content "width=device-width, initial-scale=1")))
+      (title ,(format "~a | ~a+~a"
+                      title
+                      (regexp-replace #rx" ?Wiki$" (siteinfo^-sitename siteinfo) "")
+                      (config-get 'application_name)))
+      ,@(map (λ (url)
+               `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
+             (required-styles (format "https://~a.fandom.com" wikiname)))
+      (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "main.css"))))
+      (script "const BWData = "
+              ,(jsexpr->string (hasheq 'wikiname wikiname
+                                       'strict_proxy (config-true? 'strict_proxy))))
+      ,(if (config-true? 'feature_search_suggestions)
+           `(script (@ (type "module") (src ,(get-static-url "search-suggestions.js"))))
+           "")
+      (link (@ (rel "icon") (href ,(u (λ (v) (config-true? 'strict_proxy))
+                                      (λ (v) (u-proxy-url v))
+                                      (head-data^-icon-url head-data))))))
+     (body (@ (class ,(head-data^-body-class head-data)))
+           (div (@ (class "main-container"))
+                (div (@ (class "fandom-community-header__background tileHorizontally header")))
+                (div (@ (class "page"))
+                     (main (@ (class "page__main"))
+                           ,(niwa-notice wikiname title)
+                           (div (@ (class "custom-top"))
+                                (h1 (@ (class "page-title")) ,title)
+                                (nav (@ (class "sitesearch"))
+                                     (form (@ (action ,(format "/~a/search" wikiname))
+                                              (class "bw-search-form")
+                                              (id "bw-pr-search-form"))
+                                           (label (@ (for "bw-search-input")) "Search ")
+                                           (div (@ (id "bw-pr-search-input"))
+                                                (input (@ (type "text") (name "q") (id "bw-search-input") (autocomplete "off"))))
+                                           (div (@ (class "bw-ss__container") (id "bw-pr-search-suggestions"))))))
+                           (div (@ (id "content") #;(class "page-content"))
+                                (div (@ (id "mw-content-text"))
+                                     ,content))
+                           ,(application-footer source-url #:license (siteinfo^-license siteinfo)))))))))
 (module+ test
   (define page
     (parameterize ([(config-parameter 'strict_proxy) "true"])

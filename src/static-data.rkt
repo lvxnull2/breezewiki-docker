@@ -12,7 +12,9 @@
     (define built (simple-form-path (build-path path-static f)))
     (values built (file-or-directory-modify-seconds built))))
 
-(: get-static-url ((U String Path) -> String))
+(: get-static-url (Path-String -> String))
 (define (get-static-url path-or-filename)
-  (define the-path (simple-form-path (if (path? path-or-filename) path-or-filename (build-path path-static path-or-filename))))
+  (define the-path (simple-form-path (if (path? path-or-filename)
+                                         path-or-filename
+                                         (build-path path-static path-or-filename))))
   (format "/static/~a?t=~a" (file-name-from-path the-path) (hash-ref static-data the-path)))

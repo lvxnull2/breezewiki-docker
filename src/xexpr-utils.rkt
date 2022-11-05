@@ -157,20 +157,32 @@
     (define element-type (car element))
     (define attributes (bits->attributes (cdr element)))
     (define contents (filter element-is-content? (cdr element))) ; provide elements and strings
-    (if (or (equal? element-type '*DECL)
-            (equal? element-type '@)
-            (equal? element-type '&))
-        ; special element, do nothing
-        element
-        ; regular element, transform it
-        (match (transformer element element-type attributes contents)
-          [(list element-type attributes contents)
-           (append (list element-type)
-                   (if (pair? attributes) (list (append '(@) attributes)) (list))
-                   (map (λ (content)
-                          (if (element-is-element? content) (loop content) content))
-                        contents))]))))
+    (cond
+      [(equal? element-type '*DECL*)
+       ; declarations like <!DOCTYPE html> get mapped as attributes as if the element were (*DECL* (@ (DOCTYPE) (html)))
+       (match (transformer element element-type (map list (cdr element)) null)
+         [(list element-type attributes contents)
+          `(*DECL* ,@(map car attributes))]
+         [#f ""])]
+      [(member element-type '(@ &))
+       ; special element, do nothing
+       element]
+      [#t
+       ; regular element, transform it
+       (match (transformer element element-type attributes contents)
+         [(list element-type attributes contents)
+          (append (list element-type)
+                  (if (pair? attributes) (list (append '(@) attributes)) (list))
+                  (map (λ (content)
+                         (if (element-is-element? content) (loop content) content))
+                       contents))])])))
 (module+ test
+  ; check doctype is preserved when present
+  (check-equal? (update-tree (λ (e t a c) (list t a c)) '(*TOP* (*DECL* DOCTYPE html) (html (body "Hey"))))
+                '(*TOP* (*DECL* DOCTYPE html) (html (body "Hey"))))
+  ; check doctype can be removed if desirable
+  (check-equal? (update-tree (λ (e t a c) (if (eq? t '*DECL*) #f (list t a c))) '(*TOP* (*DECL* DOCTYPE html) (html (body "Hey"))))
+                '(*TOP* "" (html (body "Hey"))))
   ; check (& x) sequences are preserved
   (check-equal? (update-tree (λ (e t a c) (list t a c)) '(body "Hey" (& nbsp) (a (@ (href "/")))))
                 '(body "Hey" (& nbsp) (a (@ (href "/"))))))
