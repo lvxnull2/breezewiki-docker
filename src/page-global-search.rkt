@@ -4,6 +4,7 @@
          net/url
          web-server/http
          "application-globals.rkt"
+         "data.rkt"
          "url-utils.rkt"
          "xexpr-utils.rkt")
 
@@ -14,12 +15,18 @@
   (define wikiname (dict-ref (url-query (request-uri req)) 'wikiname #f))
   (define q (dict-ref (url-query (request-uri req)) 'q #f))
   (response-handler
-   (if (not (and wikiname q))
-       (response/output
-        #:code 400
-        #:mime-type "text/plain"
-        (λ (out)
-          (displayln "Requires wikiname and q parameters." out)))
-       (generate-redirect (format "/~a/search?~a"
-                                  wikiname
-                                  (params->query `(("q" . ,q))))))))
+   (cond
+     [(not wikiname)
+      (response/output
+       #:code 400
+       #:mime-type "text/plain"
+       (λ (out)
+         (displayln "Requires wikiname and q parameters." out)))]
+     [(or (not q) (equal? q ""))
+      (define siteinfo (siteinfo-fetch wikiname))
+      (define dest (format "/~a/wiki/~a" wikiname (or (siteinfo^-basepage siteinfo) "Main_Page")))
+      (generate-redirect dest)]
+     [#t
+      (generate-redirect (format "/~a/search?~a"
+                                 wikiname
+                                 (params->query `(("q" . ,q)))))])))

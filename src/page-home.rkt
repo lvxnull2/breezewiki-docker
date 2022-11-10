@@ -40,7 +40,7 @@
                  (input (@ (name "wikiname") (class "paired__input") (type "text") (placeholder "pokemon") (required))))
           (label (@ (class "paired__label"))
                  "Search query"
-                 (input (@ (name "q") (class "paired__input") (type "text") (placeholder "Eevee") (required))))
+                 (input (@ (name "q") (class "paired__input") (type "text") (placeholder "Eevee"))))
           (button "Search"))
     (h2 "Example pages")
     (ul
