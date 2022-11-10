@@ -1,12 +1,8 @@
 /* reset the reset */
 blockquote, code, del, details, div, dl, dt, em, fieldset, figcaption, figure, h1, h2, h3, h4, h5, h6, li, ol, p, pre, q, span, strong, ul {
-    font-family: sans-serif;
     margin: initial;
     padding: initial;
     border: initial;
-}
-input, textarea {
-    font-family: sans-serif;
 }
 pre, code {
     font-family: monospace;
@@ -32,6 +28,7 @@ sub {
 
 /* general page appearance */
 body.skin-fandomdesktop, button, input, textarea, .wikitable, .va-table {
+    font-family: "Source Sans Pro", "Segoe UI", sans-serif;
     font-size: 18px;
     line-height: 1.5;
 }
@@ -375,4 +372,44 @@ figcaption, .lightbox-caption, .thumbcaption {
         width: auto !important;
         text-align: center !important;
     }
+}
+
+/* *****
+ * Custom Font - all of windows' preinstalled fonts are garbage, so I have to add a custom one
+ * Source Sans Pro © 20100, 2012, 2014 Adobe Systems Incorporated
+ * font files licensed under the SIL Open Font License version 1.1 http://scripts.sil.org/OFL
+ * this license notice must be distributed with the font files.
+ * thanks to https://github.com/majodev/google-webfonts-helper/ for the downloader!
+ ***** */
+@font-face {
+  font-family: "Source Sans Pro";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local(""),
+       url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Sans Pro";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local(""),
+       url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Sans Pro";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local(""),
+       url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Source Sans Pro";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: local(""),
+       url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-700italic.woff2") format("woff2");
 }

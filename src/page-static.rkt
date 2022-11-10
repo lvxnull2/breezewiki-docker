@@ -22,6 +22,7 @@
         #".js" #"text/javascript"
         #".png" #"image/png"
         #".svg" #"image/svg+xml"
+        #".woff2" #"font/woff2"
         #".txt" #"text/plain"))
 
 (define (ext->mime-type ext)
