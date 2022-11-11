@@ -386,7 +386,7 @@ figcaption, .lightbox-caption, .thumbcaption {
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: local(""),
+  src: local("Source Sans Pro"),
        url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-regular.woff2") format("woff2");
 }
 @font-face {
@@ -394,22 +394,19 @@ figcaption, .lightbox-caption, .thumbcaption {
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: local(""),
-       url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-italic.woff2") format("woff2");
+  src: url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-italic.woff2") format("woff2");
 }
 @font-face {
   font-family: "Source Sans Pro";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: local(""),
-       url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-700.woff2") format("woff2");
+  src: url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-700.woff2") format("woff2");
 }
 @font-face {
   font-family: "Source Sans Pro";
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: local(""),
-       url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-700italic.woff2") format("woff2");
+  src: url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-700italic.woff2") format("woff2");
 }
