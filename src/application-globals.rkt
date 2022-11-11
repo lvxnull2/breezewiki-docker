@@ -30,7 +30,8 @@
            html-writing))
 
 (define always-headers
-  (list (header #"Referrer-Policy" #"same-origin"))) ; header to not send referers to fandom
+  (list (header #"Referrer-Policy" #"same-origin") ; header to not send referers to fandom
+        (header #"Link" (string->bytes/latin-1 link-header))))
 (define timeouts (easy:make-timeout-config #:lease 5 #:connect 5))
 
 (define (application-footer source-url #:license [license-in #f])
