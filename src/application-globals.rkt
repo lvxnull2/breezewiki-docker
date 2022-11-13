@@ -91,7 +91,7 @@
                           (p ,(fifth ind))
                           (div (@ (class "niwa__divider")))
                           (p "Why are you seeing this message? Fandom refuses to delete or archive their copy of this wiki, so that means their pages will appear high up in search results. Fandom hopes to get clicks from readers who don't know any better.")
-                          (p (@ (class "niwa__feedback")) (a (@ (href "https://www.kotaku.com.au/2022/10/massive-zelda-wiki-reclaims-independence-six-months-before-tears-of-the-kingdom/")) "More info") " / " (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "Feedback on this notice?")))
+                          (p (@ (class "niwa__feedback")) "This notice brought to you by BreezeWiki / " (a (@ (href "https://www.kotaku.com.au/2022/10/massive-zelda-wiki-reclaims-independence-six-months-before-tears-of-the-kingdom/")) "Info & Context") " / " (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "Feedback?")))
                      (div (@ (class "niwa__right"))
                           (img (@ (class "niwa__logo") (src ,(format "https://www.niwanetwork.org~a" (fourth ind)))))))))
       ""))
