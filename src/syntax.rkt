@@ -37,7 +37,7 @@
           [(and (pair? node) (eq? 'if/out (car node))) node]
           ; -- replace if/in
           [(and (pair? node) (eq? 'if/in (car node)))
-           (append '(if) (cdr node) else)]
+           (append '(if) (walk (cdr node)) else)]
           ; recurse down pair head and tail
           [(pair? node) (cons (walk (car node)) (walk (cdr node)))]
           ; something else that can't be recursed into, so pass it through

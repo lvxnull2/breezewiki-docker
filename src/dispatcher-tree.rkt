@@ -3,6 +3,7 @@
          (for-syntax racket/base)
          racket/string
          net/url
+         web-server/http
          (prefix-in host: web-server/dispatchers/dispatch-host)
          (prefix-in pathprocedure: web-server/dispatchers/dispatch-pathprocedure)
          (prefix-in sequencer: web-server/dispatchers/dispatch-sequencer)
@@ -32,23 +33,17 @@
   (datum->syntax stx `(make-dispatcher-tree ,ds)))
 
 (define (make-dispatcher-tree ds)
-  (host:make
-   (λ (host-sym)
-     (if/out (config-true? 'canonical_origin)
-             (let* ([host-header (symbol->string host-sym)]
-                    [splitter (string-append "." (url-host (string->url (config-get 'canonical_origin))))]
-                    [s (string-split host-header splitter #:trim? #f)])
-               (if/in (and (eq? 2 (length s)) (equal? "" (cadr s)))
-                      ((hash-ref ds 'subdomain-dispatcher) (car s))))
-             (sequencer:make
-              (pathprocedure:make "/" (hash-ref ds 'page-home))
-              (pathprocedure:make "/proxy" (hash-ref ds 'page-proxy))
-              (pathprocedure:make "/search" (hash-ref ds 'page-global-search))
-              (pathprocedure:make "/buddyfight/wiki/It_Doesn't_Work!!" (hash-ref ds 'page-it-works))
-              (filter:make (pregexp (format "^/~a/wiki/Category:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-category)))
-              (filter:make (pregexp (format "^/~a/wiki/File:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-file)))
-              (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-wiki)))
-              (filter:make (pregexp (format "^/~a/search$" px-wikiname)) (lift:make (hash-ref ds 'page-search)))
-              (filter:make (pregexp (format "^/~a(/(wiki(/)?)?)?$" px-wikiname)) (lift:make (hash-ref ds 'redirect-wiki-home)))
-              (hash-ref ds 'static-dispatcher)
-              (lift:make (hash-ref ds 'page-not-found)))))))
+  (define subdomain-dispatcher (hash-ref ds 'subdomain-dispatcher))
+  (sequencer:make
+   subdomain-dispatcher
+   (pathprocedure:make "/" (hash-ref ds 'page-home))
+   (pathprocedure:make "/proxy" (hash-ref ds 'page-proxy))
+   (pathprocedure:make "/search" (hash-ref ds 'page-global-search))
+   (pathprocedure:make "/buddyfight/wiki/It_Doesn't_Work!!" (hash-ref ds 'page-it-works))
+   (filter:make (pregexp (format "^/~a/wiki/Category:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-category)))
+   (filter:make (pregexp (format "^/~a/wiki/File:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-file)))
+   (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-wiki)))
+   (filter:make (pregexp (format "^/~a/search$" px-wikiname)) (lift:make (hash-ref ds 'page-search)))
+   (filter:make (pregexp (format "^/~a(/(wiki(/)?)?)?$" px-wikiname)) (lift:make (hash-ref ds 'redirect-wiki-home)))
+   (hash-ref ds 'static-dispatcher)
+   (lift:make (hash-ref ds 'page-not-found))))
