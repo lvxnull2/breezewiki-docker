@@ -136,6 +136,7 @@
       ,(if (config-true? 'feature_search_suggestions)
            `(script (@ (type "module") (src ,(get-static-url "search-suggestions.js"))))
            "")
+      (script (@ (type "module") (src ,(get-static-url "countdown.js"))))
       (link (@ (rel "icon") (href ,(u (λ (v) (config-true? 'strict_proxy))
                                       (λ (v) (u-proxy-url v))
                                       (head-data^-icon-url head-data))))))
