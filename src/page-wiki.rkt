@@ -205,6 +205,16 @@
                attributes)
               ;; children
               ((compose1
+                ; more uncollapsing - sample: bandori/wiki/BanG_Dream!_Wikia
+                (curry u
+                       (λ (v) (has-class? "mw-collapsible-content" attributes))
+                       (λ (v) (for/list ([element v])
+                                (u (λ (element) (pair? element))
+                                   (λ (element)
+                                     `(,(car element)
+                                       (@ ,@(attribute-maybe-update 'style (λ (a) (regexp-replace #rx"display: *none" a "display:inline")) (bits->attributes element)))
+                                       ,@(filter element-is-content? (cdr element))))
+                                   element))))
                 ; wrap blinking animated images in a slot so they can be animated with CSS
                 (curry u
                        (λ (v) (and (has-class? "animated" attributes)
