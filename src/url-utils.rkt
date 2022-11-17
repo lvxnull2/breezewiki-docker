@@ -17,7 +17,9 @@
   ; prints "out: <url>"
  log-outgoing
  ; pass in a header, headers, or something useless. they'll all combine into a list
- build-headers)
+ build-headers
+ ; try to follow wikimedia's format for which characters should be encoded/replaced in page titles for the url
+ page-title->path)
 
 (module+ test
   (require "typed-rackunit.rkt"))
@@ -26,14 +28,18 @@
 
 ;; https://url.spec.whatwg.org/#urlencoded-serializing
 
-(define urlencoded-set '(#\! #\' #\( #\) #\~ ; urlencoded set
-                         #\$ #\% #\& #\+ #\, ; component set
-                         #\/ #\: #\; #\= #\@ #\[ #\\ #\] #\^ #\| ; userinfo set
-                         #\? #\` #\{ #\} ; path set
-                         #\  #\" #\# #\< #\> ; query set
-                         ; c0 controls included elsewhere
-                         ; higher ranges included elsewhere
-                         ))
+(define path-set '(#\; ; semicolon is part of the userinfo set in the URL standard, but I'm putting it here
+                   #\? #\` #\{ #\} ; path set
+                   #\  #\" #\# #\< #\> ; query set
+                   ; c0 controls included elsewhere
+                   ; higher ranges included elsewhere
+                   ))
+(define urlencoded-set (append
+                        '(#\! #\' #\( #\) #\~ ; urlencoded set
+                          #\$ #\% #\& #\+ #\, ; component set
+                          #\/ #\: #\= #\@ #\[ #\\ #\] #\^ #\| ; userinfo set
+                          )
+                        path-set))
 
 (: percent-encode (String (Listof Char) Boolean -> Bytes))
 (define (percent-encode value set space-as-plus)
@@ -98,3 +104,7 @@
            [(header? f) (list f)]
            [(pair? f) f]))
        fs)))
+
+(: page-title->path (String -> Bytes))
+(define (page-title->path title)
+  (percent-encode (regexp-replace* " " title "_") path-set #f))

@@ -18,9 +18,9 @@
 
 (define examples
   '(("minecraft" "Bricks")
-    ("crosscode" "CrossCode_Wiki")
-    ("undertale" "Hot_Dog...%3F")
-    ("tardis" "Eleanor_Blake")
+    ("crosscode" "CrossCode Wiki")
+    ("undertale" "Hot Dog...?")
+    ("tardis" "Eleanor Blake")
     ("zelda" "Boomerang")))
 
 (define content
@@ -45,7 +45,7 @@
     (h2 "Example pages")
     (ul
      ,@(map (λ (x)
-              `(li (a (@ (href ,(apply format "/~a/wiki/~a" x)))
+              `(li (a (@ (href ,(format "/~a/wiki/~a" (car x) (page-title->path (cadr x)))))
                       ,(apply format "~a: ~a" x))))
             examples))
     (h2 "Testimonials")

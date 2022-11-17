@@ -38,7 +38,7 @@
          (ul ,@(map
                 (λ (result)
                   (let* ([title (jp "/title" result)]
-                         [page-path (regexp-replace* #rx" " title "_")]
+                         [page-path (page-title->path title)]
                          [timestamp (jp "/timestamp" result)]
                          [wordcount (jp "/wordcount" result)]
                          [size (jp "/size" result)])

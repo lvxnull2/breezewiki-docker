@@ -52,7 +52,7 @@
               ,@(map
                  (λ (result)
                    (define title (jp "/title" result))
-                   (define page-path (regexp-replace* #rx" " title "_"))
+                   (define page-path (page-title->path title))
                    `(li
                      (a (@ (href ,(format "/~a/wiki/~a" wikiname page-path)))
                         ,title)))
