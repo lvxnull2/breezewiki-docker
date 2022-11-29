@@ -94,10 +94,14 @@
                 #:head-data head-data
                 #:siteinfo siteinfo))
              (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
+             (define redirect-query-parameter (dict-ref (url-query (request-uri req)) 'redirect "yes"))
              (define headers
                (build-headers
                 always-headers
-                (when redirect-msg
+                ; redirect-query-parameter: only the string "no" is significant:
+                ; https://github.com/Wikia/app/blob/fe60579a53f16816d65dad1644363160a63206a6/includes/Wiki.php#L367
+                (when (and redirect-msg
+                           (not (equal? redirect-query-parameter "no")))
                   (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
                          [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
                     (header #"Refresh" value)))))
