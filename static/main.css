@@ -256,6 +256,9 @@ figcaption, .lightbox-caption, .thumbcaption {
 .bw-ss__list--loading {
     background: #c0c0c0;
 }
+.bw-ss__input {
+    width: 100%; /* magically makes it fit the available space */
+}
 .bw-ss__input--accepted {
     background: #fffbc0;
 }
