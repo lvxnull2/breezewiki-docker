@@ -51,7 +51,8 @@
     [(regexp-match? #rx"(?i:^video/)" content-type) `(video (@ (src ,maybe-proxied-url) (controls)))]
     [else `""]))
 
-(define (generate-results-page #:source-url source-url
+(define (generate-results-page #:req req
+                               #:source-url source-url
                                #:wikiname wikiname
                                #:title title
                                #:media-detail media-detail
@@ -68,6 +69,7 @@
   (define maybe-proxied-raw-image-url
     (if (config-true? 'strict_proxy) (u-proxy-url raw-image-url) raw-image-url))
   (generate-wiki-page
+   #:req req
    #:source-url source-url
    #:wikiname wikiname
    #:title title
@@ -125,7 +127,8 @@
                          #f
                          (url-content-type (jp "/imageUrl" media-detail))))
                    (define body
-                     (generate-results-page #:source-url source-url
+                     (generate-results-page #:req req
+                                            #:source-url source-url
                                             #:wikiname wikiname
                                             #:title title
                                             #:media-detail media-detail

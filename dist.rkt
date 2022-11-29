@@ -11,6 +11,7 @@
 (require (only-in "src/page-proxy.rkt" page-proxy))
 (require (only-in "src/page-redirect-wiki-home.rkt" redirect-wiki-home))
 (require (only-in "src/page-search.rkt" page-search))
+(require (only-in "src/page-set-user-settings.rkt" page-set-user-settings))
 (require (only-in "src/page-static.rkt" static-dispatcher))
 (require (only-in "src/page-subdomain.rkt" subdomain-dispatcher))
 (require (only-in "src/page-wiki.rkt" page-wiki))
@@ -29,6 +30,7 @@
     page-not-found
     page-proxy
     page-search
+    page-set-user-settings
     page-wiki
     page-file
     redirect-wiki-home

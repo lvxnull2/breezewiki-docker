@@ -276,6 +276,7 @@
 
 (define (page-wiki req)
   (define wikiname (path/param-path (first (url-path (request-uri req)))))
+  (define user-cookies (user-cookies-getter req))
   (define origin (format "https://~a.fandom.com" wikiname))
   (define path (string-join (map path/param-path (cddr (url-path (request-uri req)))) "/"))
   (define source-url (format "https://~a.fandom.com/wiki/~a" wikiname path))
@@ -290,7 +291,9 @@
                                          ("formatversion" . "2")
                                          ("format" . "json")))))
               (log-outgoing dest-url)
-              (easy:get dest-url #:timeouts timeouts)]
+              (easy:get dest-url
+                        #:timeouts timeouts
+                        #:headers `#hasheq((cookie . ,(format "theme=~a" (user-cookies^-theme user-cookies)))))]
     [siteinfo (siteinfo-fetch wikiname)])
 
    (cond
@@ -307,6 +310,7 @@
              (define body
                (generate-wiki-page
                 (update-tree-wiki page wikiname)
+                #:req req
                 #:source-url source-url
                 #:wikiname wikiname
                 #:title title
@@ -317,9 +321,9 @@
                (build-headers
                 always-headers
                 (when redirect-msg
-                    (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
-                           [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
-                      (header #"Refresh" value)))))
+                  (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
+                         [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
+                    (header #"Refresh" value)))))
              (when (config-true? 'debug)
                ; used for its side effects
                ; convert to string with error checking, error will be raised if xexp is invalid

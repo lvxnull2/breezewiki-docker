@@ -1,6 +1,9 @@
 #lang racket/base
 (require racket/list
          racket/match
+         web-server/http/request-structs
+         net/url-string
+         (only-in net/cookies/server cookie-header->alist cookie->set-cookie-header make-cookie)
          (prefix-in easy: net/http-easy)
          memo
          "static-data.rkt"
@@ -11,11 +14,16 @@
  (struct-out siteinfo^)
  (struct-out license^)
  (struct-out head-data^)
+ (struct-out user-cookies^)
  siteinfo-fetch
  siteinfo-default
  license-default
  head-data-getter
- head-data-default)
+ head-data-default
+ user-cookies-getter
+ user-cookies-default
+ user-cookies-setter
+ user-cookies-setter-url)
 
 (struct siteinfo^ (sitename basepage license) #:transparent)
 (struct license^ (text url) #:transparent)
@@ -61,3 +69,27 @@
       (set! this-data data))
     ;; then no matter what, return the best information we have so far
     this-data))
+
+(struct user-cookies^ (theme) #:prefab)
+(define user-cookies-default (user-cookies^ 'default))
+(define (user-cookies-getter req)
+  (define cookie-header (headers-assq* #"cookie" (request-headers/raw req)))
+  (define cookies-alist (if cookie-header (cookie-header->alist (header-value cookie-header) bytes->string/utf-8) null))
+  (define cookies-hash
+    (for/hasheq ([pair cookies-alist])
+      (match pair
+        [(cons "theme" (and theme (or "light" "dark" "default")))
+         (values 'theme (string->symbol theme))]
+        [_ (values #f #f)])))
+  (user-cookies^
+   (hash-ref cookies-hash 'theme (user-cookies^-theme user-cookies-default))))
+
+(define (user-cookies-setter user-cookies)
+  (map (λ (c) (header #"Set-Cookie" (cookie->set-cookie-header c)))
+       (list (make-cookie "theme" (symbol->string (user-cookies^-theme user-cookies))
+                          #:path "/"
+                          #:max-age (* 60 60 24 365 10)))))
+
+(define (user-cookies-setter-url req new-settings)
+  (format "/set-user-settings?~a"  (params->query `(("ref" . ,(url->string (request-uri req)))
+                                                    ("new_settings" . ,(format "~a" new-settings))))))

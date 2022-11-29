@@ -51,7 +51,7 @@ p {
 .custom-top {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
 }
 .page-title {
@@ -227,6 +227,7 @@ figcaption, .lightbox-caption, .thumbcaption {
     display: grid;
     grid-template-columns: auto 1fr;
     grid-gap: 0px 5px;
+    align-items: baseline;
 }
 .bw-ss__container {
     grid-column: 2;
@@ -280,6 +281,47 @@ figcaption, .lightbox-caption, .thumbcaption {
     cursor: pointer;
     padding: 0px 2px;
     text-align: left;
+}
+
+/* (breezewiki) theme selector */
+.bw-theme__select {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 0px 5px;
+    justify-content: right;
+    align-items: baseline;
+    margin-top: 4px;
+}
+.bw-theme__items {
+    display: flex;
+}
+.bw-theme__item {
+    display: flex;
+    align-items: baseline;
+    padding: 2px;
+    border: 1px solid var(--theme-border-color);
+    border-right-width: 0px;
+    background-color: var(--custom-table-background);
+    color: var(--theme-page-text-color);
+    transition: none;
+}
+.bw-theme__item:hover, .bw-theme__item:focus {
+    /* background-color: var(--theme-page-background-color); */
+    color: var(--theme-accent-color);
+}
+.bw-theme__item:first-child {
+    border-radius: 4px 0px 0px 4px;
+}
+.bw-theme__item:last-child {
+    border-radius: 0px 4px 4px 0px;
+    border-right-width: 1px;
+}
+.bw-theme__item--selected, .bw-theme__item--selected:hover, .bw-theme__item--selected:focus {
+    background-color: var(--theme-accent-color);
+    color: var(--theme-accent-label-color);
+}
+.bw-theme__icon-container svg {
+    vertical-align: middle;
 }
 
 /* nintendo independent wiki alliance notice */

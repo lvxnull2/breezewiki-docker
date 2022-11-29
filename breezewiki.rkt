@@ -17,6 +17,7 @@
 (require-reloadable "src/page-proxy.rkt" page-proxy)
 (require-reloadable "src/page-redirect-wiki-home.rkt" redirect-wiki-home)
 (require-reloadable "src/page-search.rkt" page-search)
+(require-reloadable "src/page-set-user-settings.rkt" page-set-user-settings)
 (require-reloadable "src/page-static.rkt" static-dispatcher)
 (require-reloadable "src/page-subdomain.rkt" subdomain-dispatcher)
 (require-reloadable "src/page-wiki.rkt" page-wiki)
@@ -40,6 +41,7 @@
       page-not-found
       page-proxy
       page-search
+      page-set-user-settings
       page-wiki
       page-file
       redirect-wiki-home

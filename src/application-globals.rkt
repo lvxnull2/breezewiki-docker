@@ -1,8 +1,10 @@
 #lang racket/base
-(require racket/list
+(require racket/file
+         racket/list
          racket/string
          json
          (prefix-in easy: net/http-easy)
+         html-parsing
          html-writing
          web-server/http
          "config.rkt"
@@ -33,6 +35,11 @@
   (list (header #"Referrer-Policy" #"same-origin") ; header to not send referers to fandom
         (header #"Link" (string->bytes/latin-1 link-header))))
 (define timeouts (easy:make-timeout-config #:lease 5 #:connect 5))
+
+(define theme-icons
+  (for/hasheq ([theme '(default light dark)])
+    (values theme
+            (html->xexp (file->string (format "static/icon-theme-~a.svg" theme) #:mode 'binary)))))
 
 (define (application-footer source-url #:license [license-in #f])
   (define license (or license-in license-default))
@@ -98,24 +105,27 @@
 
 (define (generate-wiki-page
          content
+         #:req req
          #:source-url source-url
          #:wikiname wikiname
          #:title title
          #:head-data [head-data-in #f]
-         #:siteinfo [siteinfo-in #f])
+         #:siteinfo [siteinfo-in #f]
+         #:user-cookies [user-cookies-in #f])
   (define siteinfo (or siteinfo-in siteinfo-default))
   (define head-data (or head-data-in ((head-data-getter wikiname))))
+  (define user-cookies (or user-cookies-in (user-cookies-getter req)))
   (define (required-styles origin)
     (map (λ (dest-path)
            (define url (format dest-path origin))
            (if (config-true? 'strict_proxy)
                (u-proxy-url url)
                url))
-         '(#;"~a/load.php?lang=en&modules=skin.fandomdesktop.styles&only=styles&skin=fandomdesktop"
+         `(#;"~a/load.php?lang=en&modules=skin.fandomdesktop.styles&only=styles&skin=fandomdesktop"
            #;"~a/load.php?lang=en&modules=ext.gadget.dungeonsWiki%2CearthWiki%2Csite-styles%2Csound-styles&only=styles&skin=fandomdesktop"
            #;"~a/load.php?lang=en&modules=site.styles&only=styles&skin=fandomdesktop"
            ; combine the above entries into a single request for potentially extra speed - fandom.com doesn't even do this!
-           "~a/wikia.php?controller=ThemeApi&method=themeVariables"
+           ,(format "~~a/wikia.php?controller=ThemeApi&method=themeVariables&variant=~a" (user-cookies^-theme user-cookies))
            "~a/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop")))
   `(*TOP*
     (*DECL* DOCTYPE html)
@@ -155,7 +165,22 @@
                                            (label (@ (for "bw-search-input")) "Search ")
                                            (div (@ (id "bw-pr-search-input"))
                                                 (input (@ (type "text") (name "q") (id "bw-search-input") (autocomplete "off"))))
-                                           (div (@ (class "bw-ss__container") (id "bw-pr-search-suggestions"))))))
+                                           (div (@ (class "bw-ss__container") (id "bw-pr-search-suggestions"))))
+                                     (div (@ (class "bw-theme__select"))
+                                          (span (@ (class "bw-theme__main-label")) "Page theme")
+                                          (div (@ (class "bw-theme__items"))
+                                           ,@(for/list ([theme '(default light dark)])
+                                               (define class
+                                                 (if (equal? theme (user-cookies^-theme user-cookies))
+                                                     "bw-theme__item bw-theme__item--selected"
+                                                     "bw-theme__item"))
+                                               `(a (@ (href ,(user-cookies-setter-url
+                                                              req
+                                                              (struct-copy user-cookies^ user-cookies
+                                                                           [theme theme]))) (class ,class))
+                                                   (div (@ (class "bw-theme__icon-container"))
+                                                    ,(hash-ref theme-icons theme))
+                                                   ,(format "~a" theme)))))))
                            (div (@ (id "content") #;(class "page-content"))
                                 (div (@ (id "mw-content-text"))
                                      ,content))
@@ -179,11 +204,11 @@
                                  page))))
                "/proxy?dest=https%3A%2F%2Ftest.fandom.com")))
 
-(define (generate-redirect dest)
+(define (generate-redirect dest #:headers [headers-in '()])
   (define dest-bytes (string->bytes/utf-8 dest))
   (response/output
    #:code 302
-   #:headers (list (header #"Location" dest-bytes))
+   #:headers (append (list (header #"Location" dest-bytes)) headers-in)
    (λ (out)
      (write-html
       `(html
