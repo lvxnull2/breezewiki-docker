@@ -1,6 +1,7 @@
 #lang racket/base
 (require racket/file
          racket/list
+         racket/runtime-path
          racket/string
          json
          (prefix-in easy: net/http-easy)
@@ -29,17 +30,19 @@
 
 (module+ test
   (require rackunit
-           html-writing))
+           html-writing
+           "test-utils.rkt"))
 
 (define always-headers
   (list (header #"Referrer-Policy" #"same-origin") ; header to not send referers to fandom
         (header #"Link" (string->bytes/latin-1 link-header))))
 (define timeouts (easy:make-timeout-config #:lease 5 #:connect 5))
 
+(define-runtime-path path-static "../static")
 (define theme-icons
   (for/hasheq ([theme '(default light dark)])
     (values theme
-            (html->xexp (file->string (format "static/icon-theme-~a.svg" theme) #:mode 'binary)))))
+            (html->xexp (file->string (build-path path-static (format "icon-theme-~a.svg" theme)) #:mode 'binary)))))
 
 (define (application-footer source-url #:license [license-in #f])
   (define license (or license-in license-default))
@@ -190,6 +193,7 @@
     (parameterize ([(config-parameter 'strict_proxy) "true"])
       (generate-wiki-page
        '(template)
+       #:req test-req
        #:source-url ""
        #:title "test"
        #:wikiname "test")))

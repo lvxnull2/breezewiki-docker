@@ -24,7 +24,8 @@
  page-category)
 
 (module+ test
-  (require rackunit)
+  (require rackunit
+           "test-utils.rkt")
   (define category-json-data
     '#hasheq((batchcomplete . #t) (continue . #hasheq((cmcontinue . "page|4150504c45|41473") (continue . "-||"))) (query . #hasheq((categorymembers . (#hasheq((ns . 0) (pageid . 25049) (title . "Item (entity)")) #hasheq((ns . 0) (pageid . 128911) (title . "3D")) #hasheq((ns . 0) (pageid . 124018) (title . "A Very Fine Item")) #hasheq((ns . 0) (pageid . 142208) (title . "Amethyst Shard")) #hasheq((ns . 0) (pageid . 121612) (title . "Ankle Monitor")))))))))
 
@@ -119,6 +120,7 @@
 (module+ test
   (check-not-false ((query-selector (attribute-selector 'href "/test/wiki/Ankle_Monitor")
                                     (generate-results-page
+                                     #:req test-req
                                      #:source-url ""
                                      #:wikiname "test"
                                      #:title "Category:Items"

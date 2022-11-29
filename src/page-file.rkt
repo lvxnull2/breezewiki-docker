@@ -23,7 +23,8 @@
 (provide page-file)
 
 (module+ test
-  (require rackunit)
+  (require rackunit
+           "test-utils.rkt")
   (define test-media-detail
     '#hasheq((fileTitle . "Example file")
              (videoEmbedCode . "")
@@ -162,7 +163,8 @@
     (check-not-false
      ((query-selector
        (attribute-selector 'src "/proxy?dest=https%3A%2F%2Fstatic.wikia.nocookie.net%2Fexamplefile")
-       (generate-results-page #:source-url ""
+       (generate-results-page #:req test-req
+                              #:source-url ""
                               #:wikiname "test"
                               #:title "File:Example file"
                               #:media-detail test-media-detail

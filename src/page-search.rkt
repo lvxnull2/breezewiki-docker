@@ -21,7 +21,8 @@
  page-search)
 
 (module+ test
-  (require rackunit)
+  (require rackunit
+           "test-utils.rkt")
   (define search-json-data
     '#hasheq((batchcomplete . #t) (query . #hasheq((search . (#hasheq((ns . 0) (pageid . 219) (size . 1482) (snippet . "") (timestamp . "2022-08-21T08:54:23Z") (title . "Gacha Capsule") (wordcount . 214)) #hasheq((ns . 0) (pageid . 201) (size . 1198) (snippet . "") (timestamp . "2022-07-11T17:52:47Z") (title . "Badges") (wordcount . 181)))))))))
 
@@ -87,4 +88,4 @@
        (write-html body out))))))
 (module+ test
   (check-not-false ((query-selector (attribute-selector 'href "/test/wiki/Gacha_Capsule")
-                                    (generate-results-page "" "test" "Gacha" search-json-data)))))
+                                    (generate-results-page test-req "" "test" "Gacha" search-json-data)))))
