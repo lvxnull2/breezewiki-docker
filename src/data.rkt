@@ -91,5 +91,5 @@
                           #:max-age (* 60 60 24 365 10)))))
 
 (define (user-cookies-setter-url req new-settings)
-  (format "/set-user-settings?~a"  (params->query `(("ref" . ,(url->string (request-uri req)))
+  (format "/set-user-settings?~a"  (params->query `(("next_location" . ,(url->string (request-uri req)))
                                                     ("new_settings" . ,(format "~a" new-settings))))))
