@@ -69,7 +69,7 @@
                      `(div (p "This page displays proxied content from "
                               (a (@ (href ,source-url) (rel "nofollow noreferrer")) ,source-url)
                               ,(format ". Text content is available under the ~a license, " (license^-text license))
-                              (a (@ (href ,(license^-url license))) "see license info.")
+                              (a (@ (href ,(license^-url license)) (rel "nofollow")) "see license info.")
                               " Media files may have different copying restrictions.")
                            (p ,(format "Fandom is a trademark of Fandom, Inc. ~a is not affiliated with Fandom." (config-get 'application_name))))
                      `(div (p "Text content on wikis run by Fandom is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported), "
