@@ -16,9 +16,10 @@
          "config.rkt"
          "data.rkt"
          "page-wiki.rkt"
-         "syntax.rkt"
-         "url-utils.rkt"
-         "xexpr-utils.rkt")
+         "../lib/syntax.rkt"
+         "../lib/url-utils.rkt"
+         "whole-utils.rkt"
+         "../lib/xexpr-utils.rkt")
 
 (provide
  page-category)

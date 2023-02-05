@@ -1,16 +1,17 @@
 #lang racket/base
-(require "syntax.rkt"
+(require "../lib/syntax.rkt"
          (for-syntax racket/base)
          racket/string
          net/url
          web-server/http
+         web-server/dispatchers/dispatch
          (prefix-in host: web-server/dispatchers/dispatch-host)
          (prefix-in pathprocedure: web-server/dispatchers/dispatch-pathprocedure)
          (prefix-in sequencer: web-server/dispatchers/dispatch-sequencer)
          (prefix-in lift: web-server/dispatchers/dispatch-lift)
          (prefix-in filter: web-server/dispatchers/dispatch-filter)
          "config.rkt"
-         "url-utils.rkt")
+         "../lib/url-utils.rkt")
 
 (provide
  ; syntax to make the hashmap from names
@@ -43,8 +44,14 @@
    (pathprocedure:make "/buddyfight/wiki/It_Doesn't_Work!!" (hash-ref ds 'page-it-works))
    (filter:make (pregexp (format "^/~a/wiki/Category:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-category)))
    (filter:make (pregexp (format "^/~a/wiki/File:.+$" px-wikiname)) (lift:make (hash-ref ds 'page-file)))
+   (if (config-true? 'feature_offline::enabled)
+       (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-wiki-offline)))
+       (λ (_conn _req) (next-dispatcher)))
    (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-wiki)))
    (filter:make (pregexp (format "^/~a/search$" px-wikiname)) (lift:make (hash-ref ds 'page-search)))
    (filter:make (pregexp (format "^/~a(/(wiki(/)?)?)?$" px-wikiname)) (lift:make (hash-ref ds 'redirect-wiki-home)))
+   (if (config-true? 'feature_offline::enabled)
+       (filter:make (pregexp (format "^/archive/~a/(styles|images)/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-static-archive)))
+       (λ (_conn _req) (next-dispatcher)))
    (hash-ref ds 'static-dispatcher)
    (lift:make (hash-ref ds 'page-not-found))))

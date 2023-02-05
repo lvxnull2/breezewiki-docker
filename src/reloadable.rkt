@@ -3,6 +3,7 @@
 ;;; Source: https://github.com/tonyg/racket-reloadable/blob/master/reloadable/main.rkt
 ;;; Source commit: cae2a14 from 24 May 2015
 ;;; Source license: LGPL 3 or later
+;;; Further modifications by Cadence as seen in this repo's git history.
 
 (provide (struct-out reloadable-entry-point)
          reload-poll-interval
@@ -19,8 +20,8 @@
 (require racket/match)
 (require racket/rerequire)
 
-(define reload-poll-interval 0.5) ;; seconds
-(define reload-failure-retry-delay (make-parameter 5)) ;; seconds
+(define reload-poll-interval 0.5) ; seconds
+(define reload-failure-retry-delay (make-parameter 5)) ; seconds
 
 (struct reloadable-entry-point (name
                                 module-path

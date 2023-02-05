@@ -7,7 +7,7 @@
          ; libs
          (prefix-in easy: net/http-easy)
          ; html libs
-         html-parsing
+         "../lib/html-parsing/main.rkt"
          html-writing
          ; web server libs
          net/url
@@ -17,11 +17,12 @@
          "application-globals.rkt"
          "config.rkt"
          "data.rkt"
-         "pure-utils.rkt"
-         "syntax.rkt"
-         "tree-updater.rkt"
-         "xexpr-utils.rkt"
-         "url-utils.rkt")
+         "../lib/pure-utils.rkt"
+         "../lib/syntax.rkt"
+         "../lib/tree-updater.rkt"
+         "../lib/url-utils.rkt"
+         "whole-utils.rkt"
+         "../lib/xexpr-utils.rkt")
 
 (provide
  ; used by the web server
@@ -32,24 +33,6 @@
 
 (module+ test
   (require rackunit))
-
-(define (preprocess-html-wiki html)
-  (define ((rr* find replace) contents)
-    (regexp-replace* find contents replace))
-  ((compose1
-    ; fix navbox list nesting
-    ; navbox on right of page has incorrect html "<td ...><li>" and the xexpr parser puts the <li> much further up the tree
-    ; add a <ul> to make the parser happy
-    ; usage: /fallout/wiki/Fallout:_New_Vegas_achievements_and_trophies
-    (rr* #rx"(<td[^>]*>\n?)(<li>)" "\\1<ul>\\2")
-    ; change <figcaption><p> to <figcaption><span> to make the parser happy
-    (rr* #rx"(<figcaption[^>]*>)[ \t]*<p class=\"caption\">([^<]*)</p>" "\\1<span class=\"caption\">\\2</span>"))
-   html))
-(module+ test
-  (check-equal? (preprocess-html-wiki "<td class=\"va-navbox-column\" style=\"width: 33%\">\n<li>Hey</li>")
-                "<td class=\"va-navbox-column\" style=\"width: 33%\">\n<ul><li>Hey</li>")
-  (check-equal? (preprocess-html-wiki "<figure class=\"thumb tright\" style=\"width: 150px\"><a class=\"image\"><img></a><noscript><a><img></a></noscript><figcaption class=\"thumbcaption\"> 	<p class=\"caption\">Caption text.</p></figcaption></figure>")
-                "<figure class=\"thumb tright\" style=\"width: 150px\"><a class=\"image\"><img></a><noscript><a><img></a></noscript><figcaption class=\"thumbcaption\"><span class=\"caption\">Caption text.</span></figcaption></figure>"))
 
 (define (page-wiki req)
   (define wikiname (path/param-path (first (url-path (request-uri req)))))

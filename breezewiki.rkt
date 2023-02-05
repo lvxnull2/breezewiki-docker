@@ -19,8 +19,10 @@
 (require-reloadable "src/page-search.rkt" page-search)
 (require-reloadable "src/page-set-user-settings.rkt" page-set-user-settings)
 (require-reloadable "src/page-static.rkt" static-dispatcher)
+(require-reloadable "src/page-static-archive.rkt" page-static-archive)
 (require-reloadable "src/page-subdomain.rkt" subdomain-dispatcher)
 (require-reloadable "src/page-wiki.rkt" page-wiki)
+(require-reloadable "src/page-wiki-offline.rkt" page-wiki-offline)
 (require-reloadable "src/page-file.rkt" page-file)
 
 (reload!)
@@ -42,7 +44,9 @@
       page-proxy
       page-search
       page-set-user-settings
+      page-static-archive
       page-wiki
+      page-wiki-offline
       page-file
       redirect-wiki-home
       static-dispatcher

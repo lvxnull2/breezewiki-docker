@@ -8,13 +8,16 @@
          html-parsing
          html-writing
          web-server/http
+         web-server/http/bindings
          "config.rkt"
          "data.rkt"
-         "niwa-data.rkt"
+         "extwiki-data.rkt"
+         "extwiki-generic.rkt"
          "static-data.rkt"
-         "pure-utils.rkt"
-         "xexpr-utils.rkt"
-         "url-utils.rkt")
+         "../lib/syntax.rkt"
+         "../lib/pure-utils.rkt"
+         "../lib/xexpr-utils.rkt"
+         "../lib/url-utils.rkt")
 
 (provide
  ; headers to always send on all http responses
@@ -79,32 +82,69 @@
 
 ;; generate a notice with a link if a fandom wiki has a replacement as part of NIWA or similar
 ;; if the wiki has no replacement, display nothing
-(define (niwa-notice wikiname title)
-  (define ind (findf (λ (item) (member wikiname (first item))) niwa-data))
-  (if ind
-      (let* ([search-page (format "/Special:Search?~a"
-                                  (params->query `(("search" . ,title)
-                                                   ("go" . "Go"))))]
-             [go (if (string-suffix? (third ind) "/")
-                     (regexp-replace #rx"/$" (third ind) (λ (_) search-page))
-                     (let* ([joiner (second (regexp-match #rx"/(w[^./]*)/" (third ind)))])
-                       (regexp-replace #rx"/w[^./]*/.*$" (third ind) (λ (_) (format "/~a~a" joiner search-page)))))])
-        `(aside (@ (class "niwa__notice"))
-                (h1 (@ (class "niwa__header")) ,(second ind) " has its own website separate from Fandom.")
-                (a (@ (class "niwa__go") (href ,go)) "Read " ,title " on " ,(second ind) " →")
-                (div (@ (class "niwa__cols"))
-                     (div (@ (class "niwa__left"))
-                          (p "Most major Nintendo wikis are part of the "
-                             (a (@ (href "https://www.niwanetwork.org/about/")) "Nintendo Independent Wiki Alliance")
-                             " and have their own wikis off Fandom. You can help this wiki by "
-                             (a (@ (href ,go)) "visiting it directly."))
-                          (p ,(fifth ind))
-                          (div (@ (class "niwa__divider")))
-                          (p "Why are you seeing this message? Fandom refuses to delete or archive their copy of this wiki, so that means their pages will appear high up in search results. Fandom hopes to get clicks from readers who don't know any better.")
-                          (p (@ (class "niwa__feedback")) "This notice brought to you by BreezeWiki / " (a (@ (href "https://www.kotaku.com.au/2022/10/massive-zelda-wiki-reclaims-independence-six-months-before-tears-of-the-kingdom/")) "Info & Context") " / " (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "Feedback?")))
-                     (div (@ (class "niwa__right"))
-                          (img (@ (class "niwa__logo") (src ,(format "https://www.niwanetwork.org~a" (fourth ind)))))))))
-      ""))
+(define (extwiki-notice wikiname title)
+  (define xt (findf (λ (item) (member wikiname (extwiki^-wikinames item))) extwikis))
+  (cond/var
+   [xt
+    (let* ([group (hash-ref extwiki-groups (extwiki^-group xt))]
+           [search-page (format "/Special:Search?~a"
+                                (params->query `(("search" . ,title)
+                                                 ("go" . "Go"))))]
+           [go (if (string-suffix? (extwiki^-home xt) "/")
+                   (regexp-replace #rx"/$" (extwiki^-home xt) (λ (_) search-page))
+                   (let* ([joiner (second (regexp-match #rx"/(w[^./]*)/" (extwiki^-home xt)))])
+                     (regexp-replace #rx"/w[^./]*/.*$" (extwiki^-home xt) (λ (_) (format "/~a~a" joiner search-page)))))]
+           [props (extwiki-props^ go)])
+      (cond
+        [(eq? (extwiki^-banner xt) 'default)
+         `(aside (@ (class "niwa__notice"))
+                 (h1 (@ (class "niwa__header")) ,(extwiki^-name xt) " has its own website separate from Fandom.")
+                 (a (@ (class "niwa__go") (href ,go)) "Read " ,title " on " ,(extwiki^-name xt) " →")
+                 (div (@ (class "niwa__cols"))
+                      (div (@ (class "niwa__left"))
+                           (p ,((extwiki-group^-description group) props))
+                           (p ,((extwiki^-description xt) props))
+                           (p "This wiki's core community has wholly migrated away from Fandom. You should "
+                              (a (@ (href ,go)) "go to " ,(extwiki^-name xt) " now!"))
+                           (p (@ (class "niwa__feedback"))
+                              ,@(add-between
+                                 `(,@(for/list ([link (extwiki-group^-links group)])
+                                       `(a (@ (href ,(cdr link))) ,(car link)))
+                                   "This notice is from BreezeWiki"
+                                   (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "Feedback?"))
+                                 " / ")))
+                      (div (@ (class "niwa__right"))
+                           (img (@ (class "niwa__logo") (src ,(extwiki^-logo xt)))))))]
+        [(eq? (extwiki^-banner xt) 'parallel)
+         `(aside (@ (class "niwa__parallel"))
+                 (h1 (@ (class "niwa__header-mini"))
+                     "See also "
+                     (a (@ (href ,go)) ,(extwiki^-name xt)))
+                 (p "This topic has multiple communities of editors, some active on the Fandom wiki, others active on " ,(extwiki^-name xt) ".")
+                 (p "For thorough research, be sure to check both communities since they may have different information!")
+                 (p (@ (class "niwa__feedback"))
+                    ,@(add-between
+                       `(,@(for/list ([link (extwiki-group^-links group)])
+                             `(a (@ (href ,(cdr link))) ,(car link)))
+                         "This notice is from BreezeWiki"
+                         (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "Feedback?"))
+                       " / ")))]
+        [(eq? (extwiki^-banner xt) 'empty)
+         `(aside (@ (class "niwa__notice niwa__notice--alt"))
+                 (h1 (@ (class "niwa__header")) "You will be redirected to " ,(extwiki^-name xt) ".")
+                 (p (@ (style "position: relative; top: -12px;")) "This independent wiki community has its own site separate from Fandom.")
+                 (a (@ (class "niwa__go") (href ,go)) "Take me there! →")
+
+                 (p (@ (class "niwa__feedback") (style "text-align: left"))
+                    ,@(add-between
+                       `(,@(for/list ([link (extwiki-group^-links group)])
+                             `(a (@ (href ,(cdr link))) ,(car link)))
+                         "This notice is from BreezeWiki")
+                       " / ")))]))]
+   (var fetched-callback (get-redirect-content wikiname))
+   [fetched-callback
+    (fetched-callback title)]
+   [#t ""]))
 
 (define (generate-wiki-page
          content
@@ -114,22 +154,26 @@
          #:title title
          #:head-data [head-data-in #f]
          #:siteinfo [siteinfo-in #f]
-         #:user-cookies [user-cookies-in #f])
+         #:user-cookies [user-cookies-in #f]
+         #:online-styles [online-styles #t])
   (define siteinfo (or siteinfo-in siteinfo-default))
   (define head-data (or head-data-in ((head-data-getter wikiname))))
   (define user-cookies (or user-cookies-in (user-cookies-getter req)))
-  (define (required-styles origin)
-    (map (λ (dest-path)
-           (define url (format dest-path origin))
-           (if (config-true? 'strict_proxy)
-               (u-proxy-url url)
-               url))
-         `(#;"~a/load.php?lang=en&modules=skin.fandomdesktop.styles&only=styles&skin=fandomdesktop"
-           #;"~a/load.php?lang=en&modules=ext.gadget.dungeonsWiki%2CearthWiki%2Csite-styles%2Csound-styles&only=styles&skin=fandomdesktop"
-           #;"~a/load.php?lang=en&modules=site.styles&only=styles&skin=fandomdesktop"
-           ; combine the above entries into a single request for potentially extra speed - fandom.com doesn't even do this!
-           ,(format "~~a/wikia.php?controller=ThemeApi&method=themeVariables&variant=~a" (user-cookies^-theme user-cookies))
-           "~a/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop")))
+  (define origin (format "https://~a.fandom.com" wikiname))
+  (define required-styles
+    (cond
+      [online-styles
+       (define styles
+         (list
+          (format "~a/wikia.php?controller=ThemeApi&method=themeVariables&variant=~a" origin (user-cookies^-theme user-cookies))
+          (format "~a/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop" origin)))
+       (if (config-true? 'strict_proxy)
+           (map u-proxy-url styles)
+           styles)]
+      [#t
+       (list
+        (format "/archive/~a/styles/themeVariables-~a.css" wikiname (user-cookies^-theme user-cookies))
+        (format "/archive/~a/styles/site.css" wikiname))]))
   `(*TOP*
     (*DECL* DOCTYPE html)
     (html
@@ -141,7 +185,7 @@
                       (config-get 'application_name)))
       ,@(map (λ (url)
                `(link (@ (rel "stylesheet") (type "text/css") (href ,url))))
-             (required-styles (format "https://~a.fandom.com" wikiname)))
+             required-styles)
       (link (@ (rel "stylesheet") (type "text/css") (href ,(get-static-url "main.css"))))
       (script "const BWData = "
               ,(jsexpr->string (hasheq 'wikiname wikiname
@@ -154,11 +198,25 @@
                                       (λ (v) (u-proxy-url v))
                                       (head-data^-icon-url head-data))))))
      (body (@ (class ,(head-data^-body-class head-data)))
+           ,(if (config-true? 'instance_is_official)
+                (let ([balloon '(img (@ (src "/static/three-balloons.png") (class "bw-balloon") (title "Image Source: pngimg.com/image/4955 | License: CC BY-NC 4.0 | Modifications: Resized") (width "52") (height "56")))]
+                      [extension-eligible? (and req (assq 'user-agent (request-headers req)) (string-contains? (string-downcase (cdr (assq 'user-agent (request-headers req)))) "firefox/"))])
+                  `(div (@ (class "bw-top-banner"))
+                         ,balloon
+                         (div
+                          "BreezeWiki is back! Most major wikis are available.\n"
+                          ,(if extension-eligible?
+                               '(div (@ (class "bw-top-banner-rainbow"))
+                                     "Try " (a (@ (href "https://addons.mozilla.org/en-GB/firefox/addon/indie-wiki-buddy/")) "our affiliated browser extension") " - redirect to BreezeWiki automatically!\n")
+                               "")
+                          "As always, " (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "please go here") " to report problems, suggest features, or talk about the project.")
+                         ,balloon))
+                "")
            (div (@ (class "main-container"))
                 (div (@ (class "fandom-community-header__background tileHorizontally header")))
                 (div (@ (class "page"))
                      (main (@ (class "page__main"))
-                           ,(niwa-notice wikiname title)
+                           ,(extwiki-notice wikiname title)
                            (div (@ (class "custom-top"))
                                 (h1 (@ (class "page-title")) ,title)
                                 (nav (@ (class "sitesearch"))
@@ -172,18 +230,18 @@
                                      (div (@ (class "bw-theme__select"))
                                           (span (@ (class "bw-theme__main-label")) "Page theme")
                                           (div (@ (class "bw-theme__items"))
-                                           ,@(for/list ([theme '(default light dark)])
-                                               (define class
-                                                 (if (equal? theme (user-cookies^-theme user-cookies))
-                                                     "bw-theme__item bw-theme__item--selected"
-                                                     "bw-theme__item"))
-                                               `(a (@ (href ,(user-cookies-setter-url
-                                                              req
-                                                              (struct-copy user-cookies^ user-cookies
-                                                                           [theme theme]))) (class ,class))
-                                                   (div (@ (class "bw-theme__icon-container"))
-                                                    ,(hash-ref theme-icons theme))
-                                                   ,(format "~a" theme)))))))
+                                               ,@(for/list ([theme '(default light dark)])
+                                                   (define class
+                                                     (if (equal? theme (user-cookies^-theme user-cookies))
+                                                         "bw-theme__item bw-theme__item--selected"
+                                                         "bw-theme__item"))
+                                                   `(a (@ (href ,(user-cookies-setter-url
+                                                                  req
+                                                                  (struct-copy user-cookies^ user-cookies
+                                                                               [theme theme]))) (class ,class))
+                                                       (div (@ (class "bw-theme__icon-container"))
+                                                            ,(hash-ref theme-icons theme))
+                                                       ,(format "~a" theme)))))))
                            (div (@ (id "content") #;(class "page-content"))
                                 (div (@ (id "mw-content-text"))
                                      ,content))

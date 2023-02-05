@@ -1,6 +1,5 @@
 #lang typed/racket/base
 (require racket/string
-         "config.rkt"
          "pure-utils.rkt")
 (require/typed web-server/http/request-structs
                [#:opaque Header header?])
@@ -10,12 +9,14 @@
  px-wikiname
  ; make a query string from an association list of strings
  params->query
+ ; custom percent encoding (you probably want params->query instead)
+ percent-encode
+ ; sets for custom percent encoding
+ path-set urlencoded-set filename-set
  ; make a proxied version of a fandom url
  u-proxy-url
  ; check whether a url is on a domain controlled by fandom
  is-fandom-url?
-  ; prints "out: <url>"
- log-outgoing
  ; pass in a header, headers, or something useless. they'll all combine into a list
  build-headers
  ; try to follow wikimedia's format for which characters should be encoded/replaced in page titles for the url
@@ -40,6 +41,8 @@
                           #\/ #\: #\= #\@ #\[ #\\ #\] #\^ #\| ; userinfo set
                           )
                         path-set))
+
+(define filename-set '(#\< #\> #\: #\" #\/ #\\ #\| #\? #\* #\# #\~ #\&))
 
 (: percent-encode (String (Listof Char) Boolean -> Bytes))
 (define (percent-encode value set space-as-plus)
@@ -86,11 +89,6 @@
    is-fandom-url?
    (λ ([v : String]) (string-append "/proxy?" (params->query `(("dest" . ,url)))))
    url))
-
-(: log-outgoing (String -> Void))
-(define (log-outgoing url-string)
-  (when (config-true? 'log_outgoing)
-    (printf "out: ~a~n" url-string)))
 
 (: build-headers ((U Header (Listof Header) False Void) * -> (Listof Header)))
 (define (build-headers . fs)

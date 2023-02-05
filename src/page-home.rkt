@@ -6,8 +6,8 @@
          "application-globals.rkt"
          "data.rkt"
          "static-data.rkt"
-         "url-utils.rkt"
-         "xexpr-utils.rkt"
+         "../lib/url-utils.rkt"
+         "../lib/xexpr-utils.rkt"
          "config.rkt")
 
 (provide
@@ -26,13 +26,16 @@
 (define content
   `((h2 "BreezeWiki makes wiki pages on Fandom readable")
     (p "It removes ads, videos, and suggested content, leaving you with a clean page that doesn't slow down your device or use up your data.")
-    (p "BreezeWiki can also be called an \"alternative frontend for Fandom\".")
     (p ,(format "To use BreezeWiki, just replace \"fandom.com\" with \"~a\", and you'll instantly be teleported to a better world."
                 (if (config-true? 'canonical_origin)
                     (url-host (string->url (config-get 'canonical_origin)))
                     "breezewiki.com")))
     (p "If you'd like to be automatically sent to BreezeWiki every time in the future, "
+       (a (@ (href "https://getindie.wiki")) "get our affiliated browser extension (NEW!)")
+       " or "
        (a (@ (href "https://docs.breezewiki.com/Automatic_Redirection.html")) "check out the tutorial in the manual."))
+    (p "BreezeWiki is available on several different websites called " (a (@ (href "https://en.wikipedia.org/wiki/Mirror_site")) "mirrors") ". Each is independently run. If one mirror is offline, the others still work. "
+       (a (@ (href "https://docs.breezewiki.com/Links.html#%28part._.Mirrors%29")) "See the list."))
     (h2 "Find a page")
     (form (@ (action "/search"))
           (label (@ (class "paired__label"))
@@ -50,7 +53,7 @@
             examples))
     (h2 "Testimonials")
     (p (@ (class "testimonial")) ">so glad someone introduced me to a F*ndom alternative (BreezeWiki) because that x-factorized spillway of an ad-infested radioactive dumpsite can go die in a fire —RB")
-    (p (@ (class "testimonial")) ">you are so right that fandom still sucks even with adblock somehow. even zapping all the stupid padding it still sucks —Minimus")
+    (p (@ (class "testimonial")) ">apparently there are thousands of people essentially running our company " (em "for free") " right now, creating tons of content, and we just put ads on top of it and they're not even employees. thousands of people we can't lay off. thousands! —" (a (@ (href "https://hard-drive.net/fandom-ceo-frustrated-its-impossible-to-lay-off-unpaid-users-who-update-wikias-for-fun/?utm_source=breezewiki") (target "_blank")) "Perkins Miller, Fandom CEO"))
     (p (@ (class "testimonial")) ">attempting to go to a wiki's forum page with breezewiki doesn't work, which is based honestly —Tom Skeleton")
     (p (@ (class "testimonial")) ">Fandom pages crashing and closing, taking forever to load and locking up as they load the ads on the site... they are causing the site to crash because they are trying to load video ads both at the top and bottom of the site as well as two or three banner ads, then a massive top of site ad and eventually my anti-virus shuts the whole site down because it's literally pulling more resources than WoW in ultra settings... —Anonymous")
     (p (@ (class "testimonial")) ">reblogs EXTREMELY appreciated I want that twink* (*fandom wiki) obliterated —footlong")

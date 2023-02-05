@@ -31,6 +31,8 @@ body.skin-fandomdesktop, button, input, textarea, .wikitable, .va-table {
     font-family: "Source Sans Pro", "Segoe UI", sans-serif;
     font-size: 18px;
     line-height: 1.5;
+    margin: 0;
+    padding: 0;
 }
 h1, h2, h3, h4, h5, h6 {
     margin: 1.2em 0 0.6em;
@@ -65,6 +67,25 @@ p {
 .paired__input {
     width: auto;
     max-width: 240px;
+}
+
+/* global top banner message */
+.bw-top-banner {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    background-color: #000;
+    color: #fff;
+    text-align: center;
+    white-space: pre-line;
+    padding: 8px;
+}
+.bw-top-banner a, .bw-top-banner a:visited {
+    color: #ffdd57;
+    text-decoration: underline;
+}
+.bw-top-banner-rainbow {
+    animation: bw-rainbow-color 1.6s linear infinite;
 }
 
 /* custom footer with source and license info */
@@ -338,8 +359,11 @@ figcaption, .lightbox-caption, .thumbcaption {
     border-radius: 6px;
     font-size: 18px;
 }
+.niwa__notice--alt {
+    background: #e5fdd8;
+}
 .niwa__header {
-    font-size: max(2.9vw, 26px);
+    font-size: max(2.75vw, 26px);
     margin-top: 0;
 }
 .niwa__notice a {
@@ -403,6 +427,10 @@ figcaption, .lightbox-caption, .thumbcaption {
     .niwa__right {
         display: none;
     }
+    /* remove balloons in top banner */
+    .bw-balloon {
+        display: none;
+    }
 }
 
 @media (min-width: 560px) { /* wider than 560 px */
@@ -417,6 +445,16 @@ figcaption, .lightbox-caption, .thumbcaption {
     [style*="width:calc(100%"] {
         width: auto !important;
         text-align: center !important;
+    }
+    /* make text content hit the edges of the screen (no space for the background) */
+    .page {
+        margin: 0;
+    }
+    .page__main {
+        background: linear-gradient(to bottom, rgba(var(--theme-page-background-color--rgb), 0), rgba(var(--theme-page-background-color--rgb), 1) 160px);
+    }
+    .page-title {
+        color: var(--theme-body-text-color);
     }
 }
 
@@ -455,4 +493,13 @@ figcaption, .lightbox-caption, .thumbcaption {
   font-weight: 700;
   font-display: swap;
   src: url("/static/source-sans-pro-v21-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-700italic.woff2") format("woff2");
+}
+
+@keyframes bw-rainbow-color {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        filter: hue-rotate(360deg);
+    }
 }

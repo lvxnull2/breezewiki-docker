@@ -5,7 +5,11 @@
  ; help make a nested if. if/in will gain the same false form of its containing if/out.
  if/out
  ; let, but the value for each variable is evaluated within a thread
- thread-let)
+ thread-let
+ ; cond, but values can be defined between conditions
+ cond/var
+ ; wrap sql statements into lambdas so they can be executed during migration
+ wrap-sql)
 
 (module+ test
   (require rackunit)
@@ -17,9 +21,12 @@
 ;; it's in a submodule so that it can be required in both levels, for testing
 
 (module transform racket/base
+  (require racket/list)
+
   (provide
    transform-if/out
-   transform-thread-let)
+   transform-thread-let
+   transform/out-cond/var)
 
   (define (transform-if/out stx)
     (define tree (cdr (syntax->datum stx))) ; condition true false
@@ -62,11 +69,45 @@
                      (define def (list-ref defs n))
                      `(,(car def) (channel-get (vector-ref chv ,n))))
                    counter)
-            ,@forms)))))
+          ,@forms))))
+
+  (define (transform/out-cond/var stx)
+    (define tree (transform-cond/var (cdr (syntax->datum stx))))
+    (datum->syntax
+     stx
+     tree))
+
+  (define (transform-cond/var tree)
+    (define-values (els temp) (splitf-at tree (λ (el) (and (pair? el) (not (eq? (car el) 'var))))))
+    (define-values (vars rest) (splitf-at temp (λ (el) (and (pair? el) (eq? (car el) 'var)))))
+    (if (null? rest)
+        `(cond ,@els)
+        `(cond
+          ,@els
+          [#t
+           (let ,(for/list ([var vars])
+                   (cdr var))
+             ,(transform-cond/var rest))]))))
 
 ;; the syntax definitions and their tests go below here
 
 (require 'transform (for-syntax 'transform))
+
+(define-syntax (wrap-sql stx)
+  ; the arguments
+  (define xs (cdr (syntax->list stx)))
+  ; wrap each argument
+  (define wrapped (map (λ (xe) ; xe is the syntax of an argument
+                         (if (list? (car (syntax->datum xe)))
+                             ; it's a list of lists (a list of sql migration steps)
+                             ; return instead syntax of a lambda that will call everything in xe
+                             (datum->syntax stx `(λ () ,@xe))
+                             ; it's just a single sql migration step
+                             ; return instead syntax of a lambda that will call xe
+                             (datum->syntax stx `(λ () ,xe))))
+                       xs))
+  ; since I'm returning *code*, I need to return the form (list ...) so that runtime makes a list
+  (datum->syntax stx `(list ,@wrapped)))
 
 (define-syntax (if/out stx)
   (transform-if/out stx))
@@ -106,3 +147,15 @@
   ; check that it assigns the correct value to the correct variable
   (check-equal? (thread-let ([a (sleep 0) 'a] [b 'b]) (list a b))
                 '(a b)))
+
+(define-syntax (cond/var stx)
+  (transform/out-cond/var stx))
+(module+ test
+  (check-syntax-equal? (transform/out-cond/var #'(cond/def [#f 0] (var d (* a 2)) [(eq? d 8) d] [#t "not 4"]))
+                       #'(cond
+                           [#f 0]
+                           [#t
+                            (let ([d (* a 2)])
+                              (cond
+                                [(eq? d 8) d]
+                                [#t "not 4"]))])))

@@ -2,11 +2,8 @@
 (require racket/function
          racket/pretty
          racket/runtime-path
-         racket/string)
-(require/typed ini
-  [#:opaque Ini ini?]
-  [read-ini (Input-Port -> Ini)]
-  [ini->hash (Ini -> (Immutable-HashTable Symbol (Immutable-HashTable Symbol String)))])
+         racket/string
+         typed/ini)
 
 (provide
  config-parameter
@@ -14,7 +11,7 @@
  config-get)
 
 (module+ test
-  (require "typed-rackunit.rkt"))
+  (require "../lib/typed-rackunit.rkt"))
 
 (define-runtime-path path-config "../config.ini")
 
@@ -38,54 +35,58 @@
     (instance_is_official . "false") ; please don't turn this on, or you will make me very upset
     (log_outgoing . "true")
     (port . "10416")
-    (strict_proxy . "true")))
+    (strict_proxy . "false")
+
+    (feature_offline::enabled . "false")
+    (feature_offline::format . "json.gz")
+    (feature_offline::only . "false")))
 
 (define loaded-alist
   (with-handlers
     ([exn:fail:filesystem:errno?
       (λ (exn)
-        (begin0
-            '()
-          (displayln "note: config file not detected, using defaults")))]
+        (displayln "note: config file not detected, using defaults")
+        '())]
      [exn:fail:contract?
       (λ (exn)
-        (begin0
-            '()
-          (displayln "note: config file empty or missing [] section, using defaults")))])
+        (displayln "note: config file empty or missing [] section, using defaults")
+        '())])
+    (define h (in-hash
+               (ini->hash
+                (call-with-input-file path-config
+                  (λ (in)
+                    (read-ini in))))))
     (define l
-      (hash->list
-       (hash-ref
-        (ini->hash
-         (call-with-input-file path-config
-           (λ (in)
-             (read-ini in))))
-        '||)))
-    (begin0
-        l
-      (printf "note: ~a items loaded from config file~n" (length l)))))
+      (for*/list : (Listof (Pairof Symbol String))
+                 ([(section-key section) h]
+                  [(key value) (in-hash section)])
+        (if (eq? section-key '||)
+            (cons key value)
+            (cons (string->symbol (string-append (symbol->string section-key)
+                                                 "::"
+                                                 (symbol->string key)))
+                  value))))
+    (printf "note: ~a items loaded from config file~n" (length l))
+    l))
 
 (define env-alist
-  (let ([e-names (environment-variables-names (current-environment-variables))]
-        [e-ref (λ ([name : Bytes])
-                 (bytes->string/latin-1
-                  (cast (environment-variables-ref (current-environment-variables) name)
-                        Bytes)))])
-    (map (λ ([name : Bytes])
-           (cons (string->symbol (string-downcase (substring (bytes->string/latin-1 name) 3)))
-                 (e-ref name)))
-         (filter (λ ([name : Bytes]) (string-prefix? (string-downcase (bytes->string/latin-1 name))
-                                                     "bw_"))
-                 e-names))))
+  (for/list : (Listof (Pairof Symbol String))
+            ([name (environment-variables-names (current-environment-variables))]
+             #:when (string-prefix? (string-downcase (bytes->string/latin-1 name)) "bw_"))
+    (cons
+     ;; key: convert to string, remove bw_ prefix, convert to symbol
+     (string->symbol (string-downcase (substring (bytes->string/latin-1 name) 3)))
+     ;; value: convert to string
+     (bytes->string/latin-1
+      (cast (environment-variables-ref (current-environment-variables) name) Bytes)))))
 (when (> (length env-alist) 0)
   (printf "note: ~a items loaded from environment variables~n" (length env-alist)))
 
 (define combined-alist (append default-config loaded-alist env-alist))
 
 (define config
-  (make-immutable-hasheq
-   (map (λ ([pair : (Pairof Symbol String)])
-          (cons (car pair) (make-parameter (cdr pair))))
-        combined-alist)))
+  (for/hasheq ([pair combined-alist]) : (Immutable-HashTable Symbol (Parameter String))
+    (values (car pair) (make-parameter (cdr pair)))))
 
 (when (config-true? 'debug)
   ; all values here are optimised for maximum prettiness
@@ -107,4 +108,6 @@
   (parameterize ([(config-parameter 'application_name) "JeffWiki"]
                  [(config-parameter 'strict_proxy) ""])
     (check-equal? (config-get 'application_name) "JeffWiki")
-    (check-false (config-true? 'strict_proxy))))
+    (check-false (config-true? 'strict_proxy))
+    (check-equal? (string? (config-get 'feature_offline::format)) #t)))
+

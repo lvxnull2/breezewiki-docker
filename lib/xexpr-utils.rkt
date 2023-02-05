@@ -129,7 +129,7 @@
   (λ (element-type attributes children)
     (equal? (get-attribute name attributes) value)))
 
-(define (query-selector selector element)
+(define (query-selector selector element #:include-text? [include-text? #f])
   (generator
    ()
    (let loop ([element element])
@@ -140,7 +140,9 @@
        [(equal? element-type '*DECL*) #f]
        [(equal? element-type '@) #f]
        [#t
-        (when (selector element-type attributes children)
+        (when (if include-text?
+                   (selector element-type attributes children (filter string? (cdr element)))
+                   (selector element-type attributes children))
           (yield element))
         (for ([child children]) (loop child))]))
   #f))

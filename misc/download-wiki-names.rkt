@@ -4,7 +4,7 @@
          racket/string
          json
          net/http-easy
-         html-parsing
+         "../lib/html-parsing/main.rkt"
          "../src/xexpr-utils.rkt"
          "../src/url-utils.rkt")
 

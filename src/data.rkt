@@ -5,10 +5,14 @@
          net/url-string
          (only-in net/cookies/server cookie-header->alist cookie->set-cookie-header make-cookie)
          (prefix-in easy: net/http-easy)
+         db
          memo
          "static-data.rkt"
-         "url-utils.rkt"
-         "xexpr-utils.rkt")
+         "../lib/url-utils.rkt"
+         "whole-utils.rkt"
+         "../lib/xexpr-utils.rkt"
+         "../archiver/archiver-database.rkt"
+         "config.rkt")
 
 (provide
  (struct-out siteinfo^)
@@ -30,25 +34,38 @@
 (struct head-data^ (body-class icon-url) #:transparent)
 
 (define license-default (license^ "CC-BY-SA" "https://www.fandom.com/licensing"))
-(define siteinfo-default (siteinfo^ "Test Wiki" "Main_Page" license-default))
+(define siteinfo-default (siteinfo^ "Unknown Wiki" "Main_Page" license-default))
 (define head-data-default (head-data^ "skin-fandomdesktop" (get-static-url "breezewiki-favicon.svg")))
 
 (define/memoize (siteinfo-fetch wikiname) #:hash hash
-  (define dest-url
-    (format "https://~a.fandom.com/api.php?~a"
-            wikiname
-            (params->query '(("action" . "query")
-                             ("meta" . "siteinfo")
-                             ("siprop" . "general|rightsinfo")
-                             ("format" . "json")
-                             ("formatversion" . "2")))))
-  (log-outgoing dest-url)
-  (define res (easy:get dest-url))
-  (define data (easy:response-json res))
-  (siteinfo^ (jp "/query/general/sitename" data)
-             (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
-             (license^ (jp "/query/rightsinfo/text" data)
-                       (jp "/query/rightsinfo/url" data))))
+  (cond
+    [(config-true? 'feature_offline::only)
+     (when (config-true? 'debug)
+       (printf "using offline mode for siteinfo ~a~n" wikiname))
+     (define row (query-maybe-row slc "select sitename, basepage, license_text, license_url from wiki where wikiname = ?"
+                                  wikiname))
+     (if row
+         (siteinfo^ (vector-ref row 0)
+                    (vector-ref row 1)
+                    (license^ (vector-ref row 2)
+                              (vector-ref row 3)))
+         siteinfo-default)]
+    [else
+     (define dest-url
+       (format "https://~a.fandom.com/api.php?~a"
+               wikiname
+               (params->query '(("action" . "query")
+                                ("meta" . "siteinfo")
+                                ("siprop" . "general|rightsinfo")
+                                ("format" . "json")
+                                ("formatversion" . "2")))))
+     (log-outgoing dest-url)
+     (define res (easy:get dest-url))
+     (define data (easy:response-json res))
+     (siteinfo^ (jp "/query/general/sitename" data)
+                (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
+                (license^ (jp "/query/rightsinfo/text" data)
+                          (jp "/query/rightsinfo/url" data)))]))
 
 (define/memoize (head-data-getter wikiname) #:hash hash
   ;; data will be stored here, can be referenced by the memoized closure

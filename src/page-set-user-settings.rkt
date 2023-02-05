@@ -4,8 +4,8 @@
          web-server/http
          "application-globals.rkt"
          "data.rkt"
-         "url-utils.rkt"
-         "xexpr-utils.rkt")
+         "../lib/url-utils.rkt"
+         "../lib/xexpr-utils.rkt")
 
 (provide
  page-set-user-settings)

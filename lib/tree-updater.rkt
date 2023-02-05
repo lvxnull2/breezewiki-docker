@@ -3,17 +3,35 @@
          racket/function
          racket/match
          racket/string
-         "config.rkt"
          "pure-utils.rkt"
          "url-utils.rkt"
          "xexpr-utils.rkt")
 
 (provide
+ preprocess-html-wiki
  update-tree-wiki)
+
+(define (preprocess-html-wiki html)
+  (define ((rr* find replace) contents)
+    (regexp-replace* find contents replace))
+  ((compose1
+    ; fix navbox list nesting
+    ; navbox on right of page has incorrect html "<td ...><li>" and the xexpr parser puts the <li> much further up the tree
+    ; add a <ul> to make the parser happy
+    ; usage: /fallout/wiki/Fallout:_New_Vegas_achievements_and_trophies
+    (rr* #rx"(<td[^>]*>\n?)(<li>)" "\\1<ul>\\2")
+    ; change <figcaption><p> to <figcaption><span> to make the parser happy
+    (rr* #rx"(<figcaption[^>]*>)[ \t]*<p class=\"caption\">([^<]*)</p>" "\\1<span class=\"caption\">\\2</span>"))
+   html))
+(module+ test
+  (check-equal? (preprocess-html-wiki "<td class=\"va-navbox-column\" style=\"width: 33%\">\n<li>Hey</li>")
+                "<td class=\"va-navbox-column\" style=\"width: 33%\">\n<ul><li>Hey</li>")
+  (check-equal? (preprocess-html-wiki "<figure class=\"thumb tright\" style=\"width: 150px\"><a class=\"image\"><img></a><noscript><a><img></a></noscript><figcaption class=\"thumbcaption\"> 	<p class=\"caption\">Caption text.</p></figcaption></figure>")
+                "<figure class=\"thumb tright\" style=\"width: 150px\"><a class=\"image\"><img></a><noscript><a><img></a></noscript><figcaption class=\"thumbcaption\"><span class=\"caption\">Caption text.</span></figcaption></figure>"))
 
 (module+ test
   (require rackunit
-           html-parsing)
+           "html-parsing/main.rkt")
   (define wiki-document
     '(*TOP*
       (div (@ (class "mw-parser-output"))
@@ -47,7 +65,7 @@
                    (figcaption "Test figure!"))
            (iframe (@ (src "https://example.com/iframe-src")))))))
 
-(define (updater wikiname)
+(define (updater wikiname #:strict-proxy? [strict-proxy? #f])
   (define classlist-updater
     (compose1
      ; uncollapse all navbox items (bottom of page mass navigation)
@@ -101,7 +119,7 @@
                                 '(""))))
      ; proxy images from inline styles, if strict_proxy is set
      (curry u
-            (λ (v) (config-true? 'strict_proxy))
+            (λ (v) strict-proxy?)
             (λ (v) (attribute-maybe-update
                     'style
                     (λ (style)
@@ -114,14 +132,14 @@
      ; and also their links, if strict_proxy is set
      (curry u
             (λ (v)
-              (and (config-true? 'strict_proxy)
+              (and strict-proxy?
                    #;(eq? element-type 'a)
                    (or (has-class? "image-thumbnail" v)
                        (has-class? "image" v))))
             (λ (v) (attribute-maybe-update 'href u-proxy-url v)))
      ; proxy images from src attributes, if strict_proxy is set
      (curry u
-            (λ (v) (config-true? 'strict_proxy))
+            (λ (v) strict-proxy?)
             (λ (v) (attribute-maybe-update 'src u-proxy-url v)))
      ; don't lazyload images
      (curry u
@@ -208,13 +226,12 @@
 
   updater)
 
-(define (update-tree-wiki tree wikiname)
-  (update-tree (updater wikiname) tree))
+(define (update-tree-wiki tree wikiname #:strict-proxy? [strict-proxy? #f])
+  (update-tree (updater wikiname #:strict-proxy? strict-proxy?) tree))
 
 (module+ test
   (define transformed
-    (parameterize ([(config-parameter 'strict_proxy) "true"])
-      (update-tree-wiki wiki-document "test")))
+    (update-tree-wiki wiki-document "test" #:strict-proxy? #t))
   ; check that wikilinks are changed to be local
   (check-equal? (get-attribute 'href (bits->attributes
                                       ((query-selector
@@ -260,8 +277,8 @@
   ; check that noscript images are removed
   (check-equal? ((query-selector (λ (t a c) (eq? t 'noscript)) transformed)) #f)
   ; benchmark
-  (when (file-exists? "Frog.html2")
-    (with-input-from-file "Frog.html2"
+  (when (file-exists? "../misc/Frog.html")
+    (with-input-from-file "../misc/Frog.html"
       (λ ()
         (define tree (html->xexp (current-input-port)))
         (time (length (update-tree-wiki tree "minecraft")))))))

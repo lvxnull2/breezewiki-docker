@@ -9,8 +9,8 @@
          web-server/http
          (only-in web-server/dispatchers/dispatch next-dispatcher)
          "application-globals.rkt"
-         "url-utils.rkt"
-         "xexpr-utils.rkt")
+         "../lib/url-utils.rkt"
+         "../lib/xexpr-utils.rkt")
 
 (provide
  page-proxy)

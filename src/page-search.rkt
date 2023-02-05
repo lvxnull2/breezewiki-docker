@@ -13,9 +13,10 @@
          "application-globals.rkt"
          "config.rkt"
          "data.rkt"
-         "syntax.rkt"
-         "url-utils.rkt"
-         "xexpr-utils.rkt")
+         "../lib/syntax.rkt"
+         "../lib/url-utils.rkt"
+         "whole-utils.rkt"
+         "../lib/xexpr-utils.rkt")
 
 (provide
  page-search)
@@ -60,6 +61,8 @@
    (define wikiname (path/param-path (first (url-path (request-uri req)))))
    (define query (dict-ref (url-query (request-uri req)) 'q #f))
    (define origin (format "https://~a.fandom.com" wikiname))
+   (when (config-true? 'feature_offline::only)
+     (raise-user-error "Full search is currently not available on breezewiki.com - for now, please use the pop-up search suggestions or wait for me to fix it! Thanks <3"))
    (define dest-url
      (format "~a/api.php?~a"
              origin
@@ -87,5 +90,6 @@
      (λ (out)
        (write-html body out))))))
 (module+ test
-  (check-not-false ((query-selector (attribute-selector 'href "/test/wiki/Gacha_Capsule")
-                                    (generate-results-page test-req "" "test" "Gacha" search-json-data)))))
+  (parameterize ([(config-parameter 'feature_offline::only) "false"])
+    (check-not-false ((query-selector (attribute-selector 'href "/test/wiki/Gacha_Capsule")
+                                      (generate-results-page test-req "" "test" "Gacha" search-json-data))))))

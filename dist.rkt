@@ -13,8 +13,10 @@
 (require (only-in "src/page-search.rkt" page-search))
 (require (only-in "src/page-set-user-settings.rkt" page-set-user-settings))
 (require (only-in "src/page-static.rkt" static-dispatcher))
+(require (only-in "src/page-static-archive.rkt" page-static-archive))
 (require (only-in "src/page-subdomain.rkt" subdomain-dispatcher))
 (require (only-in "src/page-wiki.rkt" page-wiki))
+(require (only-in "src/page-wiki-offline.rkt" page-wiki-offline))
 (require (only-in "src/page-file.rkt" page-file))
 
 (serve/launch/wait
@@ -31,7 +33,9 @@
     page-proxy
     page-search
     page-set-user-settings
+    page-static-archive
     page-wiki
+    page-wiki-offline
     page-file
     redirect-wiki-home
     static-dispatcher

@@ -9,8 +9,8 @@
          (prefix-in lift: web-server/dispatchers/dispatch-lift)
          "application-globals.rkt"
          "config.rkt"
-         "syntax.rkt"
-         "xexpr-utils.rkt")
+         "../lib/syntax.rkt"
+         "../lib/xexpr-utils.rkt")
 
 (provide
  subdomain-dispatcher)
