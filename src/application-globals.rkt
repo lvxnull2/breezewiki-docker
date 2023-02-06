@@ -207,7 +207,7 @@
                           "BreezeWiki is back! Most major wikis are available.\n"
                           ,(if extension-eligible?
                                '(div (@ (class "bw-top-banner-rainbow"))
-                                     "Try " (a (@ (href "https://addons.mozilla.org/en-GB/firefox/addon/indie-wiki-buddy/")) "our affiliated browser extension") " - redirect to BreezeWiki automatically!\n")
+                                     "Try " (a (@ (href "https://getindie.wiki/")) "our affiliated browser extension") " - redirect to BreezeWiki automatically!\n")
                                "")
                           "As always, " (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "please go here") " to report problems, suggest features, or talk about the project.")
                          ,balloon))
