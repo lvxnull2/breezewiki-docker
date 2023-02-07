@@ -235,7 +235,8 @@
                                                      (if (equal? theme (user-cookies^-theme user-cookies))
                                                          "bw-theme__item bw-theme__item--selected"
                                                          "bw-theme__item"))
-                                                   `(a (@ (href ,(user-cookies-setter-url
+                                                   `(a (@ (rel "nofollow")
+                                                          (href ,(user-cookies-setter-url
                                                                   req
                                                                   (struct-copy user-cookies^ user-cookies
                                                                                [theme theme]))) (class ,class))

@@ -1,3 +1,4 @@
 User-Agent: *
 Disallow: /*/wiki/*
 Disallow: /proxy
+Disallow: /set-user-settings
