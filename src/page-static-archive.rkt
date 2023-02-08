@@ -41,14 +41,14 @@
                  [(string-prefix? url "http://") (regexp-replace #rx"http:" url "https:")]
                  [(string-prefix? url "//") (string-append "https:" url)]
                  [(string-prefix? url "/") (format "https://~a.fandom.com~a" wikiname url)]
-                 [else (raise-user-error "While calling replace-style-for-images, this URL had an unknown format and couldn't be saved:" url)])])
+                 [else (error 'replace-style-for-images "unknown URL format: ~a" url)])])
          (define p (image-url->values norm-url))
          ;; (printf "hashed: ~a~n     -> ~a~n    #-> ~a~n" url (car p) (cdr p))
          (format "/archive/~a/images/~a" wikiname (cdr p))))))
 
 (define (replace-style-for-images wikiname path)
   (define content (file->string path))
-  (regexp-replace* #rx"url\\(([^)]*)\\)" content (replacer wikiname)))
+  (regexp-replace* #rx"url\\(\"?'?([^)]*)'?\"?\\)" content (replacer wikiname)))
 
 (define (handle-style wikiname dest)
   (when (config-true? 'debug)
