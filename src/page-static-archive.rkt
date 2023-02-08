@@ -56,7 +56,6 @@
     (printf "using offline mode for style ~a ~a~n" wikiname dest))
   (log-styles-request #t wikiname dest)
   (define fs-path (build-path path-archive wikiname "styles" dest))
-  (println fs-path)
   (unless (file-exists? fs-path)
     (next-dispatcher))
   (response-handler
