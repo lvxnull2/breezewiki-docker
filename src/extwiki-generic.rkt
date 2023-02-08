@@ -18,7 +18,7 @@
 
 ;; fandom wikinames * Title * Main Page * Search page override * API endpoint override
 (define wikis
-  '(((gallowmere) "Gallowmere Historia" "https://medievil.wiki/w/Main_Page" #f #f)
+  '(((gallowmere) "MediEvil Wiki" "https://medievil.wiki/w/Main_Page" #f #f)
     ((fallout) "Fallout Wiki" "https://fallout.wiki/wiki/Fallout_Wiki" #f "https://fallout.wiki/api.php")
     ))
 
