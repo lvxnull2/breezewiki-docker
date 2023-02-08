@@ -39,7 +39,9 @@
 
     (feature_offline::enabled . "false")
     (feature_offline::format . "json.gz")
-    (feature_offline::only . "false")))
+    (feature_offline::only . "false")
+
+    (access_log::enabled . "false")))
 
 (define loaded-alist
   (with-handlers

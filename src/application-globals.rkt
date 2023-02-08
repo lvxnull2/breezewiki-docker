@@ -61,7 +61,7 @@
                          "Documentation and more information"))
                      (p
                       (a (@ (href "https://lists.sr.ht/~cadence/breezewiki-discuss"))
-                         "Discussions / Bug reports / Feature requests"))
+                         "Chat / Bug reports / Feature requests"))
                      ,(if (config-true? 'instance_is_official)
                           `(p ,(format "This instance is run by the ~a developer, " (config-get 'application_name))
                               (a (@ (href "https://cadence.moe/contact"))

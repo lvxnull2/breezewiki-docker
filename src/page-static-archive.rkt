@@ -12,7 +12,8 @@
          "../archiver/archiver.rkt"
          "../lib/mime-types.rkt"
          "../lib/xexpr-utils.rkt"
-         "../src/config.rkt")
+         "config.rkt"
+         "log.rkt")
 
 (provide
  page-static-archive)
@@ -53,6 +54,7 @@
 (define (handle-style wikiname dest)
   (when (config-true? 'debug)
     (printf "using offline mode for style ~a ~a~n" wikiname dest))
+  (log-styles-request #t wikiname dest)
   (define fs-path (build-path path-archive wikiname "styles" dest))
   (println fs-path)
   (unless (file-exists? fs-path)

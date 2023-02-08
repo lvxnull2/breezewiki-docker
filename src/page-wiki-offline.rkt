@@ -22,6 +22,7 @@
          "application-globals.rkt"
          "config.rkt"
          "data.rkt"
+         "log.rkt"
          "page-wiki.rkt"
          "../lib/archive-file-mappings.rkt"
          "../lib/pure-utils.rkt"
@@ -47,6 +48,12 @@
    (define maybe-hashed-basename (if ((string-length basename) . > . 240)
                                      (sha1 (string->bytes/latin-1 basename))
                                      basename))
+
+   (define user-cookies (user-cookies-getter req))
+   (define theme (user-cookies^-theme user-cookies))
+
+   (log-page-request #t wikiname maybe-hashed-basename theme)
+
    (define archive-format
      (case (config-get 'feature_offline::format)
        [(".json" "json") (cons "~a.json" (λ () (read-json)))]
@@ -98,8 +105,6 @@
        (define original-page (html->xexp (preprocess-html-wiki (jp "/parse/text" data))))
        (define page ((query-selector (λ (t a c) (has-class? "mw-parser-output" a)) original-page)))
        (define initial-head-data ((head-data-getter wikiname) data))
-       (define user-cookies (user-cookies-getter req))
-       (define theme (user-cookies^-theme user-cookies))
        (define head-data
          (case theme
            [(light dark)
