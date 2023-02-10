@@ -74,7 +74,7 @@ effect(() => {
 	})
 })
 
-document.addEventListener("pageshow", () => {
+window.addEventListener("pageshow", () => {
 	st.value = "ready" // unlock results from changing after returning to page
 })
 
@@ -88,4 +88,12 @@ render(html`<${SuggestionInput} />`, eInput)
 // form focus
 
 eForm.addEventListener("focusin", () => focus.value = true)
-eForm.addEventListener("focusout", () => focus.value = false)
+eForm.addEventListener("focusout", event => {
+	if (eForm.contains(event.relatedTarget)) {
+		// event fired when changing from one form element to the other
+		focus.value = true
+	} else {
+		// event fired when moving out of the form element
+		focus.value = false
+	}
+})
