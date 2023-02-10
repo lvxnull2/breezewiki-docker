@@ -64,6 +64,7 @@ render(html`<${SuggestionList} />`, eSuggestions)
 // input view
 
 effect(() => {
+	query.value // dependency should always be tracked
 	if (st.peek() === "accepted") return // lock results from changing during navigation
 	st.value = "loading"
 	fetchSuggestions(query.value).then(res => {
