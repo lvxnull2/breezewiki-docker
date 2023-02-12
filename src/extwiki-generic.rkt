@@ -20,6 +20,7 @@
 (define wikis
   '(((gallowmere) "MediEvil Wiki" "https://medievil.wiki/w/Main_Page" #f #f)
     ((fallout) "Fallout Wiki" "https://fallout.wiki/wiki/Fallout_Wiki" #f "https://fallout.wiki/api.php")
+    ((drawntolife) "Wapopedia" "https://drawntolife.wiki/en/Main_Page" #f "https://drawntolife.wiki/w/api.php")
     ))
 
 (define wikis-hash (make-hash))
@@ -58,8 +59,10 @@
    [(not logo) (values #f '("Data table must have a \"Logo\" column"))]
    [(null? logo) (values #f '("Logo table column must have a link"))]
    (var href (get-attribute 'href (bits->attributes (car (hash-ref table 'logo)))))
-   [(not href) (values #f '("Logo table column must have a link"))]
-   [#t (values href null)]))
+   (var src (get-attribute 'src (bits->attributes (car (hash-ref table 'logo)))))
+   (var true-src (or href src))
+   [(not true-src) (values #f '("Logo table column must have a link"))]
+   [#t (values true-src null)]))
 
 (define (get-api-endpoint wiki)
   (define main-page (third wiki))
@@ -77,7 +80,7 @@
   (or override
       (match main-page
         [(regexp #rx"/$") (string-append main-page "Special:Search")]
-        [(regexp #rx"^(.*/w[^./]*/)" (list _ wiki-prefix)) (string-append wiki-prefix "Special:Search")]
+        [(regexp #rx"^(.*/(?:en|w[^./]*)/)" (list _ wiki-prefix)) (string-append wiki-prefix "Special:Search")]
         [_ (error 'get-search-page "unknown url format: ~a" main-page)])))
 
 (define/memoize (get-redirect-content wikiname) #:hash hash
@@ -109,8 +112,10 @@
                          ,@body
                          (p "This wiki's core community has wholly migrated away from Fandom. You should "
                             (a (@ (href ,go)) "go to " ,display-name " now!")))
-                    (div (@ (class "niwa__right"))
-                         (img (@ (class "niwa__logo") (src ,logo)))))
+                    ,(if logo
+                         `(div (@ (class "niwa__right"))
+                               (img (@ (class "niwa__logo") (src ,logo))))
+                         ""))
                ,(if (pair? links)
                     `(p (@ (class "niwa__feedback"))
                         ,@(add-between links " / "))
@@ -122,4 +127,4 @@
                     "")))]
     [#t #f]))
 (module+ test
-  ((get-redirect-content "gallowmere") "Gallowmere Historia"))
+  (check-not-false ((get-redirect-content "gallowmere") "MediEvil Wiki")))

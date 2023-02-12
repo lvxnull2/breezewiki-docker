@@ -60,11 +60,11 @@
     (if (null? rest)
         `(cond ,@els)
         `(cond
-          ,@els
-          [#t
-           (let ,(for/list ([var vars])
-                   (cdr var))
-             ,(transform-cond/var rest))]))))
+           ,@els
+           [#t
+            (let* ,(for/list ([var vars])
+                     (cdr var))
+              ,(transform-cond/var rest))]))))
 
 ;; the syntax definitions and their tests go below here
 
