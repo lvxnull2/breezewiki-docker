@@ -277,8 +277,8 @@
   ; check that noscript images are removed
   (check-equal? ((query-selector (λ (t a c) (eq? t 'noscript)) transformed)) #f)
   ; benchmark
-  (when (file-exists? "../misc/Frog.html")
-    (with-input-from-file "../misc/Frog.html"
+  (when (file-exists? "../storage/Frog.html")
+    (with-input-from-file "../storage/Frog.html"
       (λ ()
         (define tree (html->xexp (current-input-port)))
         (time (length (update-tree-wiki tree "minecraft")))))))

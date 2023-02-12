@@ -17,6 +17,7 @@
          "data.rkt"
          "page-wiki.rkt"
          "../lib/syntax.rkt"
+         "../lib/thread-utils.rkt"
          "../lib/url-utils.rkt"
          "whole-utils.rkt"
          "../lib/xexpr-utils.rkt")
@@ -108,42 +109,45 @@
    (define origin (format "https://~a.fandom.com" wikiname))
    (define source-url (format "~a/wiki/~a" origin prefixed-title))
 
-   (thread-let
-    ([media-detail (define dest-url
-                     (format "~a/wikia.php?~a"
-                             origin
-                             (params->query `(("format" . "json") ("controller" . "Lightbox")
-                                                                  ("method" . "getMediaDetail")
-                                                                  ("fileTitle" . ,prefixed-title)))))
-                   (log-outgoing dest-url)
-                   (define dest-res (easy:get dest-url #:timeouts timeouts))
-                   (easy:response-json dest-res)]
-     [siteinfo (siteinfo-fetch wikiname)])
-    (if (not (jp "/exists" media-detail #f))
-        (next-dispatcher)
-        (response-handler
-         (define file-title (jp "/fileTitle" media-detail ""))
-         (define title
-           (if (non-empty-string? file-title) (format "File:~a" file-title) prefixed-title))
-         (define image-content-type
-           (if (non-empty-string? (jp "/videoEmbedCode" media-detail ""))
-               #f
-               (url-content-type (jp "/imageUrl" media-detail))))
-         (define body
-           (generate-results-page #:req req
-                                  #:source-url source-url
-                                  #:wikiname wikiname
-                                  #:title title
-                                  #:media-detail media-detail
-                                  #:image-content-type image-content-type
-                                  #:siteinfo siteinfo))
-         (when (config-true? 'debug)
-           ; used for its side effects
-           ; convert to string with error checking, error will be raised if xexp is invalid
-           (xexp->html body))
-         (response/output #:code 200
-                          #:headers (build-headers always-headers)
-                          (λ (out) (write-html body out))))))))
+   (define-values (media-detail siteinfo)
+     (thread-values
+      (λ ()
+        (define dest-url
+          (format "~a/wikia.php?~a"
+                  origin
+                  (params->query `(("format" . "json") ("controller" . "Lightbox")
+                                                       ("method" . "getMediaDetail")
+                                                       ("fileTitle" . ,prefixed-title)))))
+        (log-outgoing dest-url)
+        (define dest-res (easy:get dest-url #:timeouts timeouts))
+        (easy:response-json dest-res))
+      (λ ()
+        (siteinfo-fetch wikiname))))
+   (if (not (jp "/exists" media-detail #f))
+       (next-dispatcher)
+       (response-handler
+        (define file-title (jp "/fileTitle" media-detail ""))
+        (define title
+          (if (non-empty-string? file-title) (format "File:~a" file-title) prefixed-title))
+        (define image-content-type
+          (if (non-empty-string? (jp "/videoEmbedCode" media-detail ""))
+              #f
+              (url-content-type (jp "/imageUrl" media-detail))))
+        (define body
+          (generate-results-page #:req req
+                                 #:source-url source-url
+                                 #:wikiname wikiname
+                                 #:title title
+                                 #:media-detail media-detail
+                                 #:image-content-type image-content-type
+                                 #:siteinfo siteinfo))
+        (when (config-true? 'debug)
+          ; used for its side effects
+          ; convert to string with error checking, error will be raised if xexp is invalid
+          (xexp->html body))
+        (response/output #:code 200
+                         #:headers (build-headers always-headers)
+                         (λ (out) (write-html body out)))))))
 (module+ test
   (parameterize ([(config-parameter 'strict_proxy) "true"])
     (check-equal? (get-media-html "https://static.wikia.nocookie.net/a" "image/jpeg")

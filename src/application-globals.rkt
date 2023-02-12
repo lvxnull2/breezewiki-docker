@@ -201,13 +201,16 @@
            ,(if (config-true? 'instance_is_official)
                 (let ([balloon '(img (@ (src "/static/three-balloons.png") (class "bw-balloon") (title "Image Source: pngimg.com/image/4955 | License: CC BY-NC 4.0 | Modifications: Resized") (width "52") (height "56")))]
                       [extension-eligible?
-                       (and req (let* ([ua-pair (assq 'user-agent (request-headers req))]
-                                       [ua (string-downcase (cdr ua-pair))])
-                                  ;; everyone pretends to be chrome, so we do it in reverse
-                                  ;; this excludes common browsers that don't support the extension
-                                  (and (not (string-contains? ua "edge/"))
-                                       (not (string-contains? ua "edg/"))
-                                       (not (string-contains? ua "mobile")))))])
+                       (cond/var
+                        [(not req) #f]
+                        (var ua-pair (assq 'user-agent (request-headers req)))
+                        [(not ua-pair) #f]
+                        (var ua (string-downcase (cdr ua-pair)))
+                        ;; everyone pretends to be chrome, so we do it in reverse
+                        ;; this excludes common browsers that don't support the extension
+                        [#t (and (not (string-contains? ua "edge/"))
+                                 (not (string-contains? ua "edg/"))
+                                 (not (string-contains? ua "mobile")))])])
                   `(div (@ (class "bw-top-banner"))
                         ,balloon
                         (div

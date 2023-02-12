@@ -28,7 +28,7 @@
     (hash-set! wikis-hash (symbol->string wikiname) w)))
 (module+ test
   (check-equal? (cadr (hash-ref wikis-hash "gallowmere"))
-                "Gallowmere Historia"))
+                "MediEvil Wiki"))
 
 (define (parse-table table)
   (define rows (query-selector (λ (t a c) (eq? t 'tr)) table))

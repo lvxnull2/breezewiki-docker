@@ -14,6 +14,7 @@
          "config.rkt"
          "data.rkt"
          "../lib/syntax.rkt"
+         "../lib/thread-utils.rkt"
          "../lib/url-utils.rkt"
          "whole-utils.rkt"
          "../lib/xexpr-utils.rkt")
@@ -72,23 +73,26 @@
                               ("formatversion" . "2")
                               ("format" . "json")))))
 
-   (thread-let
-    ([dest-res (log-outgoing dest-url)
-               (easy:get dest-url #:timeouts timeouts)]
-     [siteinfo (siteinfo-fetch wikiname)])
+   (define-values (dest-res siteinfo)
+     (thread-values
+      (λ ()
+        (log-outgoing dest-url)
+        (easy:get dest-url #:timeouts timeouts))
+      (λ ()
+        (siteinfo-fetch wikiname))))
 
-    (define data (easy:response-json dest-res))
+   (define data (easy:response-json dest-res))
 
-    (define body (generate-results-page req dest-url wikiname query data #:siteinfo siteinfo))
-    (when (config-true? 'debug)
-      ; used for its side effects
-      ; convert to string with error checking, error will be raised if xexp is invalid
-      (xexp->html body))
-    (response/output
-     #:code 200
-     #:headers (build-headers always-headers)
-     (λ (out)
-       (write-html body out))))))
+   (define body (generate-results-page req dest-url wikiname query data #:siteinfo siteinfo))
+   (when (config-true? 'debug)
+     ; used for its side effects
+     ; convert to string with error checking, error will be raised if xexp is invalid
+     (xexp->html body))
+   (response/output
+    #:code 200
+    #:headers (build-headers always-headers)
+    (λ (out)
+      (write-html body out)))))
 (module+ test
   (parameterize ([(config-parameter 'feature_offline::only) "false"])
     (check-not-false ((query-selector (attribute-selector 'href "/test/wiki/Gacha_Capsule")
