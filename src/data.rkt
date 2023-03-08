@@ -8,8 +8,8 @@
          db
          memo
          "static-data.rkt"
-         "../lib/url-utils.rkt"
          "whole-utils.rkt"
+         "../lib/url-utils.rkt"
          "../lib/xexpr-utils.rkt"
          "../archiver/archiver-database.rkt"
          "config.rkt")
@@ -42,8 +42,8 @@
     [(config-true? 'feature_offline::only)
      (when (config-true? 'debug)
        (printf "using offline mode for siteinfo ~a~n" wikiname))
-     (define row (query-maybe-row slc "select sitename, basepage, license_text, license_url from wiki where wikiname = ?"
-                                  wikiname))
+     (define row (query-maybe-row* "select sitename, basepage, license_text, license_url from wiki where wikiname = ?"
+                                   wikiname))
      (if row
          (siteinfo^ (vector-ref row 0)
                     (vector-ref row 1)

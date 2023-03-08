@@ -1,5 +1,6 @@
 text/html                             html
 text/css                              css
+application/xml                       xml
 text/xml                              xml
 image/gif                             gif
 image/jpeg                            jpeg
@@ -25,6 +26,7 @@ application/font-woff2                woff2
 application/acad                      woff2
 font/woff2                            woff2
 application/font-woff                 woff
+font/woff                             woff
 application/x-font-ttf                ttf
 application/x-font-truetype           ttf
 application/x-truetype-font           ttf

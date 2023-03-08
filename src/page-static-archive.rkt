@@ -2,7 +2,6 @@
 (require racket/file
          racket/path
          racket/port
-         racket/runtime-path
          racket/string
          net/url
          web-server/http
@@ -11,6 +10,7 @@
          (only-in web-server/dispatchers/dispatch next-dispatcher)
          "../archiver/archiver.rkt"
          "../lib/mime-types.rkt"
+         "../lib/syntax.rkt"
          "../lib/xexpr-utils.rkt"
          "config.rkt"
          "log.rkt")
@@ -18,7 +18,7 @@
 (provide
  page-static-archive)
 
-(define-runtime-path path-archive "../storage/archive")
+(define path-archive (anytime-path ".." "storage/archive"))
 
 (define ((replacer wikiname) whole url)
   (format

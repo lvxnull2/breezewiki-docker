@@ -4,7 +4,7 @@
          racket/function
          racket/list
          racket/match
-         racket/runtime-path
+         racket/path
          racket/string
          ; libs
          (prefix-in easy: net/http-easy)
@@ -38,7 +38,7 @@
 (module+ test
   (require rackunit))
 
-(define-runtime-path path-archive "../storage/archive")
+(define path-archive (anytime-path ".." "storage/archive"))
 
 (define (page-wiki-offline req)
   (response-handler

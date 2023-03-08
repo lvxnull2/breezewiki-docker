@@ -1,5 +1,5 @@
 #lang racket/base
-(require (for-syntax racket/base))
+(require (for-syntax racket/base syntax/location))
 
 (provide
  ; help make a nested if. if/in will gain the same false form of its containing if/out.
@@ -7,7 +7,12 @@
  ; cond, but values can be defined between conditions
  cond/var
  ; wrap sql statements into lambdas so they can be executed during migration
- wrap-sql)
+ wrap-sql
+ ; get the name of the file that contains the currently evaluating form
+ this-directory
+ this-file
+ ; replacement for define-runtime-path
+ anytime-path)
 
 (module+ test
   (require rackunit)
@@ -96,6 +101,16 @@
   (check-equal? (if/out #t (if/in #f 'yes) 'no) 'no)
   (check-equal? (if/out #f (if/in #f 'yes) 'no) 'no))
 
+(define-syntax (this-directory stx)
+  (datum->syntax stx (syntax-source-directory stx)))
+
+(define-syntax (this-file stx)
+  (datum->syntax stx (build-path (or (syntax-source-directory stx) 'same) (syntax-source-file-name stx))))
+
+(module+ test
+  (require racket/path)
+  (check-equal? (file-name-from-path (this-file)) (build-path "syntax.rkt")))
+
 (define-syntax (cond/var stx)
   (transform/out-cond/var stx))
 (module+ test
@@ -103,7 +118,28 @@
                        #'(cond
                            [#f 0]
                            [#t
-                            (let ([d (* a 2)])
+                            (let* ([d (* a 2)])
                               (cond
                                 [(eq? d 8) d]
                                 [#t "not 4"]))])))
+
+;;; Replacement for define-runtime-path that usually works well and doesn't include the files/folder contents into the distribution.
+;;; When running from source, should always work appropriately.
+;;; When running from a distribution, (current-directory) is treated as the root.
+;;; Usage:
+;;;   * to-root : Path-String * relative path from the source file to the project root
+;;;   * to-dest : Path-String * relative path from the root to the desired file/folder
+(define-syntax (anytime-path stx)
+  (define-values (_ to-root to-dest) (apply values (syntax->list stx)))
+  (define source (syntax-source stx))
+  (unless (complete-path? source)
+    (error 'anytime-path "syntax source has no directory: ~v" stx))
+  (datum->syntax
+   stx
+   `(let* ([syntax-to-root (build-path (path-only ,source) ,to-root)]
+           [root (if (directory-exists? syntax-to-root)
+                     ;; running on the same filesystem it was compiled on, i.e. it's running the source code out of a directory, and the complication is the intermediate compilation
+                     syntax-to-root
+                     ;; not running on the same filesystem, i.e. it's a distribution. we assume that the current working directory is where the executable is, and treat this as the root.
+                     (current-directory))])
+      (simple-form-path (build-path root ,to-dest)))))

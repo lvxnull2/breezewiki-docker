@@ -8,6 +8,7 @@
          (only-in web-server/dispatchers/dispatch next-dispatcher)
          (prefix-in files: web-server/dispatchers/dispatch-files)
          "../lib/mime-types.rkt"
+         "../lib/syntax.rkt"
          "config.rkt")
 
 (provide
@@ -17,7 +18,7 @@
   (require rackunit))
 
 (define-runtime-path path-static "../static")
-(define-runtime-path path-archive "../storage/archive")
+(define path-archive (anytime-path ".." "storage/archive"))
 
 (define hash-ext-mime-type
   (hash #".css" #"text/css"
