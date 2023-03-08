@@ -1,7 +1,7 @@
 #lang racket/base
-(require racket/list
+(require racket/file
+         racket/list
          racket/path
-         racket/runtime-path
          racket/string
          json
          json-pointer
@@ -9,9 +9,16 @@
          "../lib/syntax.rkt")
 
 (provide
- slc)
+ get-slc
+ query-exec*
+ query-rows*
+ query-list*
+ query-value*
+ query-maybe-value*
+ query-maybe-row*)
 
-(define-runtime-path database-file "../storage/archiver.db")
+(define storage-path (anytime-path ".." "storage"))
+(define database-file (build-path storage-path "archiver.db"))
 
 (define migrations
   (wrap-sql
@@ -25,23 +32,50 @@
     (query-exec slc "alter table wiki add column license_text TEXT")
     (query-exec slc "alter table wiki add column license_url TEXT"))))
 
-(define slc (sqlite3-connect #:database database-file #:mode 'create))
-(query-exec slc "PRAGMA journal_mode=WAL")
-(define database-version
-  (with-handlers ([exn:fail:sql?
-                   (λ (exn)
-                     ; need to set up the database
-                     (query-exec slc "create table database_version (version integer, primary key (version))")
-                     (query-exec slc "insert into database_version values (0)")
-                     0)])
-    (query-value slc "select version from database_version")))
+(define slc (box #f))
+(define (get-slc)
+  (define slc* (unbox slc))
+  (cond
+    [slc* slc*]
+    [else
+     (make-directory* storage-path)
+     (define slc* (sqlite3-connect #:database database-file #:mode 'create))
+     (query-exec slc* "PRAGMA journal_mode=WAL")
+     (define database-version
+       (with-handlers ([exn:fail:sql?
+                        (λ (exn)
+                          ; need to set up the database
+                          (query-exec slc* "create table database_version (version integer, primary key (version))")
+                          (query-exec slc* "insert into database_version values (0)")
+                          0)])
+         (query-value slc* "select version from database_version")))
 
-(let do-migrate-step ()
-  (when (database-version . < . (length migrations))
-    (call-with-transaction
-     slc
-     (list-ref migrations database-version))
-    (set! database-version (add1 database-version))
-    (query-exec slc "update database_version set version = $1" database-version)
-    (do-migrate-step)))
+     (let do-migrate-step ()
+       (when (database-version . < . (length migrations))
+         (call-with-transaction
+          slc*
+          (list-ref migrations database-version))
+         (set! database-version (add1 database-version))
+         (query-exec slc* "update database_version set version = $1" database-version)
+         (do-migrate-step)))
 
+     (set-box! slc slc*)
+     slc*]))
+
+(define (query-exec* . args)
+  (apply query-exec (get-slc) args))
+
+(define (query-rows* . args)
+  (apply query-rows (get-slc) args))
+
+(define (query-list* . args)
+  (apply query-list (get-slc) args))
+
+(define (query-value* . args)
+  (apply query-value (get-slc) args))
+
+(define (query-maybe-value* . args)
+  (apply query-maybe-value (get-slc) args))
+
+(define (query-maybe-row* . args)
+  (apply query-maybe-row (get-slc) args))

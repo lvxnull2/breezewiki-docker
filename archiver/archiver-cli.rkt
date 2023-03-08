@@ -6,23 +6,23 @@
              ""
              "Downloaded pages go into `archive/` next to the executable."
              "Database goes into `archiver.db*` next to the executable."
-             "The database is necessary to store your download progress and resume where you left off if the process is interrupted.")
-      (ps ""
-          "Default output style is `progress` in a tty and `lines` otherwise."))
+             "The database is necessary to store your download progress and resume where you left off if the process is interrupted."))
 
 (flag (output-quiet?)
       ("-q" "--output-quiet" "disable progress output")
       (output-quiet? #t))
 
-(flag (output-lines?)
-      ("-l" "--output-lines" "output the name of each file downloaded")
-      (output-lines? #t))
-
 (flag (output-progress?)
-      ("-p" "--output-progress" "progress output for terminals")
+      ("-p" "--output-progress" "progress output for terminals (default in a tty)")
       (output-progress? #t))
 
+(flag (output-lines?)
+      ("-l" "--output-lines" "output the name of each file downloaded (default outside of a tty)")
+      (output-lines? #t))
+
 (constraint (one-of output-quiet? output-lines? output-progress?))
+
+
 
 (program
  (start [wikiname "wikiname to download"])
@@ -42,30 +42,27 @@
  ;; check
  (when (or (not wikiname) (equal? wikiname ""))
    (raise-user-error "Please specify the wikiname to download on the command line."))
- ;; stage 1
- (cond [(output-lines?) (displayln "Downloading list of pages...")]
-       [(output-progress?) (printf "Downloading list of pages... \r")])
- (if-necessary-download-list-of-pages
-  wikiname
-  (λ (a b c)
-    (cond [(output-progress?) (printf "Downloading list of pages... [~a/~b]\r" a b)])))
- ;; stage 2
- (save-each-page
-  wikiname
-  (λ (a b c)
-    (define basename (basename->name-for-query c))
-    (cond
-      [(output-lines?)
-       (displayln basename)]
-      [(output-progress?)
-       (when (eq? (modulo a 20) 0)
-         (thread (λ () (update-width))))
-       (define prefix (format "[~a/~a] " a b))
-       (define rest (- width (string-length prefix)))
-       (define real-width (min (string-length basename) rest))
-       (define spare-width (- rest real-width))
-       (define name-display (substring basename 0 real-width))
-       (define whitespace (make-string spare-width #\ ))
-       (printf "~a~a~a\r" prefix name-display whitespace)]))))
+ ;; progress reporting based on selected mode
+ (define (report-progress a b c)
+   (define basename (basename->name-for-query c))
+   (cond
+     [(output-lines?)
+      (displayln basename)]
+     [(output-progress?)
+      (when (eq? (modulo a 20) 0)
+        (thread (λ () (update-width))))
+      (define prefix (format "[~a] [~a/~a] " wikiname a b))
+      (define rest (- width (string-length prefix)))
+      (define real-width (min (string-length basename) rest))
+      (define spare-width (- rest real-width))
+      (define name-display (substring basename 0 real-width))
+      (define whitespace (make-string spare-width #\ ))
+      (printf "~a~a~a\r" prefix name-display whitespace)]))
+ ;; download all stages
+ (for ([stage all-stages]
+       [i (in-naturals 1)])
+   (printf "> Stage ~a/~a~n" i (length all-stages))
+   (stage wikiname report-progress)
+   (displayln "")))
 
 (run start)
