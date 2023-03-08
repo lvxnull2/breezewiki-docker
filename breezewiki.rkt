@@ -30,7 +30,9 @@
 (define ch (make-channel))
 (define (start)
   (serve/launch/wait
-   #:listen-ip (if (config-true? 'debug) "127.0.0.1" #f)
+   #:listen-ip (if (equal? (config-get 'bind_host) "auto")
+                 (if (config-true? 'debug) "127.0.0.1" #f)
+                 (config-get 'bind_host))
    #:port (string->number (config-get 'port))
    (λ (quit)
      (channel-put ch (lambda () (semaphore-post quit)))
