@@ -136,7 +136,10 @@
     (error 'anytime-path "syntax source has no directory: ~v" stx))
   (datum->syntax
    stx
-   `(let* ([syntax-to-root (build-path (path-only ,source) ,to-root)]
+   `(let* ([source ,source]
+           [dir-of-source (path-only source)]
+           [_ (unless (path? dir-of-source) (error 'anytime-path "syntax source has no directory: ~v" ,source))]
+           [syntax-to-root (build-path dir-of-source ,to-root)]
            [root (if (directory-exists? syntax-to-root)
                      ;; running on the same filesystem it was compiled on, i.e. it's running the source code out of a directory, and the complication is the intermediate compilation
                      syntax-to-root

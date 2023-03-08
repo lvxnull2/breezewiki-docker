@@ -1,7 +1,7 @@
 #lang typed/racket/base
 (require racket/file
+         racket/path
          racket/port
-         racket/runtime-path
          racket/string
          typed/srfi/19
          "config.rkt")
@@ -14,12 +14,21 @@
 (define last-flush 0)
 (define flush-every-millis 60000)
 
-(define-runtime-path log-file "../storage/logs/access-0.log")
+;; anytime-path macro expansion only works in an untyped submodule for reasons I cannot comprehend
+(module define-log-dir racket/base
+  (require racket/path
+           "../lib/syntax.rkt")
+  (provide log-dir)
+  (define log-dir (anytime-path ".." "storage/logs")))
+(require/typed (submod "." define-log-dir)
+               [log-dir Path])
+
+(define log-file (build-path log-dir "access-0.log"))
 (define log-port
   (if (config-true? 'access_log::enabled)
       (begin
-        (make-directory* (simplify-path (build-path log-file 'up)))
-         (open-output-file log-file #:exists 'append))
+        (make-directory* log-dir)
+        (open-output-file log-file #:exists 'append))
       (open-output-nowhere)))
 
 (: get-date-iso8601 (-> String))
