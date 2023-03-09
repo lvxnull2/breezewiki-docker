@@ -37,6 +37,9 @@
 (define siteinfo-default (siteinfo^ "Unknown Wiki" "Main_Page" license-default))
 (define head-data-default (head-data^ "skin-fandomdesktop" (get-static-url "breezewiki-favicon.svg")))
 
+(when (config-true? 'feature_offline::only)
+  (void (get-slc)))
+
 (define/memoize (siteinfo-fetch wikiname) #:hash hash
   (cond
     [(config-true? 'feature_offline::only)
