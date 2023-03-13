@@ -14,9 +14,10 @@
          racket/gui/easy
          racket/gui/easy/operator
          (only-in pict bitmap)
-         images/icons/style
+         images/icons/arrow
          images/icons/control
          images/icons/stickman
+         images/icons/style
          images/icons/symbol
          "archiver-database.rkt"
          "archiver.rkt"
@@ -115,7 +116,8 @@
 
 (define action-icons
   (hasheq 'pause (pause-icon #:color syntax-icon-color #:height button-icon-size)
-          'resume (play-icon #:color color-green #:height button-icon-size)))
+          'resume (play-icon #:color color-green #:height button-icon-size)
+          'reset (left-over-arrow-icon #:color halt-icon-color #:height button-icon-size)))
 
 (define (bitmap-view @the-bitmap [min-width 1])
   (pict-canvas #:min-size (@> (list (max min-width (send @the-bitmap get-width)) (send @the-bitmap get-height))) #;(if min-size (list min-size min-size) #f)
@@ -256,6 +258,12 @@
   (when th (kill-thread th))
   (update-qi @qi [th #f] [st 'paused]))
 
+(define (do-reset-qi @qi)
+  (define th (qi^-th (obs-peek @qi)))
+  (when th (kill-thread th))
+  (update-qi @qi [th #f] [st 'queued] [stage 0] [progress 0] [max-progress 0])
+  (query-exec* "update wiki set progress = 0 where wikiname = ?" (qi^-wikiname (obs-peek @qi))))
+
 (define (do-try-unpause-next-entry)
   (define queue (obs-peek @queue))
   (define next-qi (for/first ([qi queue]
@@ -303,6 +311,8 @@
                 [else (hash-ref status-icons (qi^-st @qi))])))
         (define @is-running?
           (@> (memq (qi^-st @qi) '(running))))
+        (define @is-complete?
+          (@> (eq? (qi^-st @qi) 'complete)))
         ;; state icon at the left side
         (hpanel #:stretch '(#t #f)
                 #:alignment '(left center)
@@ -315,6 +325,10 @@
                          (spacer)
                          (hpanel
                           #:stretch '(#f #f)
+                          (if-view @is-complete?
+                                   (button (hash-ref action-icons 'reset)
+                                           (λ () (do-reset-qi @qi)))
+                                   (spacer))
                           (if-view @is-running?
                                    (button (hash-ref action-icons 'pause)
                                            (λ () (do-stop-qi @qi)))
