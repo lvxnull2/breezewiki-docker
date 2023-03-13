@@ -8,6 +8,9 @@ pre, code {
     font-family: monospace;
     font-size: 0.85em;
 }
+pre {
+    overflow-x: auto;
+}
 ul, ol {
     list-style-type: initial;
     padding-left: 2em;
