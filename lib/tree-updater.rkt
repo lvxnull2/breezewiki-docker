@@ -97,6 +97,9 @@
      (string-replace-curried "pi-collapse-closed" "")
      (string-replace-curried "pi-collapse" "")))
 
+  (define (cardimage-class-updater c)
+    (string-append c " bw-updated-cardtable-cardimage"))
+
   (define attributes-updater
     (compose1
      ; uncollapsing
@@ -184,6 +187,24 @@
          ((class "table-scroller"))
          ((,element-type (@ (data-scrolling) ,@attributes)
                          ,@children)))]
+      ; HACK for /yugioh/wiki/Pot_of_Greed: move card images above tables
+      [(and (eq? element-type 'table)
+            (has-class? "cardtable" attributes)
+            (not (has-class? "bw-updated-cardtable-cardimage" attributes)))
+       (define (is-cardimage? t a c) (and (eq? t 'td)
+                                          (has-class? "cardtable-cardimage" a)))
+       (define cardimage ((query-selector is-cardimage? element)))
+       (if (not cardimage)
+           (list element-type attributes children)
+           (let ([new-cardtable (update-tree
+                                 (λ (e t a c)
+                                   (if (is-cardimage? t a c)
+                                       return-no-element
+                                       (list t a c)))
+                                 `(,element-type
+                                   (@ ,(attribute-maybe-update 'class cardimage-class-updater attributes))
+                                   ,@children))])
+             (list 'div null (list cardimage new-cardtable))))]
       ; exclude empty figcaptions
       [(and (eq? element-type 'figcaption)
             (or (eq? (length (filter element-is-element? children)) 0)

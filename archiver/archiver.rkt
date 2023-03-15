@@ -100,7 +100,7 @@
      (theme "default")
      (theme "light")
      (theme "dark")
-     (cons (format "https://~a.fandom.com/load.php?lang=en&modules=skin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles%7Csite.styles&only=styles&skin=fandomdesktop" wikiname)
+     (cons (format "https://~a.fandom.com/load.php?lang=en&modules=site.styles%7Cskin.fandomdesktop.styles%7Cext.fandom.PortableInfoboxFandomDesktop.css%7Cext.fandom.GlobalComponents.CommunityHeaderBackground.css%7Cext.gadget.site-styles%2Csound-styles&only=styles&skin=fandomdesktop" wikiname)
            (build-path save-dir "site.css"))))
   (for ([style styles]
         [i (in-naturals)])
