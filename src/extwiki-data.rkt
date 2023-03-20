@@ -33,6 +33,12 @@
            '(("Announcement: New Official Terraria Wiki!" . "https://forums.terraria.org/index.php?threads/new-official-terraria-wiki-launches-today.111239/") ("In the media" . "https://www.pcgamesn.com/terraria/wiki"))
            (λ (props) '()))
 
+          'Calamity_Mod
+          (extwiki-group^
+           "Calamity Mod"
+           '(("Announcement: Moving to wiki.gg" . "https://www.reddit.com/r/CalamityMod/comments/ts0586/important_calamity_wiki_announcement/"))
+           (λ (props) '()))
+
           'ARK
           (extwiki-group^
            "ARK"
@@ -338,6 +344,23 @@
     "https://wiki.seiwanetwork.org/wiki/Main_Page"
     "https://cdn.seiwanetwork.org/thumb/9/94/Square_Enix_Wiki_Logo.png/200px-Square_Enix_Wiki_Logo.png"
     (λ (props) '((p "The Square Enix Wiki was founded on February 8, 2012, and is an up-and-coming wiki project created by SEIWA. It focuses on covering all things Square Enix, from its video game series to its physical publications to its most notable employees and work as a company."))))
+
+   (extwiki^
+    '("terraria") 'default
+    'Terraria
+    "Official Terraria Wiki"
+    "https://terraria.wiki.gg/wiki/Terraria_Wiki"
+    "https://terraria.wiki.gg/images/5/5a/App_icon_1.3_Update.png"
+    (λ (props)
+      `()))
+
+   (extwiki^
+    '("calamitymod" "calamity-mod") 'empty
+    'Calamity_Mod
+    "Official Calamity Mod Wiki"
+    "https://calamitymod.wiki.gg/wiki/Calamity_Mod_Wiki"
+    #f
+    #f)
 
    (extwiki^
     '("ark" "ark-survival-evolved-archive") 'default
