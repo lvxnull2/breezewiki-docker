@@ -198,30 +198,21 @@
                                       (λ (v) (u-proxy-url v))
                                       (head-data^-icon-url head-data))))))
      (body (@ (class ,(head-data^-body-class head-data)))
-           ,(if (config-true? 'instance_is_official)
-                (let ([balloon '(img (@ (src "/static/three-balloons.png") (class "bw-balloon") (title "Image Source: pngimg.com/image/4955 | License: CC BY-NC 4.0 | Modifications: Resized") (width "52") (height "56")))]
-                      [extension-eligible?
-                       (cond/var
-                        [(not req) #f]
-                        (var ua-pair (assq 'user-agent (request-headers req)))
-                        [(not ua-pair) #f]
-                        (var ua (string-downcase (cdr ua-pair)))
-                        ;; everyone pretends to be chrome, so we do it in reverse
-                        ;; this excludes common browsers that don't support the extension
-                        [#t (and (not (string-contains? ua "edge/"))
-                                 (not (string-contains? ua "edg/"))
-                                 (not (string-contains? ua "mobile")))])])
+           ,(let ([extension-eligible?
+                   (cond/var
+                    [(not req) #f]
+                    (var ua-pair (assq 'user-agent (request-headers req)))
+                    [(not ua-pair) #f]
+                    (var ua (string-downcase (cdr ua-pair)))
+                    ;; everyone pretends to be chrome, so we do it in reverse
+                    ;; this excludes common browsers that don't support the extension
+                    [#t (and (not (string-contains? ua "edge/"))
+                             (not (string-contains? ua "mobile")))])])
+              (if extension-eligible?
                   `(div (@ (class "bw-top-banner"))
-                        ,balloon
-                        (div
-                         "BreezeWiki is back! Most major wikis are available.\n"
-                         ,(if extension-eligible?
-                              '(div (@ (class "bw-top-banner-rainbow"))
-                                    "Try " (a (@ (href "https://getindie.wiki/") (target "_blank")) "our affiliated browser extension") " - redirect to BreezeWiki automatically!\n")
-                              "")
-                         "As always, " (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "please go here") " to report problems, suggest features, or talk about the project.")
-                        ,balloon))
-                "")
+                        (div (@ (class "bw-top-banner-rainbow"))
+                             "Try " (a (@ (href "https://getindie.wiki/") (target "_blank")) "our affiliated browser extension") " - redirect to BreezeWiki automatically!\n"))
+                  ""))
            (div (@ (class "main-container"))
                 (div (@ (class "fandom-community-header__background tileHorizontally header")))
                 (div (@ (class "page"))
