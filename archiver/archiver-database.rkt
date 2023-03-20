@@ -20,18 +20,6 @@
 (define storage-path (anytime-path ".." "storage"))
 (define database-file (build-path storage-path "archiver.db"))
 
-(define migrations
-  (wrap-sql
-   ((query-exec slc "create table page (wikiname TEXT NOT NULL, basename TEXT NOT NULL, progress INTEGER NOT NULL, PRIMARY KEY (wikiname, basename))")
-    (query-exec slc "create table wiki (wikiname TEXT NOT NULL, progress INTEGER, PRIMARY KEY (wikiname))"))
-   ((query-exec slc "create table special_page (wikiname TEXT NOT NULL, key TEXT NOT NULL, basename TEXT NOT NULL, PRIMARY KEY (wikiname, key))"))
-   ((query-exec slc "update wiki set progress = 2 where wikiname in (select wikiname from wiki inner join page using (wikiname) group by wikiname having min(page.progress) = 1)"))
-   ((query-exec slc "create table image (wikiname TEXT NOT NULL, hash TEXT NTO NULL, url TEXT NOT NULL, ext TEXT, source INTEGER NOT NULL, progress INTEGER NOT NULL, PRIMARY KEY (wikiname, hash))"))
-   ((query-exec slc "alter table wiki add column sitename TEXT")
-    (query-exec slc "alter table wiki add column basepage TEXT")
-    (query-exec slc "alter table wiki add column license_text TEXT")
-    (query-exec slc "alter table wiki add column license_url TEXT"))))
-
 (define slc (box #f))
 (define (get-slc)
   (define slc* (unbox slc))
@@ -49,6 +37,18 @@
                           (query-exec slc* "insert into database_version values (0)")
                           0)])
          (query-value slc* "select version from database_version")))
+
+     (define migrations
+       (wrap-sql
+        ((query-exec slc* "create table page (wikiname TEXT NOT NULL, basename TEXT NOT NULL, progress INTEGER NOT NULL, PRIMARY KEY (wikiname, basename))")
+         (query-exec slc* "create table wiki (wikiname TEXT NOT NULL, progress INTEGER, PRIMARY KEY (wikiname))"))
+        ((query-exec slc* "create table special_page (wikiname TEXT NOT NULL, key TEXT NOT NULL, basename TEXT NOT NULL, PRIMARY KEY (wikiname, key))"))
+        ((query-exec slc* "update wiki set progress = 2 where wikiname in (select wikiname from wiki inner join page using (wikiname) group by wikiname having min(page.progress) = 1)"))
+        ((query-exec slc* "create table image (wikiname TEXT NOT NULL, hash TEXT NTO NULL, url TEXT NOT NULL, ext TEXT, source INTEGER NOT NULL, progress INTEGER NOT NULL, PRIMARY KEY (wikiname, hash))"))
+        ((query-exec slc* "alter table wiki add column sitename TEXT")
+         (query-exec slc* "alter table wiki add column basepage TEXT")
+         (query-exec slc* "alter table wiki add column license_text TEXT")
+         (query-exec slc* "alter table wiki add column license_url TEXT"))))
 
      (let do-migrate-step ()
        (when (database-version . < . (length migrations))
