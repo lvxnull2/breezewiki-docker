@@ -190,7 +190,9 @@
                 '(body "Hey" (& nbsp) (a (@ (href "/"))))))
 
 (define (has-class? name attributes)
-  (and (member name (string-split (or (get-attribute 'class attributes) "") " ")) #t))
+  ;; splitting without specifying separator or splitting on #px"\\s+" makes
+  ;; string-split use a faster whitespace-specialized implementation.
+  (and (member name (string-split (or (get-attribute 'class attributes) "") #px"\\s+")) #t))
 (module+ test
   (check-true (has-class? "red" '((class "yellow red blue"))))
   (check-false (has-class? "red" '((class "yellow blue"))))
