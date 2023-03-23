@@ -66,6 +66,11 @@
            (iframe (@ (src "https://example.com/iframe-src")))))))
 
 (define (updater wikiname #:strict-proxy? [strict-proxy? #f])
+  ;; precompute wikiurl regex for efficency
+  (define wikiurl-regex (pregexp (format "^https://(~a)\\.fandom\\.com(/wiki/.*)$" px-wikiname)))
+  ;; precompute link replacement string for efficiency
+  (define wiki-substitution (format "/~a\\1" wikiname))
+
   (define classlist-updater
     (compose1
      ; uncollapse all navbox items (bottom of page mass navigation)
@@ -110,8 +115,8 @@
      (curry attribute-maybe-update 'href
             (λ (href)
               ((compose1
-                (λ (href) (regexp-replace #rx"^(/wiki/.*)" href (format "/~a\\1" wikiname)))
-                (λ (href) (regexp-replace (pregexp (format "^https://(~a)\\.fandom\\.com(/wiki/.*)" px-wikiname)) href "/\\1\\2")))
+                (λ (href) (regexp-replace #rx"^(/wiki/.*)$" href wiki-substitution))
+                (λ (href) (regexp-replace wikiurl-regex href "/\\1\\2")))
                href)))
      ; add noreferrer to a.image
      (curry u
