@@ -110,8 +110,8 @@
                     (div (@ (class "niwa__left"))
                          (a (@ (class "niwa__go") (href ,go)) "Read " ,title " on " ,display-name " →")
                          ,@body
-                         (p "This wiki's core community has wholly migrated away from Fandom. You should "
-                            (a (@ (href ,go)) "go to " ,display-name " now!")))
+                         (p "This external wiki is a helpful alternative to Fandom. You should "
+                            (a (@ (href ,go)) "check it out now!")))
                     ,(if logo
                          `(div (@ (class "niwa__right"))
                                (img (@ (class "niwa__logo") (src ,logo))))
