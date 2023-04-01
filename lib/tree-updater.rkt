@@ -12,17 +12,12 @@
  update-tree-wiki)
 
 (define (preprocess-html-wiki html)
-  (define ((rr* find replace) contents)
-    (regexp-replace* find contents replace))
-  ((compose1
-    ; fix navbox list nesting
-    ; navbox on right of page has incorrect html "<td ...><li>" and the xexpr parser puts the <li> much further up the tree
-    ; add a <ul> to make the parser happy
-    ; usage: /fallout/wiki/Fallout:_New_Vegas_achievements_and_trophies
-    (rr* #rx"(<td[^>]*>\n?)(<li>)" "\\1<ul>\\2")
-    ; change <figcaption><p> to <figcaption><span> to make the parser happy
-    (rr* #rx"(<figcaption[^>]*>)[ \t]*<p class=\"caption\">([^<]*)</p>" "\\1<span class=\"caption\">\\2</span>"))
-   html))
+  (regexp-replace* #rx"(<(?:td|figcaption)[^>]*?>\n?)(?:<li>|[ \t]*?<p class=\"caption\">(.*?)</p>)"
+                   html (λ (whole first-tag [contents #f])
+                          (if (eq? (string-ref whole 1) #\f) ;; figcaption
+                              (string-append first-tag "<span class=\"caption\">" contents "</span>")
+                              (string-append first-tag "<ul><li>")))))
+
 (module+ test
   (check-equal? (preprocess-html-wiki "<td class=\"va-navbox-column\" style=\"width: 33%\">\n<li>Hey</li>")
                 "<td class=\"va-navbox-column\" style=\"width: 33%\">\n<ul><li>Hey</li>")
