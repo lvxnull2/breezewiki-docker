@@ -66,7 +66,7 @@
 (define (page-category req)
   (response-handler
    (define wikiname (path/param-path (first (url-path (request-uri req)))))
-   (define prefixed-category (path/param-path (caddr (url-path (request-uri req)))))
+   (define prefixed-category (string-join (map path/param-path (cddr (url-path (request-uri req)))) "/"))
    (define origin (format "https://~a.fandom.com" wikiname))
    (define source-url (format "~a/wiki/~a" origin prefixed-category))
 
