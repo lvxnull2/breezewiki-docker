@@ -31,8 +31,10 @@
                     (url-host (string->url (config-get 'canonical_origin)))
                     "breezewiki.com")))
     (p "If you'd like to be automatically sent to BreezeWiki every time in the future, "
-       (a (@ (href "https://getindie.wiki")) "get our affiliated browser extension (NEW!)")
-       " or "
+       ,@(if (config-member? 'promotions::indie_wiki_buddy "home")
+             `((a (@ (href "https://getindie.wiki")) "get our affiliated browser extension (NEW!)")
+               " or ")
+             null)
        (a (@ (href "https://docs.breezewiki.com/Automatic_Redirection.html")) "check out the tutorial in the manual."))
     (p "BreezeWiki is available on several different websites called " (a (@ (href "https://en.wikipedia.org/wiki/Mirror_site")) "mirrors") ". Each is independently run. If one mirror is offline, the others still work. "
        (a (@ (href "https://docs.breezewiki.com/Links.html#%28part._.Mirrors%29")) "See the list."))

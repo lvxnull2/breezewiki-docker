@@ -62,10 +62,19 @@
                      (p
                       (a (@ (href "https://lists.sr.ht/~cadence/breezewiki-discuss"))
                          "Chat / Bug reports / Feature requests"))
+                     ,(if (config-member? 'promotions::indie_wiki_buddy "footer")
+                          `(p
+                            (a (@ (href "https://getindie.wiki/"))
+                               "Get Indie Wiki Buddy browser extension - be redirected to BreezeWiki every time!"))
+                          "")
                      ,(if (config-true? 'instance_is_official)
                           `(p ,(format "This instance is run by the ~a developer, " (config-get 'application_name))
                               (a (@ (href "https://cadence.moe/contact"))
-                                 "Cadence."))
+                                 "Cadence")
+                              ". Proudly hosted by "
+                              (a (@ (href "http://alphamethyl.barr0w.net"))
+                                 "Barrow Network Solutions" (sup "XD"))
+                              ".")
                           `(p
                             ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application_name)))))
                 ,(if source-url
@@ -201,6 +210,7 @@
            ,(let ([extension-eligible?
                    (cond/var
                     [(not req) #f]
+                    [(not (config-member? 'promotions::indie_wiki_buddy "banner")) #f]
                     (var ua-pair (assq 'user-agent (request-headers req)))
                     [(not ua-pair) #f]
                     (var ua (string-downcase (cdr ua-pair)))

@@ -8,6 +8,7 @@
 (provide
  config-parameter
  config-true?
+ config-member?
  config-get)
 
 (module+ test
@@ -22,6 +23,11 @@
 (: config-true? (Symbol -> Boolean))
 (define (config-true? key)
   (not (member ((config-parameter key)) '("" "false"))))
+
+(: config-member? (Symbol String [#:sep String] -> Boolean))
+(define (config-member? key item #:sep [sep #px"\\s+"])
+  (and (config-true? key)
+       (not (not (member item (string-split (config-get key) sep))))))
 
 (: config-get (Symbol -> String))
 (define (config-get key)
@@ -42,7 +48,9 @@
     (feature_offline::format . "json.gz")
     (feature_offline::only . "false")
 
-    (access_log::enabled . "false")))
+    (access_log::enabled . "false")
+
+    (promotions::indie_wiki_buddy . "banner home")))
 
 (define loaded-alist
   (with-handlers
@@ -109,8 +117,10 @@
 (module+ test
   ; this is just a sanity check
   (parameterize ([(config-parameter 'application_name) "JeffWiki"]
-                 [(config-parameter 'strict_proxy) ""])
+                 [(config-parameter 'strict_proxy) ""]
+                 [(config-parameter 'promotions::indie_wiki_buddy) "a b c"])
     (check-equal? (config-get 'application_name) "JeffWiki")
     (check-false (config-true? 'strict_proxy))
-    (check-equal? (string? (config-get 'feature_offline::format)) #t)))
+    (check-equal? (string? (config-get 'feature_offline::format)) #t)
+    (check-true (config-member? 'promotions::indie_wiki_buddy "b"))))
 
