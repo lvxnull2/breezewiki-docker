@@ -403,7 +403,6 @@
    ;; fandom wikinames * empty * empty * Name * Home Page
    (extwiki^ '("aether") 'empty 'empty "Aether Wiki" "https://aether.wiki.gg/wiki/Aether_Wiki" #f #f)
    (extwiki^ '("before-darkness-falls") 'empty 'empty "Before Darkness Falls Wiki" "https://beforedarknessfalls.wiki.gg/wiki/Before_Darkness_Falls_Wiki" #f #f)
-   (extwiki^ '("calamitymod") 'empty 'empty "Calamity Mod Wiki" "https://calamitymod.wiki.gg/wiki/Calamity_Mod_Wiki" #f #f)
    (extwiki^ '("chivalry" "chivalry2") 'empty 'empty "Official Chivalry Wiki" "https://chivalry.wiki.gg/wiki/Chivalry_Wiki" #f #f)
    (extwiki^ '("clockup") 'empty 'empty "CLOCKUP WIKI" "https://en.clockupwiki.org/wiki/CLOCKUP_WIKI:Plan" #f #f)
    (extwiki^ '("half-life") 'empty 'empty "Combine OverWiki" "https://combineoverwiki.net/wiki/Main_Page" #f #f)
@@ -431,6 +430,7 @@
    (extwiki^ '("steamworld") 'empty 'empty "Official SteamWorld Wiki" "https://steamworld.wiki.gg/wiki/SteamWorld_Wiki" #f #f)
    (extwiki^ '("teamfortress") 'empty 'empty "Official Team Fortress Wiki" "https://wiki.teamfortress.com/wiki/Main_Page" #f #f)
    (extwiki^ '("temtem") 'empty 'empty "Official Temtem Wiki" "https://temtem.wiki.gg/wiki/Temtem_Wiki" #f #f)
+   (extwiki^ '("terrariamods") 'empty 'empty "Official Terraria Mods Wiki" "https://terrariamods.wiki.gg/wiki/Terraria_Mods_Wiki" #f #f)
    (extwiki^ '("thoriummod") 'empty 'empty "Official Thorium Mod Wiki" "https://thoriummod.wiki.gg/wiki/Thorium_Mod_Wiki" #f #f)
    (extwiki^ '("totherescue") 'empty 'empty "To The Rescue!" "https://totherescue.wiki.gg/wiki/To_The_Rescue%21_Wiki" #f #f)
    (extwiki^ '("touhou") 'empty 'empty "Touhou Wiki" "https://en.touhouwiki.net/wiki/Touhou_Wiki" #f #f)
