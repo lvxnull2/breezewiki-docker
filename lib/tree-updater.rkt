@@ -58,7 +58,9 @@
                                (data-src "https://static.wikia.nocookie.net/nice-image-thumbnail.png")
                                (class "thumbimage")))))
                    (figcaption "Test figure!"))
-           (iframe (@ (src "https://example.com/iframe-src")))))))
+           (iframe (@ (src "https://example.com/iframe-src")))
+           (div (@ (class "reviews"))
+                   (header "GameSpot Expert Reviews"))))))
 
 (define (updater wikiname #:strict-proxy? [strict-proxy? #f])
   ;; precompute wikiurl regex for efficency
@@ -238,6 +240,9 @@
               [(list (list 'img _)) #t]
               [_ #f]))
        return-no-element]
+      ; remove gamespot reviews/ads
+      [(has-class? "reviews" attributes)
+       return-no-element]
       [#t
        (list element-type
              ;; attributes
@@ -297,6 +302,8 @@
                 "/proxy?dest=https%3A%2F%2Fstatic.wikia.nocookie.net%2Fnice-image.png")
   ; check that noscript images are removed
   (check-equal? ((query-selector (λ (t a c) (eq? t 'noscript)) transformed)) #f)
+  ; check that gamespot reviews/ads are removed
+  (check-equal? ((query-selector (λ (t a c) (has-class? "reviews" a)) transformed)) #f)
   ; benchmark
   (when (file-exists? "../storage/Frog.html")
     (with-input-from-file "../storage/Frog.html"
