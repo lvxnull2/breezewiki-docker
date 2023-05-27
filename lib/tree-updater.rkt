@@ -60,7 +60,9 @@
                    (figcaption "Test figure!"))
            (iframe (@ (src "https://example.com/iframe-src")))
            (div (@ (class "reviews"))
-                   (header "GameSpot Expert Reviews"))))))
+                (header "GameSpot Expert Reviews"))
+           (div (@ (data-test-ampersand) (class "mw-collapsible-content"))
+                (& ndash))))))
 
 (define (updater wikiname #:strict-proxy? [strict-proxy? #f])
   ;; precompute wikiurl regex for efficency
@@ -159,7 +161,7 @@
        (u
         (λ (v) (has-class? "mw-collapsible-content" attributes))
         (λ (v) (for/list ([element v])
-                 (u (λ (element) (pair? element))
+                 (u (λ (element) (element-is-element? element))
                     (λ (element)
                       `(,(car element)
                         (@ ,@(attribute-maybe-update 'style (λ (a) (regexp-replace #rx"display: *none" a "display:inline")) (bits->attributes element)))
@@ -304,6 +306,10 @@
   (check-equal? ((query-selector (λ (t a c) (eq? t 'noscript)) transformed)) #f)
   ; check that gamespot reviews/ads are removed
   (check-equal? ((query-selector (λ (t a c) (has-class? "reviews" a)) transformed)) #f)
+  ; check that (& x) sequences are not broken
+  (check-equal? ((query-selector (λ (t a c) (dict-has-key? a 'data-test-ampersand)) transformed))
+                '(div (@ (data-test-ampersand) (class "mw-collapsible-content"))
+                      (& ndash)))
   ; benchmark
   (when (file-exists? "../storage/Frog.html")
     (with-input-from-file "../storage/Frog.html"

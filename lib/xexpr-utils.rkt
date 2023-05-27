@@ -86,15 +86,16 @@
 
 ; "element" is a real element with a type and everything (non-string, non-attributes)
 (define (element-is-element? element)
-  (and (element-is-bits? element) (not (element-is-xattributes? element))))
+  (and (element-is-bits? element) (not (eq? (car element) '&))(not (element-is-xattributes? element))))
 (module+ test
   (check-true (element-is-element? '(span "hi")))
   (check-false (element-is-element? '(@ (alt "Cute cat."))))
-  (check-false (element-is-element? "hi")))
+  (check-false (element-is-element? "hi"))
+  (check-false (element-is-element? '(& ndash))))
 
-; "element content" is a real element or a string
+; "element content" is a real element or a string or a (& x) sequence
 (define (element-is-content? element)
-  (or (string? element) (element-is-element? element)))
+  (or (string? element) (element-is-element? element) (and (pair? element) (eq? (car element) '&))))
 (module+ test
   (check-true (element-is-content? '(span "hi")))
   (check-false (element-is-content? '(@ (alt "Cute cat."))))
