@@ -1,5 +1,6 @@
 #lang typed/racket/base
 (require racket/string
+         typed/net/url-structs
          "pure-utils.rkt")
 (require/typed web-server/http/request-structs
                [#:opaque Header header?])
@@ -20,7 +21,10 @@
  ; pass in a header, headers, or something useless. they'll all combine into a list
  build-headers
  ; try to follow wikimedia's format for which characters should be encoded/replaced in page titles for the url
- page-title->path)
+ page-title->path
+ ; path/param eats semicolons into params, which need to be fixed back into semicolons
+ fix-semicolons-url-path
+ fix-semicolons-url)
 
 (module+ test
   (require "typed-rackunit.rkt"))
@@ -106,3 +110,20 @@
 (: page-title->path (String -> Bytes))
 (define (page-title->path title)
   (percent-encode (regexp-replace* " " title "_") path-set #f))
+
+(: fix-semicolons-url-path ((Listof Path/Param) -> (Listof Path/Param)))
+(define (fix-semicolons-url-path pps)
+  (for/list ([pp pps])
+    (define path (path/param-path pp))
+    (if (or (null? (path/param-param pp))
+            (symbol? path))
+        pp
+        ;; path/param does have params, which need to be fixed into a semicolon.
+        (path/param
+         (string-append path ";" (string-join (path/param-param pp) ";"))
+         null))))
+
+(: fix-semicolons-url (URL -> URL))
+(define (fix-semicolons-url orig-url)
+  (struct-copy url orig-url [path (fix-semicolons-url-path (url-path orig-url))]))
+

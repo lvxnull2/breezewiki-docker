@@ -59,16 +59,5 @@
   (make-semicolon-fixer-dispatcher tree))
 
 (define ((make-semicolon-fixer-dispatcher orig-dispatcher) conn orig-req)
-  (define orig-uri (request-uri orig-req))
-  (define pps (url-path orig-uri)) ; list of path/param structs
-  (define new-path
-    (for/list ([pp pps])
-      (if (null? (path/param-param pp))
-          pp
-          ;; path/param does have params, which need to be fixed into a semicolon.
-          (path/param
-           (string-append (path/param-path pp) ";" (string-join (path/param-param pp) ";"))
-           null))))
-  (define new-uri (struct-copy url orig-uri [path new-path]))
-  (define new-req (struct-copy request orig-req [uri new-uri]))
+  (define new-req (struct-copy request orig-req [uri (fix-semicolons-url (request-uri orig-req))]))
   (orig-dispatcher conn new-req))

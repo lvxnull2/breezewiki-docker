@@ -11,7 +11,7 @@
  url-segments->guess-title)
 
 (define (local-encoded-url->segments str) ; '("wiki" "Page_title")
-  (map path/param-path (url-path (string->url str))))
+  (map path/param-path (fix-semicolons-url-path (url-path (string->url str)))))
 
 (define (url-segments->basename segments) ; "Page_title" filename encoded, no extension or dir prefix
   (define extra-encoded (map (λ (s) (bytes->string/latin-1 (percent-encode s filename-set #f))) (cdr segments)))
