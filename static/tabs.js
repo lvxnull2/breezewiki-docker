@@ -1,29 +1,22 @@
 "use strict";
 
-function handleTabber(tabber) {
+let tabToFind = location.hash.length > 1 ? location.hash.substring(1) : null;
+for (let tabber of document.body.querySelectorAll(".wds-tabber")) {
     let [tabs, contents] = getTabs(tabber);
 
     for (let i in tabs) {
         let tab = tabs[i];
         let content = contents[i];
-        tab.addEventListener("click", function(e) {
-            let [currentTab, currentContent] = getCurrentTab(tabber);
-            if (currentTab) {
-                currentTab.classList.remove("wds-is-current");
-            }
-            if (currentContent) {
-                currentContent.classList.remove("wds-is-current");
-            }
 
-            tab.classList.add("wds-is-current");
-            content.classList.add("wds-is-current");
+        tab.addEventListener("click", function(e) {
+            setCurrentTab(tabber, tab, content);
             e.preventDefault();
         });
+        if (tab.dataset.hash === tabToFind) {
+            setCurrentTab(tabber, tab, content);
+            tabToFind = null;
+        }
     }
-}
-
-for (let tabber of document.body.querySelectorAll(".wds-tabber")) {
-    handleTabber(tabber);
 }
 document.body.classList.remove("bw-tabs-nojs");
 
@@ -60,4 +53,19 @@ function getCurrentTab(tabber) {
     }
 
     return [tab, content];
+}
+
+function setCurrentTab(tabber, tab, content) {
+    let [currentTab, currentContent] = getCurrentTab(tabber);
+    if (currentTab) {
+        currentTab.classList.remove("wds-is-current");
+    }
+    if (currentContent) {
+        currentContent.classList.remove("wds-is-current");
+    }
+
+    tab.classList.add("wds-is-current");
+    content.classList.add("wds-is-current");
+    location.hash = "#" + tab.dataset.hash;
+    history.pushState(null, "", "#" + tab.dataset.hash);
 }
