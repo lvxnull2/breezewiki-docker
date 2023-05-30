@@ -14,7 +14,6 @@ for (let tabber of document.body.querySelectorAll(".wds-tabber")) {
         });
         if (tab.dataset.hash === tabToFind) {
             setCurrentTab(tabber, tab, content);
-            tabToFind = null;
         }
     }
 }
@@ -66,6 +65,8 @@ function setCurrentTab(tabber, tab, content) {
 
     tab.classList.add("wds-is-current");
     content.classList.add("wds-is-current");
-    location.hash = "#" + tab.dataset.hash;
-    history.pushState(null, "", "#" + tab.dataset.hash);
+    if (tab.dataset.hash) {
+        location.hash = "#" + tab.dataset.hash;
+        history.pushState(null, "", "#" + tab.dataset.hash);
+    }
 }
