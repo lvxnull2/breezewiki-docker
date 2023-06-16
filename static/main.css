@@ -210,9 +210,12 @@ figcaption, .lightbox-caption, .thumbcaption {
     display: block;
 }
 
-/* javascript audio play buttons, see hearthstone/wiki/Diablo_(Duels_hero) */
-a.ext-audiobutton {
+/* javascript audio play buttons */
+a.ext-audiobutton { /* see hearthstone/wiki/Diablo_(Duels_hero) */
     display: none;
+}
+.sound > [style="display:none"] { /* see minecraft/wiki/villager#Sounds */
+  display: inline !important;
 }
 
 /* animated slots */
