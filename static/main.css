@@ -210,6 +210,11 @@ figcaption, .lightbox-caption, .thumbcaption {
     display: block;
 }
 
+/* javascript audio play buttons, see hearthstone/wiki/Diablo_(Duels_hero) */
+a.ext-audiobutton {
+    display: none;
+}
+
 /* animated slots */
 #mw-content-text .animated > :not(.animated-active), #mw-content-text .animated > .animated-subframe > :not(.animated-active) {
     display: inline-block;

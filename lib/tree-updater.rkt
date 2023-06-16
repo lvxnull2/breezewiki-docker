@@ -110,6 +110,10 @@
      #;(curry attribute-maybe-update 'class
               (λ (class) (string-join (classlist-updater (string-split class " ")) " ")))
      (curry attribute-maybe-update 'class class-updater)
+     ; audio buttons - sample: hearthstone/wiki/Diablo_(Duels_hero)#Sounds
+     (curry u
+            (λ (v) (has-class? "ext-audiobutton" v))
+            (λ (v) (dict-set (dict-remove v 'hidden) 'controls '(""))))
      ; yet more uncollapsing - sample: warframe/wiki/Amp_(Ability)
      (curry u
             (λ (v) (and (dict-has-key? v 'id)
