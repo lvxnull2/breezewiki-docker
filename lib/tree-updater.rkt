@@ -110,6 +110,11 @@
      #;(curry attribute-maybe-update 'class
               (λ (class) (string-join (classlist-updater (string-split class " ")) " ")))
      (curry attribute-maybe-update 'class class-updater)
+     ; yet more uncollapsing - sample: warframe/wiki/Amp_(Ability)
+     (curry u
+            (λ (v) (and (dict-has-key? v 'id)
+                        (string-prefix? (car (dict-ref v 'id)) "mw-customcollapsible")))
+            (λ (v) (dict-set v 'style "display:block")))
      ; change links to stay on the same wiki
      (curry attribute-maybe-update 'href
             (λ (href)
@@ -244,6 +249,9 @@
        return-no-element]
       ; remove gamespot reviews/ads
       [(has-class? "reviews" attributes)
+       return-no-element]
+      ; remove customcollapsible customtoggle buttons - sample: warframe/wiki/Amp_(Ability)
+      [(and (dict-has-key? attributes 'class) (regexp-match? #rx"^mw-customtoggle-[^ ]* button-c$" (car (dict-ref attributes 'class))))
        return-no-element]
       [#t
        (list element-type
