@@ -61,6 +61,16 @@
              ("Browser Extension" . "https://runescape.wiki/w/RuneScape:Finding_the_wikis_with_ease#Extensions"))
            (λ (props) '()))
 
+          'Minecraft
+          (extwiki-group^
+           "Minecraft"
+           '(("Post-Move FAQ" . "https://minecraft.wiki/w/Minecraft_Wiki:Moving_from_Fandom")
+             ("Pre-Move Discussion" . "https://minecraft.fandom.com/wiki/Minecraft_Wiki:Moving_from_Fandom")
+             ("In the media: PCGamer" . "https://www.pcgamer.com/official-minecraft-wiki-editors-so-furious-at-fandoms-degraded-functionality-and-popups-theyre-overwhelmingly-voting-to-leave-the-site/")
+             ("In the media: PCGamesN" . "https://www.pcgamesn.com/minecraft/wiki-fandom"))
+           (λ (props)
+             '(p "The wiki was founded by Citricsquid on July 16th, 2009 as a way to document information from Minecraft. Since November 15th, 2010, it has been hosted by Curse Media. On December 12th, 2018, it moved to Fandom as it purchased Curse Media. Since September 24, 2023, it forked from Fandom and has been hosted by Weird Gloop.")))
+
           'empty
           (extwiki-group^
            "Misc"
@@ -399,6 +409,15 @@
     (λ (props)
       `((p "“Fandom bought Gamepedia and forced a migration, with their restricted, ad-heavy appearance, and other annoying features that we could not remove, the wiki grew slow and annoying to use, especially for logged out users.")
         (p "“We decided to move away from Fandom to Wiki.gg, which returns the wiki to how it used to be on gamepedia, without the ads spamming and forced videos.”"))))
+
+   (extwiki^
+    '("minecraft") 'default
+    'Minecraft
+    "The Minecraft Wiki"
+    "https://minecraft.wiki/w/Minecraft_Wiki"
+    "https://minecraft.wiki/images/Wiki.png"
+    (λ (props)
+      `()))
 
    ;; fandom wikinames * empty * empty * Name * Home Page
    (extwiki^ '("aether") 'empty 'empty "Aether Wiki" "https://aether.wiki.gg/wiki/Aether_Wiki" #f #f)
