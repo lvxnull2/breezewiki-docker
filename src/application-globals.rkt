@@ -240,7 +240,7 @@
                                            (div (@ (class "bw-ss__container") (id "bw-pr-search-suggestions"))))
                                      (div (@ (class "bw-theme__select"))
                                           (span (@ (class "bw-theme__main-label")) "Page theme")
-                                          (div (@ (class "bw-theme__items"))
+                                          (span (@ (class "bw-theme__items"))
                                                ,@(for/list ([theme '(default light dark)])
                                                    (define class
                                                      (if (equal? theme (user-cookies^-theme user-cookies))
@@ -251,7 +251,7 @@
                                                                   req
                                                                   (struct-copy user-cookies^ user-cookies
                                                                                [theme theme]))) (class ,class))
-                                                       (div (@ (class "bw-theme__icon-container"))
+                                                       (span (@ (class "bw-theme__icon-container"))
                                                             ,(hash-ref theme-icons theme))
                                                        ,(format "~a" theme)))))))
                            (div (@ (id "content") #;(class "page-content"))

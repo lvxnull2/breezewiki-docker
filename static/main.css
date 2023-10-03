@@ -332,6 +332,7 @@ a.ext-audiobutton { /* see hearthstone/wiki/Diablo_(Duels_hero) */
     display: flex;
 }
 .bw-theme__item {
+    display: inline-block;
     display: flex;
     align-items: baseline;
     padding: 2px;
