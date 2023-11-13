@@ -66,6 +66,9 @@ function setCurrentTab(tabber, tab, content) {
     tab.classList.add("wds-is-current");
     content.classList.add("wds-is-current");
     if (tab.dataset.hash) {
-        location.hash = "#" + tab.dataset.hash;
+        let fragment = "#" + tab.dataset.hash;
+        if (location.hash !== fragment) {
+            history.pushState(null, "", fragment);
+        }
     }
 }
