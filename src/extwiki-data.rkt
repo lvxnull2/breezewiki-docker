@@ -423,7 +423,7 @@
    (extwiki^ '("aether") 'empty 'empty "Aether Wiki" "https://aether.wiki.gg/wiki/Aether_Wiki" #f #f)
    (extwiki^ '("before-darkness-falls") 'empty 'empty "Before Darkness Falls Wiki" "https://beforedarknessfalls.wiki.gg/wiki/Before_Darkness_Falls_Wiki" #f #f)
    (extwiki^ '("chivalry" "chivalry2") 'empty 'empty "Official Chivalry Wiki" "https://chivalry.wiki.gg/wiki/Chivalry_Wiki" #f #f)
-   (extwiki^ '("clockup") 'empty 'empty "CLOCKUP WIKI" "https://en.clockupwiki.org/wiki/CLOCKUP_WIKI:Plan" #f #f)
+   (extwiki^ '("clockup") 'empty 'empty "CLOCKUP WIKI" "https://en.clockup.wiki/wiki/Main_Page" #f #f)
    (extwiki^ '("half-life") 'empty 'empty "Combine OverWiki" "https://combineoverwiki.net/wiki/Main_Page" #f #f)
    (extwiki^ '("coromon") 'empty 'empty "Coromon Wiki" "https://coromon.wiki.gg/wiki/Coromon_Wiki" #f #f)
    (extwiki^ '("cosmoteer") 'empty 'empty "Cosmoteer Wiki" "https://cosmoteer.wiki.gg/wiki/Cosmoteer_Wiki" #f #f)
