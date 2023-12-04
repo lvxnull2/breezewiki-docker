@@ -93,6 +93,19 @@ https://solr.apache.org/guide/solr/latest/indexing-guide/document-analysis.html#
     </analyzer>
   </fieldType>
 
+  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true">
+    <analyzer type="index">
+      <tokenizer name="standard"/>
+      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt" />
+      <filter name="lowercase"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer name="standard"/>
+      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt" />
+      <filter name="lowercase"/>
+    </analyzer>
+  </fieldType>
+
   <fieldType name="text_en_splitting_numbers" class="solr.TextField" positionIncrementGap="100" multiValued="true">
     <analyzer type="index">
       <tokenizer name="whitespace"/>
