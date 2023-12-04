@@ -83,40 +83,38 @@ https://solr.apache.org/guide/solr/latest/indexing-guide/document-analysis.html#
 
   <fieldType name="text_prefix" class="solr.TextField" positionIncrementGap="100">
     <analyzer type="index">
-      <tokenizer class="solr.LowerCaseTokenizerFactory"/>
+      <tokenizer name="standard"/>
+      <filter name="lowercase"/>
       <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="20" />
     </analyzer>
     <analyzer type="query">
-      <tokenizer class="solr.LowerCaseTokenizerFactory"/>
+      <tokenizer name="standard"/>
+      <filter name="lowercase"/>
     </analyzer>
   </fieldType>
 
-  <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true">
+  <fieldType name="text_en_splitting_numbers" class="solr.TextField" positionIncrementGap="100" multiValued="true">
     <analyzer type="index">
-      <tokenizer name="standard"/>
-      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt" />
-      <!-- in this example, we will only use synonyms at query time
-           <filter name="synonymGraph" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
-           <filter name="flattenGraph"/>
-      -->
+      <tokenizer name="whitespace"/>
+      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt"/>
+      <filter name="wordDelimiterGraph" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
       <filter name="lowercase"/>
+      <filter name="porterStem"/>
+      <filter name="flattenGraph" />
     </analyzer>
     <analyzer type="query">
-      <tokenizer name="standard"/>
-      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt" />
+      <tokenizer name="whitespace"/>
+      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt"/>
+      <filter name="wordDelimiterGraph" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
       <filter name="lowercase"/>
+      <filter name="porterStem"/>
     </analyzer>
   </fieldType>
 
   <fieldType name="text_en_splitting" class="solr.TextField" positionIncrementGap="100" autoGeneratePhraseQueries="true">
     <analyzer type="index">
       <tokenizer name="whitespace"/>
-      <!-- Case insensitive stop word removal.
-      -->
-      <filter name="stop"
-              ignoreCase="true"
-              words="lang/stopwords_en.txt"
-              />
+      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt"/>
       <filter name="wordDelimiterGraph" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1"/>
       <filter name="lowercase"/>
       <filter class="solr.PatternReplaceFilterFactory" pattern="(\d{2,})" replacement="" replace="all" />
@@ -125,10 +123,7 @@ https://solr.apache.org/guide/solr/latest/indexing-guide/document-analysis.html#
     </analyzer>
     <analyzer type="query">
       <tokenizer name="whitespace"/>
-      <filter name="stop"
-              ignoreCase="true"
-              words="lang/stopwords_en.txt"
-              />
+      <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt"/>
       <filter name="wordDelimiterGraph" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1"/>
       <filter name="lowercase"/>
       <filter name="porterStem"/>
@@ -137,7 +132,7 @@ https://solr.apache.org/guide/solr/latest/indexing-guide/document-analysis.html#
 
   <!-- Fields -->
   <field name="id" type="string" indexed="true" required="true" />
-  <field name="title" type="text_en_splitting" indexed="true" stored="true" required="true" />
+  <field name="title" type="text_en_splitting_numbers" indexed="true" stored="true" required="true" />
   <field name="body" type="text_en_splitting" indexed="true" stored="true" required="true" />
   <field name="table" type="text_en_splitting" indexed="true" stored="false" required="true" />
   <field name="len" type="pint" indexed="false" stored="true" required="true" />
