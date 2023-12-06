@@ -249,10 +249,23 @@ a.ext-audiobutton { /* see hearthstone/wiki/Diablo_(Duels_hero) */
 .my-result__link {
     font-size: 1.2em;
 }
+.my-result__description {
+    font-size: 0.8em;
+    white-space: pre-line;
+    margin-left: 1.2em;
+}
+.my-result mark {
+    background: rgba(255, 255, 0, 0.4);
+}
 .my-result__info {
     font-size: 0.8em;
     color: var(--theme-page-text-color--hover);
     margin-left: 1.2em;
+}
+.my-result__filter {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr;
+    grid-gap: 8px;
 }
 
 /* (breezewiki) search suggestions */
