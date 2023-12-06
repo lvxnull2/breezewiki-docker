@@ -46,7 +46,8 @@
     (for/list ([doc (jp "/response/docs" json)])
       (define id (jp "/id" doc))
       (define len (jp "/len" doc))
-      (define title (jp "/title" doc))
+      (define title (let ([t (jp "/title" doc)])
+                      (if (list? t) (car t) t)))
       (define page-path (page-title->path title))
       (define kb (exact->inexact (/ (round (/ len 100)) 10))) ; divide by 1000 and round to nearest 0.1
       (define words (* (round (/ len 60)) 10)) ; divide by 6 and round to nearest 10
