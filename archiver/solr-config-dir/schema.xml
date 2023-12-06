@@ -106,7 +106,7 @@ https://solr.apache.org/guide/solr/latest/indexing-guide/document-analysis.html#
     </analyzer>
   </fieldType>
 
-  <fieldType name="text_en_splitting_numbers" class="solr.TextField" positionIncrementGap="100" multiValued="true">
+  <fieldType name="text_en_number_splitting" class="solr.TextField" positionIncrementGap="100">
     <analyzer type="index">
       <tokenizer name="whitespace"/>
       <filter name="stop" ignoreCase="true" words="lang/stopwords_en.txt"/>
@@ -145,7 +145,7 @@ https://solr.apache.org/guide/solr/latest/indexing-guide/document-analysis.html#
 
   <!-- Fields -->
   <field name="id" type="string" indexed="true" required="true" />
-  <field name="title" type="text_en_splitting_numbers" indexed="true" stored="true" required="true" />
+  <field name="title" type="text_en_number_splitting" indexed="true" stored="true" required="true" />
   <field name="body" type="text_en_splitting" indexed="true" stored="true" required="true" />
   <field name="table" type="text_en_splitting" indexed="true" stored="false" required="true" />
   <field name="len" type="pint" indexed="false" stored="true" required="true" />
