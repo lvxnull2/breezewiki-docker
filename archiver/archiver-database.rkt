@@ -48,7 +48,8 @@
         ((query-exec slc* "alter table wiki add column sitename TEXT")
          (query-exec slc* "alter table wiki add column basepage TEXT")
          (query-exec slc* "alter table wiki add column license_text TEXT")
-         (query-exec slc* "alter table wiki add column license_url TEXT"))))
+         (query-exec slc* "alter table wiki add column license_url TEXT"))
+        ((query-exec slc* "alter table page add column redirect"))))
 
      (let do-migrate-step ()
        (when (database-version . < . (length migrations))

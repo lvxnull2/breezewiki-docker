@@ -1,5 +1,6 @@
 #lang racket/base
 (require racket/file
+         racket/format
          racket/function
          racket/list
          racket/path
@@ -43,10 +44,18 @@
             wikiname
             (params->query '(("action" . "query")
                              ("meta" . "siteinfo")
-                             ("siprop" . "general|rightsinfo|statistics")
+                             ("siprop" . "general|rightsinfo|statistics|namespaces")
                              ("format" . "json")
                              ("formatversion" . "2")))))
   (define data (response-json (get dest-url)))
+  (define content-nss
+    (sort
+     (for/list ([(k v) (in-hash (jp "/query/namespaces" data))]
+                #:do [(define id (hash-ref v 'id))]
+                #:when (and (id . < . 2900) ; exclude maps namespace
+                            (hash-ref v 'content))) ; exclude non-content and talk namespaces
+       id)
+     <))
   (define exists? (query-maybe-value* "select progress from wiki where wikiname = ?" wikiname))
   (if (and exists? (not (sql-null? exists?)))
       (query-exec* "update wiki set sitename = ?, basepage = ?, license_text = ?, license_url = ? where wikiname = ?"
@@ -61,7 +70,8 @@
                   (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
                   (jp "/query/rightsinfo/text" data)
                   (jp "/query/rightsinfo/url" data)))
-  (jp "/query/statistics/articles" data))
+  (values (jp "/query/statistics/articles" data)
+          content-nss))
 
 
 (define (check-style-for-images wikiname path)
@@ -131,48 +141,57 @@
   ;; done yet?
   (unless (and (real? wiki-progress) (wiki-progress . >= . 1))
     ;; Count total pages
-    (define num-pages (insert-wiki-entry wikiname))
+    (define-values (num-pages namespaces) (insert-wiki-entry wikiname))
     ;; Download the entire index of pages
-    (define basenames
-      (let loop ([path-with-namefrom "/wiki/Local_Sitemap"]
-                 [basenames-previous-pages null])
-        ;; Download the current index page
-        (define url (format "https://~a.fandom.com~a" wikiname path-with-namefrom))
-        (define r (get url))
-        ;; Metadata from this page (the link to the next page)
-        (define page (html->xexp (bytes->string/utf-8 (response-body r))))
-        (define link-namefrom
-          ((query-selector (λ (t a c x) (and (eq? t 'a)
-                                             (pair? x)
-                                             (string-contains? (car x) "Next page")
-                                             (let ([href (get-attribute 'href a)] )
-                                               (and href (string-contains? href "/wiki/Local_Sitemap")))))
-                           page #:include-text? #t)))
-        ;; Content from this page
-        (define basenames-this-page
-          (for/list ([link (in-producer
-                            (query-selector
-                             (λ (t a c) (eq? t 'a))
-                             ((query-selector (λ (t a c) (has-class? "mw-allpages-chunk" a)) page)))
-                            #f)])
-            (local-encoded-url->basename (get-attribute 'href (bits->attributes link)))))
-        ;; Call the progress callback
-        (define all-basenames (append basenames-previous-pages basenames-this-page))
-        (callback (length all-basenames) num-pages (last all-basenames))
-        ;; Recurse to download from the next page
-        (if link-namefrom
-            (loop (get-attribute 'href (bits->attributes link-namefrom)) all-basenames)
-            all-basenames)))
-    ;; Save those pages into the database
-    ;; SQLite can have a maximum of 32766 parameters in a single query
-    (for ([slice (in-slice 32760 basenames)])
-      (define query-template (string-join (make-list (length slice) "(?1, ?, 0)") ", " #:before-first "insert or ignore into page (wikiname, basename, progress) values "))
-      (call-with-transaction
-       (get-slc)
-       (λ ()
-         (apply query-exec* query-template wikiname slice)
-         ;; Record that we have the complete list of pages
-         (query-exec* "update wiki set progress = 1 where wikiname = ?" wikiname))))))
+    (for*/fold ([total 0])
+               ([namespace namespaces]
+                [redir-filter '("nonredirects" "redirects")])
+      (let loop ([apcontinue ""]
+                 [basenames null])
+        (cond
+          [apcontinue
+           (define url (format "https://~a.fandom.com/api.php?~a"
+                               wikiname
+                               (params->query `(("action" . "query")
+                                                ("list" . "allpages")
+                                                ("apnamespace" . ,(~a namespace))
+                                                ("apfilterredir" . ,redir-filter)
+                                                ("aplimit" . "500")
+                                                ("apcontinue" . ,apcontinue)
+                                                ("format" . "json")
+                                                ("formatversion" . "2")))))
+           ;; Download the current listing page
+           (define res (get url))
+           (define json (response-json res))
+           ;; Content from this page
+           (define current-basenames
+             (for/list ([page (jp "/query/allpages" json)])
+               (title->basename (jp "/title" page))))
+           (when ((length current-basenames) . > . 0)
+             ;; Report
+             (if (equal? redir-filter "nonredirects")
+                 (callback (+ (length basenames) (length current-basenames) total) num-pages (last current-basenames))
+                 (callback total num-pages (last current-basenames))))
+           ;; Loop
+           (loop (jp "/continue/apcontinue" json #f) (append basenames current-basenames))]
+          [else
+           ;; All done with this (loop)! Save those pages into the database
+           ;; SQLite can have a maximum of 32766 parameters in a single query
+           (begin0
+               ;; next for*/fold
+               (if (equal? redir-filter "nonredirects")
+                   (+ (length basenames) total)
+                   total) ; redirects don't count for the site statistics total
+             (call-with-transaction
+              (get-slc)
+              (λ ()
+                (for ([slice (in-slice 32760 basenames)])
+                  (define query-template
+                    (string-join #:before-first "insert or ignore into page (wikiname, redirect, basename, progress) values "
+                                 (make-list (length slice) "(?1, ?2, ?, 0)") ", "))
+                  (apply query-exec* query-template wikiname (if (equal? redir-filter "redirects") 1 sql-null) slice)))))])))
+    ;; Record that we have the complete list of pages
+    (query-exec* "update wiki set progress = 1 where wikiname = ?" wikiname)))
 
 
 ;; 2. Download each page via API and:
@@ -183,7 +202,7 @@
   (define save-dir (build-path archive-root wikiname))
   (make-directory* save-dir)
   ;; gather list of basenames to download (that aren't yet complete)
-  (define basenames (query-list* "select basename from page where wikiname = ? and progress < ?"
+  (define basenames (query-list* "select basename from page where wikiname = ? and progress < ? and redirect is null"
                                 wikiname max-page-progress))
   ;; counter of complete/incomplete basenames
   (define already-done-count
@@ -222,8 +241,39 @@
     (query-exec* "update page set progress = 1 where wikiname = ? and basename = ?"
                 wikiname basename)
     (callback i total-count basename))
+  ;; save redirects as well
+  (save-redirects wikiname callback (+ already-done-count (length basenames)) total-count)
   ;; saved all pages, register that fact in the database
   (query-exec* "update wiki set progress = 2 where wikiname = ?" wikiname))
+
+
+;; 2.5. Download each redirect-target via API and save mapping in database
+(define (save-redirects wikiname callback already-done-count total-count)
+  (define basenames (query-list* "select basename from page where wikiname = ? and progress < ? and redirect = 1"
+                                 wikiname max-page-progress))
+  ;; loop through basenames, in slices of 50 (MediaWiki API max per request), and download
+  (for ([basename basenames]
+        [i (in-naturals (add1 already-done-count))])
+    (define dest-url
+      (format "https://~a.fandom.com/api.php?~a"
+              wikiname
+              (params->query `(("action" . "query")
+                               ("prop" . "links")
+                               ("titles" . ,(basename->name-for-query basename))
+                               ("format" . "json")
+                               ("formatversion" . "2")))))
+    (define res (get dest-url))
+    (define json (response-json res))
+    (define dest-title (jp "/query/pages/0/links/0/title" json #f))
+    (callback i total-count basename)
+    (cond
+      [dest-title
+       ;; store it
+       (define dest-basename (title->basename dest-title))
+       (query-exec* "update page set progress = 1, redirect = ? where wikiname = ? and basename = ?" dest-basename wikiname basename)]
+      [else
+       ;; the page just doesn't exist
+       (query-exec* "delete from page where wikiname = ? and basename = ?" wikiname basename)])))
 
 
 ;; 3. Download CSS and:

@@ -35,9 +35,12 @@
           (output-lines? #t)]))
  (define (update-width)
    (when (output-progress?)
-     (with-charterm
-       (call-with-values (λ () (charterm-screen-size))
-                         (λ (cols rows) (set! width cols))))))
+     (case (system-type 'os)
+       [(linux)
+        (with-charterm
+          (call-with-values (λ () (charterm-screen-size))
+                            (λ (cols rows) (set! width cols))))]
+       [else 100])))
  (update-width)
  ;; check
  (when (or (not wikiname) (equal? wikiname ""))
@@ -56,8 +59,8 @@
       (define real-width (min (string-length basename) rest))
       (define spare-width (- rest real-width))
       (define name-display (substring basename 0 real-width))
-      (define whitespace (make-string spare-width #\ ))
-      (printf "~a~a~a\r" prefix name-display whitespace)]))
+      (printf "\e[2K\r~a~a" prefix name-display)
+      (flush-output)]))
  ;; download all stages
  (for ([stage all-stages]
        [i (in-naturals 1)])

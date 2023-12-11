@@ -19,7 +19,7 @@
      [(not wikiname)
       (response/output
        #:code 400
-       #:mime-type "text/plain"
+       #:mime-type #"text/plain"
        (λ (out)
          (displayln "Requires wikiname and q parameters." out)))]
      [(or (not q) (equal? q ""))

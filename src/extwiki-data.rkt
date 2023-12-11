@@ -377,7 +377,7 @@
     '("runescape") 'default
     'RuneScape
     "RuneScape Wiki"
-    "https://runescape.wiki/"
+    "https://runescape.wiki/w/Main_Page"
     "https://runescape.wiki/images/Wiki.png"
     (λ (props)
       `((p "The RuneScape Wiki was founded on April 8, 2005. In October 2018, the wiki left Fandom (then Wikia), citing their apathy towards the wiki and excessive advertisements."))))
@@ -386,7 +386,7 @@
     '("oldschoolrunescape") 'default
     'RuneScape
     "Old School RuneScape Wiki"
-    "https://oldschool.runescape.wiki/"
+    "https://oldschool.runescape.wiki/w/Main_Page"
     "https://oldschool.runescape.wiki/images/Wiki.png"
     (λ (props)
       `((p "The Old School RuneScape Wiki was founded on February 14, 2013. In October 2018, the RuneScape Wiki left Fandom (then Wikia), citing their apathy towards the wiki and excessive advertisements, with the Old School RuneScape Wiki following suit."))))
@@ -395,7 +395,7 @@
     '("runescapeclassic") 'default
     'RuneScape
     "RuneScape Classic Wiki"
-    "https://classic.runescape.wiki/"
+    "https://classic.runescape.wiki/w/Main_Page"
     "https://classic.runescape.wiki/images/Wiki.png"
     (λ (props)
       `((p "The Old School RuneScape Wiki was founded on April 19, 2009. In October 2018, the RuneScape Wiki left Fandom (then Wikia), citing their apathy towards the wiki and excessive advertisements, with the RuneScape Classic Wiki following suit."))))

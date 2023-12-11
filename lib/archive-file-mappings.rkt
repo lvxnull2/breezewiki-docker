@@ -7,6 +7,7 @@
  local-encoded-url->segments
  url-segments->basename
  local-encoded-url->basename
+ title->basename
  basename->name-for-query
  url-segments->guess-title)
 
@@ -20,6 +21,12 @@
 
 (define (local-encoded-url->basename str) ; '("wiki" "Page_title"), no extension or dir prefix
   (url-segments->basename (local-encoded-url->segments str)))
+
+(define (title->basename title) ; "Page title/Strategies" -> "Page_title#Strategies" filename encoded, no extension or dir prefi
+  (define elements (string-split (string-replace title " " "_") "/"))
+  (define extra-encoded (map (λ (s) (bytes->string/latin-1 (percent-encode s filename-set #f))) elements))
+  (define basic-filename (string-join extra-encoded "#"))
+  basic-filename)
 
 (define (basename->name-for-query str)
   (uri-decode (regexp-replace* #rx"#" str "/")))

@@ -53,7 +53,8 @@
    ;; grab the part after ?q= which is the search terms
    (define query (dict-ref params 'q #f))
    ;; figure out which search provider we're going to use
-   (define search-provider (hash-ref search-providers (config-get 'feature_offline::search)))
+   (define search-provider (hash-ref search-providers (config-get 'feature_offline::search)
+                                     (λ () (error 'search-provider "unknown search provider configured"))))
 
    ;; external special:search url to link at the bottom of the page as the upstream source
    (define external-search-url
