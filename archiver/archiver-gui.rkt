@@ -90,27 +90,21 @@
 
 (define/obs @input "")
 
-(splicing-let ([frame-count 30])
+(splicing-let ([frame-count 20])
   (define stickman-frames
     (for/vector ([s (in-range 0 1 (/ 1 frame-count))])
       (running-stickman-icon
        s
        #:height status-icon-size
-       #:material (default-icon-material))))
+       #:material (default-icon-material)))))
 
-  (define/obs @stick-frame-no 0)
-  (define stick-timer
-    (new timer%
-         [notify-callback (λ () (@stick-frame-no . <~ . add1))]
-         [interval (truncate (/ 1000 frame-count))]))
-  (define/obs @stick
-    (@stick-frame-no . ~> . (λ (n) (vector-ref stickman-frames
-                                               (modulo n (vector-length stickman-frames)))))))
+(define (stick n)
+  (vector-ref stickman-frames (modulo n (vector-length stickman-frames))))
 
 (define status-icons
   (hasheq 'queued (stop-icon #:color syntax-icon-color #:height status-icon-size)
           'paused (continue-forward-icon #:color syntax-icon-color #:height status-icon-size)
-          'running @stick
+          'running (stick 0)
           'error (x-icon #:height status-icon-size)
           'complete (check-icon #:color color-green #:height status-icon-size)))
 
@@ -155,7 +149,7 @@
                  #:mixin (λ (%) (class % (super-new)
                                   (obs-observe! @visible? (λ (visible?) (send this show visible?)))))
                  (vpanel #:margin '(15 15)
-                         (text "Encountered this error while downloading:")
+                         (text (format "Encountered this error while downloading ~a:" (qi^-wikiname (obs-peek @qi))))
                          (input #:style '(multiple hscroll)
                                 #:min-size '(#f 200)
                                 (exn->string e))
@@ -259,15 +253,16 @@
   (update-qi @qi [th #f] [st 'paused]))
 
 (define (do-reset-qi @qi)
+  (define reset-progress-to 0)
   (define th (qi^-th (obs-peek @qi)))
   (when th (kill-thread th))
-  (update-qi @qi [th #f] [st 'queued] [stage 0] [progress 0] [max-progress 0])
-  (query-exec* "update wiki set progress = 0 where wikiname = ?" (qi^-wikiname (obs-peek @qi))))
+  (update-qi @qi [th #f] [st 'queued] [stage reset-progress-to] [progress 0] [max-progress 0])
+  (query-exec* "update wiki set progress = ? where wikiname = ?" reset-progress-to (qi^-wikiname (obs-peek @qi))))
 
 (define (do-try-unpause-next-entry)
   (define queue (obs-peek @queue))
-  (define next-qi (for/first ([qi queue]
-                              #:when (memq (qi^-st qi) '(paused queued error)))
+  (define next-qi (for/last ([qi queue]
+                             #:when (memq (qi^-st qi) '(paused queued)))
                     qi))
   (when next-qi
     (define @qi (@queue . ~> . (λ (queue) (findf (λ (qi) (equal? (qi^-wikiname qi) (qi^-wikiname next-qi))) queue))))
@@ -281,7 +276,6 @@
     #:mixin (λ (%) (class %
                      (super-new)
                      (define/augment (on-close)
-                       (send stick-timer stop)
                        (for ([qi (obs-peek @queue)])
                          (when (qi^-th qi)
                            (kill-thread (qi^-th qi))))
@@ -307,7 +301,7 @@
       (λ (k @qi)
         (define @status-icons
           (@> (case (qi^-st @qi)
-                [(running) @stick]
+                [(running) (stick (qi^-progress @qi))]
                 [else (hash-ref status-icons (qi^-st @qi))])))
         (define @is-running?
           (@> (memq (qi^-st @qi) '(running))))
@@ -325,10 +319,8 @@
                          (spacer)
                          (hpanel
                           #:stretch '(#f #f)
-                          (if-view @is-complete?
-                                   (button (hash-ref action-icons 'reset)
-                                           (λ () (do-reset-qi @qi)))
-                                   (spacer))
+                          (button (hash-ref action-icons 'reset)
+                                  (λ () (do-reset-qi @qi)))
                           (if-view @is-running?
                                    (button (hash-ref action-icons 'pause)
                                            (λ () (do-stop-qi @qi)))

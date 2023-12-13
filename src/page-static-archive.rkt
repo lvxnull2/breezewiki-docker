@@ -30,16 +30,19 @@
            (string-contains? url "/drm_fonts/")
            (string-contains? url "//db.onlinewebfonts.com/")
            (string-contains? url "//bits.wikimedia.org/")
+           (string-contains? url "mygamercard.net/")
            (string-contains? url "dropbox")
            (string-contains? url "only=styles")
            (string-contains? url "https://https://")
            (regexp-match? #rx"^%20|^'" url)
-           (regexp-match? #rx"^\"?data:" url))
+           (regexp-match? #rx"^\"?data:" url)
+           (regexp-match? #rx"^file:" url))
        url
        (let* ([norm-url
                (cond
                  [(string-prefix? url "https://") url]
                  [(string-prefix? url "http://") (regexp-replace #rx"http:" url "https:")]
+                 [(string-prefix? url "httpshttps://") (regexp-replace #rx"httpshttps://" url "https://")]
                  [(string-prefix? url "//") (string-append "https:" url)]
                  [(string-prefix? url "/") (format "https://~a.fandom.com~a" wikiname url)]
                  [else (error 'replace-style-for-images "unknown URL format: ~a" url)])])

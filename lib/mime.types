@@ -22,6 +22,7 @@ image/x-jng                           jng
 image/x-ms-bmp                        bmp
 image/svg+xml                         svg
 image/webp                            webp
+image/avif                            avif
 
 application/font-woff2                woff2
 application/acad                      woff2
@@ -31,6 +32,7 @@ font/woff                             woff
 application/x-font-ttf                ttf
 application/x-font-truetype           ttf
 application/x-truetype-font           ttf
+font/ttf                              ttf
 application/font-sfnt                 ttf
 font/sfnt                             ttf
 application/vnd.oasis.opendocument.formula-template otf

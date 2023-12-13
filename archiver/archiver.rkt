@@ -86,14 +86,17 @@
                              (string-contains? url "/drm_fonts/")
                              (string-contains? url "//db.onlinewebfonts.com/")
                              (string-contains? url "//bits.wikimedia.org/")
+                             (string-contains? url "mygamercard.net/")
                              (string-contains? url "dropbox")
                              (string-contains? url "only=styles")
                              (string-contains? url "https://https://")
                              (regexp-match? #rx"^%20" url)
-                             (regexp-match? #rx"^data:" url))))
+                             (regexp-match? #rx"^data:" url)
+                             (regexp-match? #rx"^file:" url))))
     (cond
       [(string-prefix? url "https://") url]
       [(string-prefix? url "http://") (regexp-replace #rx"http:" url "https:")]
+      [(string-prefix? url "httpshttps://") (regexp-replace #rx"httpshttps://" url "https://")]
       [(string-prefix? url "//") (string-append "https:" url)]
       [(string-prefix? url "/") (format "https://~a.fandom.com~a" wikiname url)]
       [else (raise-user-error "While calling check-style-for-images, this URL had an unknown format and couldn't be saved:" url path)])))
@@ -244,7 +247,7 @@
   ;; save redirects as well
   (save-redirects wikiname callback (+ already-done-count (length basenames)) total-count)
   ;; saved all pages, register that fact in the database
-  (query-exec* "update wiki set progress = 2 where wikiname = ?" wikiname))
+  (query-exec* "update wiki set progress = 2 where wikiname = ? and progress <= 2" wikiname))
 
 
 ;; 2.5. Download each redirect-target via API and save mapping in database
@@ -334,8 +337,8 @@
     (define url (vector-ref row 0))
     (define hash (vector-ref row 1))
     ;; check
-    #; (printf "~a -> ~a~n" url hash)
-    (define r (get url))
+    #;(printf "~a -> ~a~n" url hash)
+    (define r (get url #:timeouts (make-timeout-config #:connect 15)))
     (define declared-type (response-headers-ref r 'content-type))
     (define final-type (if (equal? declared-type #"application/octet-stream")
                            (let ([sniff-entity (message-entity (mime-analyze (response-body r)))])
