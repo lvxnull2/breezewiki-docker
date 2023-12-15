@@ -2,11 +2,14 @@
 (require racket/class
          racket/draw
          racket/format
+         racket/function
          racket/list
+         racket/math
          racket/port
          racket/set
          racket/splicing
          racket/string
+         (except-in pict text table)
          db
          net/http-easy
          memo
@@ -65,7 +68,7 @@
 
 (define/obs @auto-retry #f)
 
-(define-struct qi^ (wikiname st stage progress max-progress eta th) #:transparent) ;; queue item
+(define-struct qi^ (wikiname st stage progress max-progress ticks eta th) #:transparent) ;; queue item
 
 (define rows (query-rows* "select wikiname, progress from wiki where progress < 4"))
 (define/obs @queue null)
@@ -74,7 +77,7 @@
                    (define already-exists? (findf (λ (qi) (equal? (qi^-wikiname qi) wikiname)) queue))
                    (if already-exists?
                        queue
-                       (append queue (list (qi^ wikiname st stage 0 1 "..." #f)))))))
+                       (append queue (list (qi^ wikiname st stage 0 1 0 "..." #f)))))))
 (for ([row rows])
   (add-wikiname-to-queue (vector-ref row 0)
                          (if (= (vector-ref row 1) 4)
@@ -88,7 +91,43 @@
 
 (define color-green (make-color 90 212 68))
 
-(define/obs @input "")
+(define (resize coords fraction)
+  (for/list ([coord (in-list coords)])
+    (cons (* fraction (car coord))
+          (* fraction (cdr coord)))))
+
+(define (flat-right-arrow #:height [height 32] #:color [color #f])
+  ((if color
+       (curryr colorize color)
+       values)
+   (dc (λ (dc dx dy)
+         (send dc draw-polygon (resize
+                                (list '(0 . 9) '(15 . 9) '(14 . 0)
+                                      '(31 . 15.5)
+                                      '(14 . 31) '(15 . 22) '(0 . 22))
+                                (/ height 32))))
+       height height)))
+
+(define (double-left-arrow-icon #:height [height 32])
+  (define shift (/ height 48))
+  (pict->bitmap
+   (scale-to-fit
+    (panorama
+     (pin-under
+      (bitmap
+       (left-over-arrow-icon #:color halt-icon-color #:height height
+                             #:material rubber-icon-material))
+      (- (* -20 shift) 2) (+ (* 6 shift) 1)
+      (bitmap
+       (bitmap-render-icon
+        (pict->bitmap
+         (rotate
+          (flat-right-arrow #:color (make-object color% 255 64 64) #:height (/ height 1.26))
+          (* pi 1.23)))))
+      #;(rotate
+         (flat-right-arrow #:color (make-object color% 255 64 64) #:height (/ height 1.26))
+         (* pi 1.23))))
+    height height #:mode 'preserve/max)))
 
 (splicing-let ([frame-count 20])
   (define stickman-frames
@@ -111,7 +150,8 @@
 (define action-icons
   (hasheq 'pause (pause-icon #:color syntax-icon-color #:height button-icon-size)
           'resume (play-icon #:color color-green #:height button-icon-size)
-          'reset (left-over-arrow-icon #:color halt-icon-color #:height button-icon-size)))
+          'reset (left-over-arrow-icon #:color halt-icon-color #:height button-icon-size)
+          'reseter (double-left-arrow-icon #:height button-icon-size)))
 
 (define (bitmap-view @the-bitmap [min-width 1])
   (pict-canvas #:min-size (@> (list (max min-width (send @the-bitmap get-width)) (send @the-bitmap get-height))) #;(if min-size (list min-size min-size) #f)
@@ -217,7 +257,9 @@
 
 (define ((make-progress-updater @qi) a b c)
   ;; (printf "~a: ~a/~a ~a~n" (qi^-wikiname (obs-peek @qi)) a b c)
-  (update-qi @qi [progress a] [max-progress b]))
+  (update-qi @qi [progress a] [max-progress b] [ticks (add1 (qi^-ticks (obs-peek @qi)))]))
+
+(define/obs @input "")
 
 (define (do-add-to-queue)
   (define wikiname (string-trim (obs-peek @input)))
@@ -258,6 +300,10 @@
   (when th (kill-thread th))
   (update-qi @qi [th #f] [st 'queued] [stage reset-progress-to] [progress 0] [max-progress 0])
   (query-exec* "update wiki set progress = ? where wikiname = ?" reset-progress-to (qi^-wikiname (obs-peek @qi))))
+
+(define (do-reseter-qi @qi)
+  (do-reset-qi @qi)
+  (query-exec* "delete from page where wikiname = ?" (qi^-wikiname (obs-peek @qi))))
 
 (define (do-try-unpause-next-entry)
   (define queue (obs-peek @queue))
@@ -301,7 +347,7 @@
       (λ (k @qi)
         (define @status-icons
           (@> (case (qi^-st @qi)
-                [(running) (stick (qi^-progress @qi))]
+                [(running) (stick (qi^-ticks @qi))]
                 [else (hash-ref status-icons (qi^-st @qi))])))
         (define @is-running?
           (@> (memq (qi^-st @qi) '(running))))
@@ -319,13 +365,18 @@
                          (spacer)
                          (hpanel
                           #:stretch '(#f #f)
-                          (button (hash-ref action-icons 'reset)
-                                  (λ () (do-reset-qi @qi)))
+
                           (if-view @is-running?
                                    (button (hash-ref action-icons 'pause)
                                            (λ () (do-stop-qi @qi)))
-                                   (button (hash-ref action-icons 'resume)
-                                           (λ () (do-start-qi @qi))))))
+                                   (hpanel
+                                    #:stretch '(#f #f)
+                                    (button (hash-ref action-icons 'reseter)
+                                            (λ () (do-reseter-qi @qi)))
+                                    (button (hash-ref action-icons 'reset)
+                                            (λ () (do-reset-qi @qi)))
+                                    (button (hash-ref action-icons 'resume)
+                                            (λ () (do-start-qi @qi)))))))
                  ;; progress bar (bottom half)
                  (hpanel
                   (canvas
