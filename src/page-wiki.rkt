@@ -80,16 +80,19 @@
                #:title title
                #:head-data head-data
                #:siteinfo siteinfo))
-            (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
             (define redirect-query-parameter (dict-ref (url-query (request-uri req)) 'redirect "yes"))
+            (define redirect-msg ((query-selector (attribute-selector 'class "redirectMsg") body)))
+            (define redirect-msg-a (if redirect-msg
+                                       ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))
+                                       #f))
             (define headers
               (build-headers
                always-headers
                ; redirect-query-parameter: only the string "no" is significant:
                ; https://github.com/Wikia/app/blob/fe60579a53f16816d65dad1644363160a63206a6/includes/Wiki.php#L367
-               (when (and redirect-msg
+               (when (and redirect-msg-a
                           (not (equal? redirect-query-parameter "no")))
-                 (let* ([dest (get-attribute 'href (bits->attributes ((query-selector (λ (t a c) (eq? t 'a)) redirect-msg))))]
+                 (let* ([dest (get-attribute 'href (bits->attributes redirect-msg-a))]
                         [value (bytes-append #"0;url=" (string->bytes/utf-8 dest))])
                    (header #"Refresh" value)))))
             (when (config-true? 'debug)
