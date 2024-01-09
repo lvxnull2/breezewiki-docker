@@ -126,7 +126,8 @@
     ;; page not found on disk, perhaps it's a redirect? redirects are stored in the database
     (var target (query-maybe-value* "select redirect from page where wikiname = ? and basename = ?" wikiname basename))
     [target
-     (generate-redirect (basename->name-for-query target))]
+     ; don't url decode the target, or Category: pages will be interpreted as a protocol
+     (generate-redirect (regexp-replace* #rx"#" target "/"))]
 
     ;; breezewiki doesn't have the page archived, see if we can make a network request for it
     [(not (config-true? 'feature_offline::only))
