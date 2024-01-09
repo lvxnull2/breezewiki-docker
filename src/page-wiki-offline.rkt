@@ -127,7 +127,7 @@
     (var target (query-maybe-value* "select redirect from page where wikiname = ? and basename = ?" wikiname basename))
     [target
      ; don't url decode the target, or Category: pages will be interpreted as a protocol
-     (generate-redirect (regexp-replace* #rx"#" target "/"))]
+     (generate-redirect (format "/~a/wiki/~a" wikiname (regexp-replace* #rx"#" target "/")))]
 
     ;; breezewiki doesn't have the page archived, see if we can make a network request for it
     [(not (config-true? 'feature_offline::only))
