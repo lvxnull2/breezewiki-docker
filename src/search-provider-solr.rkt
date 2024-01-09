@@ -9,11 +9,11 @@
          "../lib/xexpr-utils.rkt")
 
 (provide
- generate-results-content-solr)
+ search-solr)
 
 (struct result^ (hl-title hl-body kb words page-path) #:transparent)
 
-(define (generate-results-content-solr wikiname query params)
+(define (search-solr wikiname query params)
   ;; grab things from params that would modify the search
   (define op (if (equal? (dict-ref params 'op #f) "or") '("or" . "OR") '("and" . "AND")))
   (define sort (if (equal? (dict-ref params 'sort #f) "len") '("len" . "len desc") '("relevance" . "score desc")))

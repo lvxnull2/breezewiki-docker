@@ -25,8 +25,8 @@
  page-search)
 
 (define search-providers
-  (hash "fandom" generate-results-content-fandom
-        "solr" generate-results-content-solr))
+  (hash "fandom" search-fandom
+        "solr" search-solr))
 
 ;; this takes the info we gathered from fandom and makes the big fat x-expression page
 (define (generate-results-page req source-url wikiname query results-content #:siteinfo [siteinfo #f])
