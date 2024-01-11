@@ -8,6 +8,7 @@
          racket/promise
          racket/port
          racket/runtime-path
+         racket/sequence
          racket/string
          file/gunzip
          db
@@ -156,8 +157,16 @@
  (define data
    (cond
      [(and (read-from-cache?) (file-exists? "cache.rkt"))
-        (displayln "Reading in...")
-        (with-input-from-file "cache.rkt" (λ () (read)))]
+      (define size (file-size "cache.rkt"))
+      (call-with-input-file "cache.rkt"
+        (λ (in)
+          (define quit (make-progress (λ () (progress^ (ceiling (/ (file-position in) 64 1024))
+                                                       (ceiling (/ size 64 1024))
+                                                       "Reading in..."))
+                                      2))
+          (begin0
+              (read in)
+            (quit))))]
      [else
       (define x (box (progress^ 0 1 "...")))
       (define quit (make-progress (λ () (unbox x))))
@@ -183,18 +192,22 @@
 
  (display "Converting... ")
  (flush-output)
- (define ser (jsexpr->bytes data))
- (define ser-port (open-input-bytes ser))
- (define quit (make-progress (λ () (progress^ (ceiling (/ (file-position ser-port) 64 1024))
-                                              (ceiling (/ (bytes-length ser) 64 1024))
-                                              "Posting..."))
-                             2))
- (define res
-   (post (format "http://localhost:8983/solr/~a/update?commit=true" wikiname)
-         #:data ser-port
-         #:headers '#hasheq((Content-Type . "application/json"))
-         #:timeouts (make-timeout-config #:lease 5 #:connect 5 #:request 300)))
- (quit)
- (displayln (response-status-line res)))
+ (define slice-size 30000)
+ (define slices (ceiling (/ (length data) slice-size)))
+ (for ([slice (in-slice slice-size data)]
+       [i (in-naturals 1)])
+   (define ser (jsexpr->bytes slice))
+   (define ser-port (open-input-bytes ser))
+   (define quit (make-progress (λ () (progress^ (ceiling (/ (file-position ser-port) 64 1024))
+                                                (ceiling (/ (bytes-length ser) 64 1024))
+                                                (format "Posting... (~a/~a)" i slices)))
+                               2))
+   (define res
+     (post (format "http://localhost:8983/solr/~a/update?commit=true" wikiname)
+           #:data ser-port
+           #:headers '#hasheq((Content-Type . "application/json"))
+           #:timeouts (make-timeout-config #:lease 5 #:connect 5 #:request 300)))
+   (quit)
+ (displayln (response-status-line res))))
 
 (run start)
