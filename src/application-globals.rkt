@@ -110,7 +110,7 @@
                       (div (@ (class "niwa__left"))
                            (p ,((extwiki-group^-description group) props))
                            (p ,((extwiki^-description xt) props))
-                           (p "This wiki's core community has wholly migrated away from Fandom. You should "
+                           (p "This wiki's core community has largely migrated away from Fandom. You should "
                               (a (@ (href ,go)) "go to " ,(extwiki^-name xt) " now!"))
                            (p (@ (class "niwa__feedback"))
                               ,@(add-between

@@ -71,6 +71,13 @@
            (λ (props)
              '(p "The wiki was founded by Citricsquid on July 16th, 2009 as a way to document information from Minecraft. Since November 15th, 2010, it has been hosted by Curse Media. On December 12th, 2018, it moved to Fandom as it purchased Curse Media. Since September 24, 2023, it forked from Fandom and has been hosted by Weird Gloop.")))
 
+          'Tardis
+          (extwiki-group^
+           "Tardis"
+           '(("Forking announcement" . "https://tardis.wiki/wiki/Tardis:Forking_announcement")
+             ("Discussion on Reddit" . "https://old.reddit.com/r/doctorwho/comments/1azxmrl/tardis_wiki_has_regenerated/"))
+           (λ (props) '()))
+
           'empty
           (extwiki-group^
            "Misc"
@@ -416,6 +423,15 @@
     "The Minecraft Wiki"
     "https://minecraft.wiki/w/Minecraft_Wiki"
     "https://minecraft.wiki/images/Wiki.png"
+    (λ (props)
+      `()))
+
+   (extwiki^
+    '("tardis") 'default
+    'Tardis
+    "Tardis Data Core"
+    "https://tardis.wiki/wiki/Doctor_Who_Wiki"
+    "https://tardis.wiki/images/Tardis_images/e/e6/Site-logo.png"
     (λ (props)
       `()))
 
