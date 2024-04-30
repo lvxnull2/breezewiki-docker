@@ -35,7 +35,6 @@
                              ("hl.tag.post" . "</mark>")
                              ("sort" . ,(cdr sort))))))
   ;; HTTP request to dest-url for search results
-  (log-outgoing dest-url)
   (define res (easy:get dest-url #:timeouts (easy:make-timeout-config #:lease 5 #:connect 5)))
   (define json (easy:response-json res))
 
