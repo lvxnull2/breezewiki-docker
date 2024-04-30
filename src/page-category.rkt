@@ -15,11 +15,11 @@
          "application-globals.rkt"
          "config.rkt"
          "data.rkt"
+         "fandom-request.rkt"
          "page-wiki.rkt"
          "../lib/syntax.rkt"
          "../lib/thread-utils.rkt"
          "../lib/url-utils.rkt"
-         "whole-utils.rkt"
          "../lib/xexpr-utils.rkt")
 
 (provide
@@ -73,30 +73,24 @@
    (define-values (members-data page-data siteinfo)
      (thread-values
       (λ ()
-        (define dest-url
-          (format "~a/api.php?~a"
-                  origin
-                  (params->query `(("action" . "query")
-                                   ("list" . "categorymembers")
-                                   ("cmtitle" . ,prefixed-category)
-                                   ("cmlimit" . "max")
-                                   ("formatversion" . "2")
-                                   ("format" . "json")))))
-        (log-outgoing dest-url)
-        (define dest-res (easy:get dest-url #:timeouts timeouts))
-        (easy:response-json dest-res))
+        (easy:response-json
+         (fandom-get-api
+          wikiname
+          `(("action" . "query")
+            ("list" . "categorymembers")
+            ("cmtitle" . ,prefixed-category)
+            ("cmlimit" . "max")
+            ("formatversion" . "2")
+            ("format" . "json")))))
       (λ ()
-        (define dest-url
-          (format "~a/api.php?~a"
-                  origin
-                  (params->query `(("action" . "parse")
-                                   ("page" . ,prefixed-category)
-                                   ("prop" . "text|headhtml|langlinks")
-                                   ("formatversion" . "2")
-                                   ("format" . "json")))))
-        (log-outgoing dest-url)
-        (define dest-res (easy:get dest-url #:timeouts timeouts))
-        (easy:response-json dest-res))
+        (easy:response-json
+         (fandom-get-api
+          wikiname
+          `(("action" . "parse")
+            ("page" . ,prefixed-category)
+            ("prop" . "text|headhtml|langlinks")
+            ("formatversion" . "2")
+            ("format" . "json")))))
       (λ ()
         (siteinfo-fetch wikiname))))
 

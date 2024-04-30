@@ -15,11 +15,11 @@
          "application-globals.rkt"
          "config.rkt"
          "data.rkt"
+         "fandom-request.rkt"
          "page-wiki.rkt"
          "../lib/syntax.rkt"
          "../lib/thread-utils.rkt"
          "../lib/url-utils.rkt"
-         "whole-utils.rkt"
          "../lib/xexpr-utils.rkt")
 
 (provide page-file)
@@ -40,8 +40,7 @@
              (imageDescription . #f))))
 
 (define (url-content-type url)
-  (log-outgoing url)
-  (define dest-res (easy:head url #:timeouts timeouts))
+  (define dest-res (easy:head url))
   (easy:response-headers-ref dest-res 'content-type))
 
 (define (get-media-html url content-type)
@@ -106,20 +105,18 @@
   (response-handler
    (define wikiname (path/param-path (first (url-path (request-uri req)))))
    (define prefixed-title (path/param-path (caddr (url-path (request-uri req)))))
-   (define origin (format "https://~a.fandom.com" wikiname))
-   (define source-url (format "~a/wiki/~a" origin prefixed-title))
+   (define source-url (format "https://~a.fandom.com/wiki/~a" wikiname prefixed-title))
 
    (define-values (media-detail siteinfo)
      (thread-values
       (λ ()
-        (define dest-url
-          (format "~a/wikia.php?~a"
-                  origin
-                  (params->query `(("format" . "json") ("controller" . "Lightbox")
-                                                       ("method" . "getMediaDetail")
-                                                       ("fileTitle" . ,prefixed-title)))))
-        (log-outgoing dest-url)
-        (define dest-res (easy:get dest-url #:timeouts timeouts))
+        (define dest-res
+          (fandom-get
+           wikiname
+           (format "/wikia.php?~a"
+                   (params->query `(("format" . "json") ("controller" . "Lightbox")
+                                                        ("method" . "getMediaDetail")
+                                                        ("fileTitle" . ,prefixed-title))))))
         (easy:response-json dest-res))
       (λ ()
         (siteinfo-fetch wikiname))))

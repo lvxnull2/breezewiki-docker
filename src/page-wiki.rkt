@@ -17,12 +17,12 @@
          "application-globals.rkt"
          "config.rkt"
          "data.rkt"
+         "fandom-request.rkt"
          "../lib/pure-utils.rkt"
          "../lib/syntax.rkt"
          "../lib/thread-utils.rkt"
          "../lib/tree-updater.rkt"
          "../lib/url-utils.rkt"
-         "whole-utils.rkt"
          "../lib/xexpr-utils.rkt")
 
 (provide
@@ -38,25 +38,20 @@
 (define (page-wiki req)
   (define wikiname (path/param-path (first (url-path (request-uri req)))))
   (define user-cookies (user-cookies-getter req))
-  (define origin (format "https://~a.fandom.com" wikiname))
   (define path (string-join (map path/param-path (cddr (url-path (request-uri req)))) "/"))
   (define source-url (format "https://~a.fandom.com/wiki/~a" wikiname path))
 
   (define-values (dest-res siteinfo)
     (thread-values
      (λ ()
-       (define dest-url
-         (format "~a/api.php?~a"
-                 origin
-                 (params->query `(("action" . "parse")
-                                  ("page" . ,path)
-                                  ("prop" . "text|headhtml|langlinks")
-                                  ("formatversion" . "2")
-                                  ("format" . "json")))))
-       (log-outgoing dest-url)
-       (easy:get dest-url
-                 #:timeouts timeouts
-                 #:headers `#hasheq((cookie . ,(format "theme=~a" (user-cookies^-theme user-cookies))))))
+       (fandom-get-api
+        wikiname
+        `(("action" . "parse")
+          ("page" . ,path)
+          ("prop" . "text|headhtml|langlinks")
+          ("formatversion" . "2")
+          ("format" . "json"))
+        #:headers `#hasheq((cookie . ,(format "theme=~a" (user-cookies^-theme user-cookies))))))
      (λ ()
        (siteinfo-fetch wikiname))))
 
@@ -103,4 +98,13 @@
              #:code 200
              #:headers headers
              (λ (out)
-               (write-html body out))))))]))
+               (write-html body out))))))]
+    [(eq? 404 (easy:response-status-code dest-res))
+     (next-dispatcher)]
+    [else
+     (response-handler
+      (error 'page-wiki "Tried to load page ~a/~v~nSadly, the page didn't load because Fandom returned status code ~a with response:~n~a"
+             wikiname
+             path
+             (easy:response-status-code dest-res)
+             (easy:response-body dest-res)))]))

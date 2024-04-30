@@ -3,8 +3,8 @@
          (prefix-in easy: net/http-easy)
          "application-globals.rkt"
          "config.rkt"
+         "fandom-request.rkt"
          "../lib/url-utils.rkt"
-         "whole-utils.rkt"
          "../lib/xexpr-utils.rkt")
 
 (provide
@@ -17,20 +17,14 @@
     '(#hasheq((ns . 0) (pageid . 219) (size . 1482) (snippet . "") (timestamp . "2022-08-21T08:54:23Z") (title . "Gacha Capsule") (wordcount . 214)) #hasheq((ns . 0) (pageid . 201) (size . 1198) (snippet . "") (timestamp . "2022-07-11T17:52:47Z") (title . "Badges") (wordcount . 181)))))
 
 (define (search-fandom wikiname query params)
-  ;; constructing the URL where I want to get fandom data from...
-  (define origin (format "https://~a.fandom.com" wikiname))
-  ;; the dest-URL will look something like https://minecraft.fandom.com/api.php?action=query&list=search&srsearch=Spawner&formatversion=2&format=json
-  (define dest-url
-    (format "~a/api.php?~a"
-            origin
-            (params->query `(("action" . "query")
-                             ("list" . "search")
-                             ("srsearch" . ,query)
-                             ("formatversion" . "2")
-                             ("format" . "json")))))
-  ;; HTTP request to dest-url for search results
-  (log-outgoing dest-url)
-  (define res (easy:get dest-url #:timeouts timeouts))
+  (define res
+    (fandom-get-api
+     wikiname
+     `(("action" . "query")
+       ("list" . "search")
+       ("srsearch" . ,query)
+       ("formatversion" . "2")
+       ("format" . "json"))))
   (define json (easy:response-json res))
   (define search-results (jp "/query/search" json))
   (generate-results-content-fandom wikiname query search-results))

@@ -2,7 +2,6 @@
 (require racket/dict
          racket/list
          racket/string
-         (prefix-in easy: net/http-easy)
          ; html libs
          html-writing
          ; web server libs
@@ -18,7 +17,6 @@
          "../lib/syntax.rkt"
          "../lib/thread-utils.rkt"
          "../lib/url-utils.rkt"
-         "whole-utils.rkt"
          "../lib/xexpr-utils.rkt")
 
 (provide

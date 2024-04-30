@@ -33,12 +33,29 @@
   ; don't forget that I'm returning *code* - return a call to the function
   (datum->syntax stx `(make-dispatcher-tree ,ds)))
 
+; guard that the page returned a response, otherwise print more detailed debugging information
+(define-syntax-rule (page ds name)
+  (λ (req)
+    (define dispatcher (hash-ref ds (quote name)))
+    (define page-response (dispatcher req))
+    (if (response? page-response)
+        page-response
+        (response/output
+         #:code 500
+         #:mime-type #"text/plain"
+         (λ (out)
+           (for ([port (list (current-error-port) out)])
+             (parameterize ([current-output-port port])
+               (printf "error in ~a:~n  expected page to return a response~n  actually returned: ~v~n"
+                       (quote name)
+                       page-response))))))))
+
 (define (make-dispatcher-tree ds)
   (define subdomain-dispatcher (hash-ref ds 'subdomain-dispatcher))
   (define tree
     (sequencer:make
      subdomain-dispatcher
-     (pathprocedure:make "/" (hash-ref ds 'page-home))
+     (pathprocedure:make "/" (page ds page-home))
      (pathprocedure:make "/proxy" (hash-ref ds 'page-proxy))
      (pathprocedure:make "/search" (hash-ref ds 'page-global-search))
      (pathprocedure:make "/set-user-settings" (hash-ref ds 'page-set-user-settings))
@@ -48,7 +65,7 @@
      (if (config-true? 'feature_offline::enabled)
          (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-wiki-offline)))
          (λ (_conn _req) (next-dispatcher)))
-     (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (hash-ref ds 'page-wiki)))
+     (filter:make (pregexp (format "^/~a/wiki/.+$" px-wikiname)) (lift:make (page ds page-wiki)))
      (filter:make (pregexp (format "^/~a/search$" px-wikiname)) (lift:make (hash-ref ds 'page-search)))
      (filter:make (pregexp (format "^/~a(/(wiki(/)?)?)?$" px-wikiname)) (lift:make (hash-ref ds 'redirect-wiki-home)))
      (if (config-true? 'feature_offline::enabled)

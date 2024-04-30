@@ -7,8 +7,8 @@
          (prefix-in easy: net/http-easy)
          db
          memo
+         "fandom-request.rkt"
          "static-data.rkt"
-         "whole-utils.rkt"
          "../lib/url-utils.rkt"
          "../lib/xexpr-utils.rkt"
          "../archiver/archiver-database.rkt"
@@ -54,16 +54,14 @@
                               (vector-ref row 3)))
          siteinfo-default)]
     [else
-     (define dest-url
-       (format "https://~a.fandom.com/api.php?~a"
-               wikiname
-               (params->query '(("action" . "query")
-                                ("meta" . "siteinfo")
-                                ("siprop" . "general|rightsinfo")
-                                ("format" . "json")
-                                ("formatversion" . "2")))))
-     (log-outgoing dest-url)
-     (define res (easy:get dest-url))
+     (define res
+       (fandom-get-api
+        wikiname
+        (params->query '(("action" . "query")
+                         ("meta" . "siteinfo")
+                         ("siprop" . "general|rightsinfo")
+                         ("format" . "json")
+                         ("formatversion" . "2")))))
      (define data (easy:response-json res))
      (siteinfo^ (jp "/query/general/sitename" data)
                 (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))

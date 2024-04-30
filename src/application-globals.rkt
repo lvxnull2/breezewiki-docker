@@ -22,8 +22,6 @@
 (provide
  ; headers to always send on all http responses
  always-headers
- ; timeout durations for http-easy requests
- timeouts
  ; generates a consistent footer
  application-footer
  ; generates a consistent template for wiki page content to sit in
@@ -39,7 +37,6 @@
 (define always-headers
   (list (header #"Referrer-Policy" #"same-origin") ; header to not send referers to fandom
         (header #"Link" (string->bytes/latin-1 link-header))))
-(define timeouts (easy:make-timeout-config #:lease 5 #:connect 5))
 
 (define-runtime-path path-static "../static")
 (define theme-icons

@@ -1,6 +1,5 @@
 #lang racket/base
-(require (prefix-in easy: net/http-easy)
-         "../src/data.rkt"
+(require "../src/data.rkt"
          "xexpr-utils.rkt")
 
 (provide
