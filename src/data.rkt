@@ -57,11 +57,11 @@
      (define res
        (fandom-get-api
         wikiname
-        (params->query '(("action" . "query")
-                         ("meta" . "siteinfo")
-                         ("siprop" . "general|rightsinfo")
-                         ("format" . "json")
-                         ("formatversion" . "2")))))
+        '(("action" . "query")
+          ("meta" . "siteinfo")
+          ("siprop" . "general|rightsinfo")
+          ("format" . "json")
+          ("formatversion" . "2"))))
      (define data (easy:response-json res))
      (siteinfo^ (jp "/query/general/sitename" data)
                 (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
