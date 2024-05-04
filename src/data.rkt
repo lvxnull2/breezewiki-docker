@@ -62,11 +62,13 @@
           ("siprop" . "general|rightsinfo")
           ("format" . "json")
           ("formatversion" . "2"))))
-     (define data (easy:response-json res))
-     (siteinfo^ (jp "/query/general/sitename" data)
-                (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
-                (license^ (jp "/query/rightsinfo/text" data)
-                          (jp "/query/rightsinfo/url" data)))]))
+     (cond [(= (easy:response-status-code res) 200)
+            (define data (easy:response-json res))
+            (siteinfo^ (jp "/query/general/sitename" data)
+                       (second (regexp-match #rx"/wiki/(.*)" (jp "/query/general/base" data)))
+                       (license^ (jp "/query/rightsinfo/text" data)
+                                 (jp "/query/rightsinfo/url" data)))]
+           [else siteinfo-default])]))
 
 (define/memoize (head-data-getter wikiname) #:hash hash
   ;; data will be stored here, can be referenced by the memoized closure
