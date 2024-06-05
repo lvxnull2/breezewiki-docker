@@ -202,11 +202,11 @@ figcaption, .lightbox-caption, .thumbcaption {
     padding: 0;
 }
 
-/* show tabs always */
-.wds-tabs__wrapper {
+/* show tabs if tabs.js isn't loaded */
+.bw-tabs-nojs .wds-tabs__wrapper {
     display: none;
 }
-.wds-tab__content {
+.bw-tabs-nojs .wds-tab__content {
     display: block;
 }
 
