@@ -512,6 +512,7 @@
    (extwiki^ '("doom") 'empty 'empty "DoomWiki.org" "https://doomwiki.org/wiki/Entryway" #f #f)
    (extwiki^ '("dreamscaper") 'empty 'empty "Official Dreamscaper Wiki" "https://dreamscaper.wiki.gg/wiki/Dreamscaper_Wiki" #f #f)
    (extwiki^ '("elderscrolls") 'empty 'empty "UESP" "https://en.uesp.net/wiki/Main_Page" #f #f)
+   (extwiki^ '("enterthegungeon" "exit-the-gungeon" "enter-the-gungeon-archive") 'empty 'empty "Official Enter The Gungeon Wiki" "https://enterthegungeon.wiki.gg/wiki/Enter_the_Gungeon_Wiki" "https://enterthegungeon.wiki.gg/images/e/e6/Site-logo.png" #f)
    (extwiki^ '("fiend-folio") 'empty 'empty "Official Fiend Folio Wiki" "https://fiendfolio.wiki.gg/wiki/Fiend_Folio_Wiki" #f #f)
    (extwiki^ '("foxhole") 'empty 'empty "Foxhole Wiki" "https://foxhole.wiki.gg/wiki/Foxhole_Wiki" #f #f)
    (extwiki^ '("have-a-nice-death") 'empty 'empty "Have a Nice Death Wiki" "https://haveanicedeath.wiki.gg/wiki/Have_a_Nice_Death_Wiki" #f #f)
