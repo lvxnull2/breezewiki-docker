@@ -68,9 +68,6 @@
                           `(p ,(format "This instance is run by the ~a developer, " (config-get 'application_name))
                               (a (@ (href "https://cadence.moe/contact"))
                                  "Cadence")
-                              ". Proudly hosted by "
-                              (a (@ (href "http://alphamethyl.barr0w.net"))
-                                 "Barrow Network Solutions" (sup "XD"))
                               ".")
                           `(p
                             ,(format "This unofficial instance is based off the ~a source code, but is not controlled by the code developer." (config-get 'application_name)))))
@@ -88,11 +85,13 @@
 
 ;; generate a notice with a link if a fandom wiki has a replacement as part of NIWA or similar
 ;; if the wiki has no replacement, display nothing
-(define (extwiki-notice wikiname title)
+(define (extwiki-notice wikiname title req user-cookies)
   (define xt (findf (λ (item) (member wikiname (extwiki^-wikinames item))) extwikis))
   (cond/var
    [xt
-    (let* ([group (hash-ref extwiki-groups (extwiki^-group xt))]
+    (let* ([seen? (member wikiname (user-cookies^-notices user-cookies))]
+           [aside-class (if seen? "niwa__notice niwa--seen" "niwa__notice")]
+           [group (hash-ref extwiki-groups (extwiki^-group xt))]
            [search-page (format "/Special:Search?~a"
                                 (params->query `(("search" . ,title)
                                                  ("go" . "Go"))))]
@@ -103,7 +102,7 @@
            [props (extwiki-props^ go)])
       (cond
         [(eq? (extwiki^-banner xt) 'default)
-         `(aside (@ (class "niwa__notice"))
+         `(aside (@ (class ,aside-class))
                  (h1 (@ (class "niwa__header")) ,(extwiki^-name xt) " has its own website separate from Fandom.")
                  (a (@ (class "niwa__go") (href ,go)) "Read " ,title " on " ,(extwiki^-name xt) " →")
                  (div (@ (class "niwa__cols"))
@@ -117,7 +116,10 @@
                                  `(,@(for/list ([link (extwiki-group^-links group)])
                                        `(a (@ (href ,(cdr link))) ,(car link)))
                                    "This notice is from BreezeWiki"
-                                   (a (@ (href "https://docs.breezewiki.com/Reporting_Bugs.html")) "Feedback?"))
+                                   (a (@ (rel "nofollow")
+                                         (class "niwa__got-it")
+                                         (href ,(user-cookies-setter-url/add-notice req user-cookies wikiname)))
+                                      "OK, got it"))
                                  " / ")))
                       (div (@ (class "niwa__right"))
                            (img (@ (class "niwa__logo") (src ,(extwiki^-logo xt)))))))]
@@ -225,7 +227,7 @@
                 (div (@ (class "fandom-community-header__background tileHorizontally header")))
                 (div (@ (class "page"))
                      (main (@ (class "page__main"))
-                           ,(extwiki-notice wikiname title)
+                           ,(extwiki-notice wikiname title req user-cookies)
                            (div (@ (class "custom-top"))
                                 (h1 (@ (class "page-title")) ,title)
                                 (nav (@ (class "sitesearch"))

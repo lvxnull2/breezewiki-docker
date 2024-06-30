@@ -431,6 +431,23 @@ a.ext-audiobutton { /* see hearthstone/wiki/Diablo_(Duels_hero) */
     font-size: 14px;
     text-align: right;
 }
+/* more compact notice after it's been seen the first time */
+.niwa--seen {
+    padding: 1.5vw 2vw 2vw;
+    overflow-y: auto;
+    max-height: min(280px, 33vh);
+    font-size: 17px;
+}
+.niwa--seen .niwa__header {
+    font-size: 26px;
+}
+.niwa--seen .niwa__go {
+    padding: 10px 18px;
+    font-size: 20px;
+}
+.niwa--seen .niwa__got-it {
+    display: none;
+}
 
 /* media queries */
 

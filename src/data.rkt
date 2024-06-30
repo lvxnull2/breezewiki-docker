@@ -1,6 +1,7 @@
 #lang racket/base
 (require racket/list
          racket/match
+         racket/string
          web-server/http/request-structs
          net/url-string
          (only-in net/cookies/server cookie-header->alist cookie->set-cookie-header make-cookie)
@@ -27,7 +28,8 @@
  user-cookies-getter
  user-cookies-default
  user-cookies-setter
- user-cookies-setter-url)
+ user-cookies-setter-url
+ user-cookies-setter-url/add-notice)
 
 (struct siteinfo^ (sitename basepage license) #:transparent)
 (struct license^ (text url) #:transparent)
@@ -90,8 +92,8 @@
     ;; then no matter what, return the best information we have so far
     this-data))
 
-(struct user-cookies^ (theme) #:prefab)
-(define user-cookies-default (user-cookies^ 'default))
+(struct user-cookies^ (theme notices) #:prefab)
+(define user-cookies-default (user-cookies^ 'default '()))
 (define (user-cookies-getter req)
   (define cookie-header (headers-assq* #"cookie" (request-headers/raw req)))
   (define cookies-alist (if cookie-header (cookie-header->alist (header-value cookie-header) bytes->string/utf-8) null))
@@ -100,16 +102,29 @@
       (match pair
         [(cons "theme" (and theme (or "light" "dark" "default")))
          (values 'theme (string->symbol theme))]
+        [(cons "notices" notices)
+         (values 'notices (string-split notices "|"))]
         [_ (values #f #f)])))
   (user-cookies^
-   (hash-ref cookies-hash 'theme (user-cookies^-theme user-cookies-default))))
+   (hash-ref cookies-hash 'theme (user-cookies^-theme user-cookies-default))
+   (hash-ref cookies-hash 'notices (user-cookies^-notices user-cookies-default))))
 
 (define (user-cookies-setter user-cookies)
   (map (λ (c) (header #"Set-Cookie" (cookie->set-cookie-header c)))
        (list (make-cookie "theme" (symbol->string (user-cookies^-theme user-cookies))
                           #:path "/"
+                          #:max-age (* 60 60 24 365 10))
+             (make-cookie "notices" (string-join (user-cookies^-notices user-cookies) "|")
+
+                          #:path "/"
                           #:max-age (* 60 60 24 365 10)))))
 
 (define (user-cookies-setter-url req new-settings)
   (format "/set-user-settings?~a"  (params->query `(("next_location" . ,(url->string (request-uri req)))
-                                                    ("new_settings" . ,(format "~a" new-settings))))))
+                                                    ("new_settings" . ,(format "~s" new-settings))))))
+
+(define (user-cookies-setter-url/add-notice req user-cookies notice-name)
+  (user-cookies-setter-url
+   req
+   (struct-copy user-cookies^ user-cookies
+                [notices (cons notice-name (user-cookies^-notices user-cookies))])))
