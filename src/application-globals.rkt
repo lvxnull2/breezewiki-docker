@@ -108,8 +108,8 @@
                  (a (@ (class "niwa__go") (href ,go)) "Read " ,title " on " ,(extwiki^-name xt) " →")
                  (div (@ (class "niwa__cols"))
                       (div (@ (class "niwa__left"))
-                           (p ,((extwiki-group^-description group) props))
                            (p ,((extwiki^-description xt) props))
+                           (p ,((extwiki-group^-description group) props))
                            (p "This wiki's core community has largely migrated away from Fandom. You should "
                               (a (@ (href ,go)) "go to " ,(extwiki^-name xt) " now!"))
                            (p (@ (class "niwa__feedback"))

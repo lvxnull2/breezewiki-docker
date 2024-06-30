@@ -27,6 +27,13 @@
            (λ (props)
              `(p "The Square Enix Indpendent Wiki Alliance, or SEIWA, is a network of independent wikis established in 2011 and focused on providing high-quality coverage of Square Enix and its content. We work together, along with our affiliates and others, to co-operate and support one another while providing the best-quality content on the various Square Enix video games and media.")))
 
+          'GWN
+          (extwiki-group^
+           "GWN"
+           '(("Gaming Wiki Network" . "https://gamingwikinetwork.org/"))
+           (λ (props)
+             `(p "This wiki is part of the Gaming Wiki Network, a network of independently-hosted wikis about video game franchises. The GWN was founded on October 21, 2022. It aims to support all gaming communities in building independently-hosted wikis.")))
+
           'Terraria
           (extwiki-group^
            "Terraria"
@@ -316,11 +323,11 @@
    (extwiki^
     '("zelda" "zelda-archive") 'default
     'NIWA
-    "Zeldapedia"
-    "https://zeldapedia.wiki/wiki/Main_Page"
+    "Zelda Wiki"
+    "https://zeldawiki.wiki/wiki/Main_Page"
     "https://niwanetwork.org/images/logos/zeldapedia.png"
     (λ (props)
-      `((p "Founded on April 23, 2005 as Zelda Wiki, today's Zeldapedia is your definitive source for encyclopedic information on The Legend of Zelda series, as well as all of the latest Zelda news. Zeldapedia went independent from Fandom in October 2022, citing Fandom's recent buyouts and staffing decisions among their reasons."))))
+      `((p "Founded on April 23, 2005, Zelda Wiki is your definitive source for encyclopedic information on The Legend of Zelda series, as well as all of the latest Zelda news. Zelda Wiki went independent from Fandom in October 2022, citing Fandom's recent buyouts and staffing decisions among their reasons."))))
 
    (extwiki^
     '("chrono") 'default
@@ -434,6 +441,61 @@
     "https://tardis.wiki/images/Tardis_images/e/e6/Site-logo.png"
     (λ (props)
       `()))
+
+   (extwiki^
+    '("wizardry") 'default
+    'GWN
+    "Wizardry Wiki"
+    "https://wizardry.wiki.gg/wiki/Wizardry_Wiki"
+    "https://wizardry.wiki.gg/images/e/e6/Site-logo.png"
+    (λ (props)
+      `((p "On March 21, 2023, the wiki has decided to leave and abandoning from Fandom due to numerous of issues such as intrusive advertising, long-lasting bugs, restrictions on customization, etcetera. Wizardry Wiki was officially inducted into the wiki.gg wikifarm, with all contents forked over.")
+        (p "The wiki has partnered with " (a (@ (href "https://fallout.wiki/")) "Independent Fallout Wiki") " as of June 14, 2024."))))
+
+   (extwiki^
+    '("jackryan") 'default
+    'GWN
+    "Tom Clancy Wiki"
+    "https://tomclancy.wiki.gg/wiki/Tom_Clancy_Wiki"
+    "https://tomclancy.wiki.gg/images/thumb/c/c5/Jack_Ryan_Logo_Dark.png/600px-Jack_Ryan_Logo_Dark.png"
+    (λ (props)
+      `((p "The Tom Clancy Wiki is a collaborative encyclopedia dedicated to Tom Clancy’s franchises. The Tom Clancy franchise is a 40-year old expansive franchise founded by Tom Clancy, telling several unique sagas through books, video games, and films, as well as a TV show."))))
+
+    (extwiki^
+     '("hollowknight") 'default
+     'GWN
+     "Hollow Knight Wiki"
+     "https://hollowknight.wiki/wiki/Main_Page"
+     "https://gamingwikinetwork.org/images/logos/hollowknight.png"
+     (λ (props)
+       `((p "We are an independently hosted wiki for the games Hollow Knight and Hollow Knight: Silksong, created by fans, for fans. The wiki is a fork of the FANDOM Hollow Knight Wiki and was officially unveiled on October 31, 2023."))))
+
+    (extwiki^
+     '("hellokitty" "sanrio") 'default
+     'GWN
+     "Sanrio Wiki"
+     "https://sanriowiki.com/wiki/Sanrio_Wiki"
+     "https://cdn.sanriowiki.com/wiki.png"
+     (λ (props)
+       `((p "Sanrio Wiki is a project that was started on April 14, 2015 by EvieMelody. It was hosted on the wiki-farm ShoutWiki and has since become independent."))))
+
+    (extwiki^
+     '("sto") 'default
+     'GWN
+     "Star Trek Online Wiki"
+     "https://stowiki.net/wiki/Main_Page"
+     "https://gamingwikinetwork.org/images/logos/stowiki.png"
+     (λ (props)
+       `()))
+
+    (extwiki^
+     '("rayman-game" "ubisoftrayman") 'default
+     'GWN
+     "Rayman Wiki"
+     "https://raymanpc.com/wiki/en/Main_Page"
+     "https://raymanpc.com/wiki/script-en/resources/assets/logo-en.png?5c608"
+     (λ (props)
+       `()))
 
    ;; fandom wikinames * empty * empty * Name * Home Page
    (extwiki^ '("aether") 'empty 'empty "Aether Wiki" "https://aether.wiki.gg/wiki/Aether_Wiki" #f #f)
