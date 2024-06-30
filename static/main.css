@@ -437,6 +437,8 @@ a.ext-audiobutton { /* see hearthstone/wiki/Diablo_(Duels_hero) */
     overflow-y: auto;
     max-height: min(280px, 33vh);
     font-size: 17px;
+    margin-top: -2vw;
+    margin-bottom: 12px;
 }
 .niwa--seen .niwa__header {
     font-size: 26px;
