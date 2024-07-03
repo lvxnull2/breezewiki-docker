@@ -104,7 +104,7 @@
   ; all values here are optimised for maximum prettiness
   (parameterize ([pretty-print-columns 80])
     (display "config: ")
-    (pretty-write ((inst sort (Pairof Symbol String))
+    (pretty-write ((inst sort (Pairof Symbol String) Symbol)
                    (hash->list (make-immutable-hasheq combined-alist))
                    symbol<?
                    #:key car))))
