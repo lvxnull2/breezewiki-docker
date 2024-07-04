@@ -89,7 +89,7 @@
           (extwiki-group^
            "Misc"
            '(("This wiki doesn't have a description yet. Add one?" . "https://docs.breezewiki.com/Reporting_Bugs.html"))
-           #f)))
+           (λ (props) '()))))
 
 ;; wikiname, niwa-name, url, logo-url
 (struct extwiki^ (wikinames banner group name home logo description) #:transparent)
@@ -494,6 +494,15 @@
      "Rayman Wiki"
      "https://raymanpc.com/wiki/en/Main_Page"
      "https://raymanpc.com/wiki/script-en/resources/assets/logo-en.png?5c608"
+     (λ (props)
+       `()))
+
+    (extwiki^
+     '("granblue") 'empty
+     'empty
+     "Granblue Fantasy Wiki"
+     "https://gbf.wiki/"
+     "https://gbf.wiki/images/1/18/Vyrnball.png?0704c"
      (λ (props)
        `()))
 
