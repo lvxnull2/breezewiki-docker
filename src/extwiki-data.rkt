@@ -506,6 +506,15 @@
      (λ (props)
        `()))
 
+    (extwiki^
+     '("hellmet-roblox") 'empty
+     'empty
+     "HELLMET Wiki"
+     "https://hellmet.miraheze.org/wiki/Main_Page"
+     "https://static.miraheze.org/hellmetwiki/thumb/c/ce/Hellmet_Wiki_Logo.png/135px-Hellmet_Wiki_Logo.png"
+     (λ (props)
+       `()))
+
    ;; fandom wikinames * empty * empty * Name * Home Page
    (extwiki^ '("aether") 'empty 'empty "Aether Wiki" "https://aether.wiki.gg/wiki/Aether_Wiki" #f #f)
    (extwiki^ '("before-darkness-falls") 'empty 'empty "Before Darkness Falls Wiki" "https://beforedarknessfalls.wiki.gg/wiki/Before_Darkness_Falls_Wiki" #f #f)
