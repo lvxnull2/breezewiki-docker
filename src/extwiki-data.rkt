@@ -85,6 +85,13 @@
              ("Discussion on Reddit" . "https://old.reddit.com/r/doctorwho/comments/1azxmrl/tardis_wiki_has_regenerated/"))
            (λ (props) '()))
 
+          'Rainverse
+          (extwiki-group^
+           "Rainverse"
+           '(("Forking announcement" . "https://transfem.social/notes/9qsqdkmqi78e01bh"))
+           (λ (props)
+             '()))
+
           'empty
           (extwiki-group^
            "Misc"
@@ -514,6 +521,17 @@
      "https://static.miraheze.org/hellmetwiki/thumb/c/ce/Hellmet_Wiki_Logo.png/135px-Hellmet_Wiki_Logo.png"
      (λ (props)
        `()))
+
+    (extwiki^
+     '("rain-web-comic") 'default
+     'empty
+     "Rainverse Wiki"
+     "https://rainverse.wiki/wiki/Main_Page"
+     "https://static.miraheze.org/rainversewiki/2/2c/Rain_comic_cover.png"
+     (λ (props)
+       `((p "We have a newly-migrated Rainverse Wiki which escaped from Fandom! Rain is the comic that helped me figure out my gender, so I am really glad to have a wiki on a non-evil host.")
+         (p "Please stop using the abandoned copy of Rain Wiki on Fandom. Fandom is still \"training\" a generator which adds procedurally-generated bullshit to articles, with no way for users to remove or correct it, and they're demanding volunteer wiki admins waste time \"vetting\" the procedurally-generated BS for accuracy. As Jocelyn herself said, \"fuck Fandom forever.\"")
+         (p "If you are interested, please add more articles related to other Rainverse stories."))))
 
    ;; fandom wikinames * empty * empty * Name * Home Page
    (extwiki^ '("aether") 'empty 'empty "Aether Wiki" "https://aether.wiki.gg/wiki/Aether_Wiki" #f #f)
