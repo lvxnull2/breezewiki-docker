@@ -443,9 +443,9 @@
    (extwiki^
     '("tardis") 'default
     'Tardis
-    "Tardis Data Core"
+    "TARDIS Wiki"
     "https://tardis.wiki/wiki/Doctor_Who_Wiki"
-    "https://tardis.wiki/images/Tardis_images/e/e6/Site-logo.png"
+    "https://tardis.wiki/w/images/Tardis_Images/e/e6/Site-logo.png"
     (λ (props)
       `()))
 
