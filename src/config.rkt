@@ -36,7 +36,7 @@
 (define default-config
   '((application_name . "BreezeWiki")
     (bind_host . "auto")
-    (port . "10416")
+    (port . "8080")
     (canonical_origin . "")
     (debug . "false")
     (feature_search_suggestions . "true")
