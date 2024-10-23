@@ -18,6 +18,7 @@
          "config.rkt"
          "data.rkt"
          "fandom-request.rkt"
+         "../lib/archive-file-mappings.rkt"
          "../lib/pure-utils.rkt"
          "../lib/syntax.rkt"
          "../lib/thread-utils.rkt"
@@ -37,8 +38,9 @@
 
 (define (page-wiki req)
   (define wikiname (path/param-path (first (url-path (request-uri req)))))
+  (define segments (map path/param-path (cdr (url-path (request-uri req)))))
   (define user-cookies (user-cookies-getter req))
-  (define path (string-join (map path/param-path (cddr (url-path (request-uri req)))) "/"))
+  (define path (string-join (cdr segments) "/"))
   (define source-url (format "https://~a.fandom.com/wiki/~a" wikiname path))
 
   (define-values (dest-res siteinfo)
@@ -101,9 +103,31 @@
                (write-html body out))))))]
     [(eq? 404 (easy:response-status-code dest-res))
      (next-dispatcher)]
+    [(memq (easy:response-status-code dest-res) '(403 406))
+     (response-handler
+      (define body
+        (generate-wiki-page
+         `(div
+           (p "Sorry! Fandom isn't allowing BreezeWiki to show pages right now.")
+           (p "We'll automatically try again in 30 seconds, so please stay on this page and be patient.")
+           (p (small "In a hurry? " (a (@ (href ,source-url)) "Click here to read the page on Fandom."))))
+         #:req req
+         #:source-url source-url
+         #:wikiname wikiname
+         #:title (url-segments->guess-title segments)
+         #:siteinfo siteinfo))
+      (response/output
+       #:code 503
+       #:headers (build-headers
+                  always-headers
+                  (header #"Retry-After" #"30")
+                  (header #"Cache-Control" #"max-age=30, public")
+                  (header #"Refresh" #"35"))
+       (λ (out)
+         (write-html body out))))]
     [else
      (response-handler
-      (error 'page-wiki "Tried to load page ~a/~v~nSadly, the page didn't load because Fandom returned status code ~a with response:~n~a"
+      (error 'page-wiki "Tried to load page ~a/~a~nSadly, the page didn't load because Fandom returned status code ~a with response:~n~a"
              wikiname
              path
              (easy:response-status-code dest-res)
