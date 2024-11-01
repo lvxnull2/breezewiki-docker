@@ -9,7 +9,7 @@ RUN raco pkg install --batch --auto --no-docs --skip-installed req-lib \
     && raco exe -v -o breezewiki dist.rkt \
     && touch config.ini \
     && raco distribute -v output breezewiki \
-    && ln -sf /etc/config.ini ./output/lib/plt/breezewiki/exts/ert/r0/app/config.ini
+    && find ./output -name config.ini -exec ln -sf /etc/config.ini {} \;
 
 FROM debian:stable-slim
 
